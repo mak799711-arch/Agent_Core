@@ -36,6 +36,20 @@ export class MockAuthService implements IAuthService {
       language: 'en',
       theme: 'neon'
     });
+
+    this.users.set('mak799711@gmail.com', {
+      id: 'mock-admin-uuid',
+      role: 'admin',
+      fullName: 'Mak Admin',
+      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=Mak',
+      createdAt: new Date().toISOString(),
+      email: 'mak799711@gmail.com',
+      cardBound: true,
+      cardNumber: '7777 7777 7777 7777',
+      currency: 'USD',
+      language: 'ru',
+      theme: 'neon'
+    });
   }
 
   async getCurrentUser(): Promise<UserProfile | null> {
@@ -44,26 +58,27 @@ export class MockAuthService implements IAuthService {
 
   async signUp(email: string, password: string, role: 'partner' | 'business', fullName?: string): Promise<UserProfile> {
     const id = `mock-user-${Math.random().toString(36).substr(2, 9)}`;
+    const lowerEmail = email.toLowerCase();
     const user: UserProfile & { email: string } = {
       id,
       role,
       fullName: fullName || null,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${fullName || id}`,
       createdAt: new Date().toISOString(),
-      email,
+      email: lowerEmail,
       cardBound: false, // Новый пользователь должен пройти Onboarding!
       cardNumber: null,
       currency: 'USD',
       language: 'en',
       theme: 'neon'
     };
-    this.users.set(email, user);
+    this.users.set(lowerEmail, user);
     this.currentUser = user;
     return user;
   }
 
   async signIn(email: string, password: string): Promise<UserProfile> {
-    const user = this.users.get(email);
+    const user = this.users.get(email.toLowerCase());
     if (!user) {
       throw new Error('User not found');
     }
