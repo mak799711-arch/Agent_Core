@@ -201,7 +201,23 @@ export default function PartnerDashboard() {
   const handleCreateSession = async (offer: Offer) => {
     if (!user) return;
     try {
+      const bizBalance = await walletRepository.getBalance(offer.businessId);
+      if (bizBalance < offer.rewardAmount) {
+        alert(lang === 'ru' ? 'У заведения недостаточно средств на балансе. Код не может быть создан.' : 'This venue has insufficient reserve funds. Cannot generate code.');
+        return;
+      }
+
       const session = await referralRepository.createSession(user.id, offer.id, offer.businessId);
+      
+      // Freeze the reward amount in escrow immediately
+      await walletRepository.createTransaction({
+        userId: offer.businessId,
+        amount: offer.rewardAmount,
+        type: 'escrow_hold',
+        sessionId: session.id,
+        status: 'completed'
+      });
+
       setGeneratedSession(session);
       
       const sessions = await referralRepository.getActiveSessionsForPartner(user.id);

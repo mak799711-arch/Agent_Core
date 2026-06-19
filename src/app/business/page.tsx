@@ -39,6 +39,7 @@ const translations = {
     codeError: 'Active referral code not found or expired',
     offerError: 'Offer not found',
     balanceError: 'Insufficient reserve balance to pay the reward',
+    balanceErrorCreate: 'Insufficient reserve balance to cover the reward. Please deposit funds first.',
     successPrefix: 'Referral confirmed!',
     depositSuccess: 'successfully added to your reserve balance.',
     loading: 'Loading Business Portal...'
@@ -74,6 +75,7 @@ const translations = {
     codeError: 'Активный реферальный код не найден или истек',
     offerError: 'Предложение не найдено',
     balanceError: 'Недостаточно средств в резерве для выплаты награды',
+    balanceErrorCreate: 'Недостаточно средств на балансе резерва для создания предложения. Пожалуйста, пополните баланс.',
     successPrefix: 'Реферал подтвержден!',
     depositSuccess: 'успешно добавлено к вашему балансу резерва.',
     loading: 'Загрузка портала бизнеса...'
@@ -109,6 +111,7 @@ const translations = {
     codeError: 'Kode rujukan aktif tidak ditemukan atau kedaluwarsa',
     offerError: 'Penawaran tidak ditemukan',
     balanceError: 'Saldo cadangan tidak mencukupi untuk membayar hadiah',
+    balanceErrorCreate: 'Saldo cadangan tidak mencukupi untuk membuat penawaran ini. Silakan setor dana terlebih dahulu.',
     successPrefix: 'Rujukan dikonfirmasi!',
     depositSuccess: 'berhasil ditambahkan ke saldo cadangan Anda.',
     loading: 'Memuat Panel Bisnis...'
@@ -205,21 +208,9 @@ export default function BusinessDashboard() {
         return;
       }
 
-      if (balance < offer.rewardAmount) {
-        setStatusMessage({ text: t.balanceError, type: 'error' });
-        return;
-      }
-
       await referralRepository.completeSession(session.id);
 
-      await walletRepository.createTransaction({
-        userId: user.id,
-        amount: offer.rewardAmount,
-        type: 'withdrawal',
-        sessionId: session.id,
-        status: 'completed'
-      });
-
+      // Money is already held in escrow (escrow_hold). We now pay the promoter:
       await walletRepository.createTransaction({
         userId: session.partnerId,
         amount: offer.rewardAmount,
@@ -260,6 +251,11 @@ export default function BusinessDashboard() {
 
     if (isNaN(computedReward) || computedReward <= 0) {
       alert('Invalid reward calculation');
+      return;
+    }
+
+    if (balance < computedReward) {
+      alert(t.balanceErrorCreate);
       return;
     }
 

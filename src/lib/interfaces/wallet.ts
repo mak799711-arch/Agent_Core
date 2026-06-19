@@ -2,7 +2,7 @@ export interface Transaction {
   id: string;
   userId: string;
   amount: number;
-  type: 'reward' | 'withdrawal' | 'deposit' | 'fee';
+  type: 'reward' | 'withdrawal' | 'deposit' | 'fee' | 'escrow_hold' | 'escrow_release';
   sessionId: string | null;
   status: 'pending' | 'completed' | 'failed';
   createdAt: string;
