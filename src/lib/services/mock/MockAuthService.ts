@@ -5,7 +5,7 @@ export class MockAuthService implements IAuthService {
   private users: Map<string, UserProfile & { email: string }> = new Map();
 
   constructor() {
-    // Дефолтные тестовые аккаунты
+    // Дефолтные тестовые аккаунты (уже завершили onboarding для удобства тестов)
     const partnerId = 'mock-partner-uuid';
     const businessId = 'mock-business-uuid';
 
@@ -15,7 +15,12 @@ export class MockAuthService implements IAuthService {
       fullName: 'John Bali Promoter',
       avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
       createdAt: new Date().toISOString(),
-      email: 'partner@agent.core'
+      email: 'partner@agent.core',
+      cardBound: true,
+      cardNumber: '4242 4242 4242 4242',
+      currency: 'USD',
+      language: 'en',
+      theme: 'neon'
     });
 
     this.users.set('business@agent.core', {
@@ -24,7 +29,12 @@ export class MockAuthService implements IAuthService {
       fullName: 'La Brisa Bali Manager',
       avatarUrl: 'https://api.dicebear.com/7.x/identicon/svg?seed=LaBrisa',
       createdAt: new Date().toISOString(),
-      email: 'business@agent.core'
+      email: 'business@agent.core',
+      cardBound: true,
+      cardNumber: '5555 5555 5555 5555',
+      currency: 'USD',
+      language: 'en',
+      theme: 'neon'
     });
   }
 
@@ -40,7 +50,12 @@ export class MockAuthService implements IAuthService {
       fullName: fullName || null,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${fullName || id}`,
       createdAt: new Date().toISOString(),
-      email
+      email,
+      cardBound: false, // Новый пользователь должен пройти Onboarding!
+      cardNumber: null,
+      currency: 'USD',
+      language: 'en',
+      theme: 'neon'
     };
     this.users.set(email, user);
     this.currentUser = user;
@@ -58,5 +73,32 @@ export class MockAuthService implements IAuthService {
 
   async signOut(): Promise<void> {
     this.currentUser = null;
+  }
+
+  async updateProfile(updates: Partial<UserProfile>): Promise<UserProfile> {
+    if (!this.currentUser) {
+      throw new Error('No authenticated user');
+    }
+    
+    const updatedUser = {
+      ...this.currentUser,
+      ...updates
+    };
+
+    // Находим почту текущего юзера
+    let userEmail = '';
+    for (const [email, user] of this.users.entries()) {
+      if (user.id === this.currentUser.id) {
+        userEmail = email;
+        break;
+      }
+    }
+
+    if (userEmail) {
+      this.users.set(userEmail, { ...this.users.get(userEmail)!, ...updates });
+    }
+
+    this.currentUser = updatedUser;
+    return updatedUser;
   }
 }

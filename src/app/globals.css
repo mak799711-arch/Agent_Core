@@ -1,30 +1,65 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* Default (Neon Theme) */
 :root {
   --background: #0a0a0a;
   --foreground: #ededed;
-  
-  /* Primary brand colors */
   --primary: #00d2ff;
   --primary-hover: #3a7bd5;
   --accent: #ff007f;
-  
-  /* Surface and UI elements */
   --surface: rgba(255, 255, 255, 0.05);
   --surface-border: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(10, 10, 10, 0.6);
   --glass-border: rgba(255, 255, 255, 0.08);
-  
-  /* System */
   --error: #ff4d4f;
   --success: #52c41a;
   --warning: #faad14;
+}
+
+/* Dark Theme */
+html[data-theme="dark"] {
+  --background: #121212;
+  --foreground: #e0e0e0;
+  --primary: #90caf9;
+  --primary-hover: #42a5f5;
+  --accent: #f48fb1;
+  --surface: #1e1e1e;
+  --surface-border: #333333;
+  --glass-bg: rgba(18, 18, 18, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.05);
+}
+
+/* Light Theme */
+html[data-theme="light"] {
+  --background: #f7f9fa;
+  --foreground: #1c1e21;
+  --primary: #0070f3;
+  --primary-hover: #0051a2;
+  --accent: #e0005a;
+  --surface: #ffffff;
+  --surface-border: #e2e8f0;
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.08);
+}
+
+/* Neon Theme Explicit */
+html[data-theme="neon"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --primary: #00d2ff;
+  --primary-hover: #3a7bd5;
+  --accent: #ff007f;
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(10, 10, 10, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  transition: background-color 0.2s ease, color 0.15s ease, border-color 0.2s ease;
 }
 
 html,

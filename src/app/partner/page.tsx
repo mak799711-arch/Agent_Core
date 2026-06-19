@@ -6,6 +6,67 @@ import { authService, offerRepository, referralRepository, walletRepository } fr
 import { UserProfile } from '@/lib/interfaces/auth';
 import { Offer } from '@/lib/interfaces/offers';
 import { ReferralSession } from '@/lib/interfaces/referrals';
+import { formatCurrency } from '@/lib/utils/currency';
+
+const translations = {
+  en: {
+    promoter: 'Local Promoter',
+    exit: 'Exit',
+    settings: 'Settings ⚙️',
+    balanceLabel: 'Wallet Balance',
+    withdraw: 'Withdraw',
+    activeCodes: 'Active Referral Codes',
+    waiting: 'Waiting for scan',
+    offersTitle: 'Active Offers in Bali',
+    mapHint: '📍 Canggu & Seminyak Map (Mock)',
+    mapPending: 'Mapbox Integration Pending Token Setup',
+    rewardLabel: 'Reward',
+    generateBtn: 'Generate Referral Code',
+    modalTitle: 'Referral Active',
+    modalHint: 'Show this code or QR to the venue manager to confirm attribution.',
+    shortCodeLabel: 'SHORT CODE',
+    done: 'Done',
+    loading: 'Loading Partner Portal...'
+  },
+  ru: {
+    promoter: 'Локальный промоутер',
+    exit: 'Выйти',
+    settings: 'Настройки ⚙️',
+    balanceLabel: 'Баланс кошелька',
+    withdraw: 'Вывести',
+    activeCodes: 'Активные реферальные коды',
+    waiting: 'Ожидает сканирования',
+    offersTitle: 'Активные офферы на Бали',
+    mapHint: '📍 Карта Чангу и Семиньяка (Заглушка)',
+    mapPending: 'Ожидает настройки токена Mapbox',
+    rewardLabel: 'Награда',
+    generateBtn: 'Создать реферальный код',
+    modalTitle: 'Реферал активирован',
+    modalHint: 'Покажите этот код или QR-код менеджеру заведения для подтверждения.',
+    shortCodeLabel: 'КОРОТКИЙ КОД',
+    done: 'Готово',
+    loading: 'Загрузка портала партнера...'
+  },
+  id: {
+    promoter: 'Promotor Lokal',
+    exit: 'Keluar',
+    settings: 'Pengaturan ⚙️',
+    balanceLabel: 'Saldo Dompet',
+    withdraw: 'Tarik',
+    activeCodes: 'Kode Rujukan Aktif',
+    waiting: 'Menunggu pemindaian',
+    offersTitle: 'Penawaran Aktif di Bali',
+    mapHint: '📍 Peta Canggu & Seminyak (Mock)',
+    mapPending: 'Integrasi Mapbox Menunggu Pengaturan Token',
+    rewardLabel: 'Hadiah',
+    generateBtn: 'Buat Kode Rujukan',
+    modalTitle: 'Rujukan Aktif',
+    modalHint: 'Tunjukkan kode atau QR ini kepada manajer tempat untuk mengonfirmasi atribusi.',
+    shortCodeLabel: 'KODE PENDEK',
+    done: 'Selesai',
+    loading: 'Memuat Portal Mitra...'
+  }
+};
 
 export default function PartnerDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -17,19 +78,31 @@ export default function PartnerDashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const lang = user?.language || 'en';
+  const t = translations[lang];
+
   useEffect(() => {
     async function loadData() {
       try {
-        // Проверяем авторизацию
         let currentUser = await authService.getCurrentUser();
         if (!currentUser || currentUser.role !== 'partner') {
-          // Если не вошли, автоматически авторизуем демо-партнера для удобства разработки
           await authService.signIn('partner@agent.core', 'password123');
           currentUser = await authService.getCurrentUser();
         }
-        setUser(currentUser);
 
         if (currentUser) {
+          // Защита роута: если карта не привязана, перекидываем на onboarding
+          if (!currentUser.cardBound) {
+            router.push('/onboarding');
+            return;
+          }
+
+          setUser(currentUser);
+          
+          // Применяем тему
+          const activeTheme = localStorage.getItem('theme') || currentUser.theme;
+          document.documentElement.setAttribute('data-theme', activeTheme);
+
           const bal = await walletRepository.getBalance(currentUser.id);
           setBalance(bal);
 
@@ -54,7 +127,6 @@ export default function PartnerDashboard() {
       const session = await referralRepository.createSession(user.id, offer.id, offer.businessId);
       setGeneratedSession(session);
       
-      // Обновляем список активных сессий
       const sessions = await referralRepository.getActiveSessionsForPartner(user.id);
       setActiveSessions(sessions);
     } catch (err) {
@@ -70,7 +142,7 @@ export default function PartnerDashboard() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <p style={{ color: 'var(--primary)' }}>Loading Partner Portal...</p>
+        <p style={{ color: 'var(--primary)' }}>{t?.loading || 'Loading...'}</p>
       </div>
     );
   }
@@ -78,8 +150,8 @@ export default function PartnerDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(to bottom, #0d0d0d, #050505)',
-      color: 'white',
+      background: 'linear-gradient(to bottom, var(--background), #050505)',
+      color: 'var(--foreground)',
       padding: '1.5rem',
       paddingBottom: '5rem',
       fontFamily: 'Inter, sans-serif'
@@ -101,20 +173,34 @@ export default function PartnerDashboard() {
           />
           <div>
             <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{user?.fullName}</h4>
-            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>Local Promoter</span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.promoter}</span>
           </div>
         </div>
-        <button onClick={handleLogout} style={{
-          background: 'rgba(255,255,255,0.05)',
-          border: 'none',
-          color: 'var(--error)',
-          padding: '6px 12px',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '0.8rem'
-        }}>
-          Exit
-        </button>
+        
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={() => router.push('/partner/settings')} style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--surface-border)',
+            color: 'white',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}>
+            {t.settings}
+          </button>
+          <button onClick={handleLogout} style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: 'none',
+            color: 'var(--error)',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}>
+            {t.exit}
+          </button>
+        </div>
       </header>
 
       {/* Wallet Widget */}
@@ -125,9 +211,9 @@ export default function PartnerDashboard() {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>Wallet Balance</span>
+        <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.balanceLabel}</span>
         <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', margin: 0 }}>
-          ${balance.toFixed(2)}
+          {user && formatCurrency(balance, user.currency)}
         </h2>
         <button className="btn-primary" style={{
           position: 'absolute',
@@ -136,7 +222,7 @@ export default function PartnerDashboard() {
           padding: '8px 16px',
           fontSize: '0.85rem'
         }} onClick={() => alert('Payout processing will be available in Phase 2')}>
-          Withdraw
+          {t.withdraw}
         </button>
       </div>
 
@@ -145,38 +231,43 @@ export default function PartnerDashboard() {
         <div style={{ marginBottom: '2rem' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ width: '8px', height: '8px', background: '#52c41a', borderRadius: '50%', display: 'inline-block' }}></span>
-            Active Referral Codes
+            {t.activeCodes}
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {activeSessions.map(session => (
-              <div key={session.id} className="glass-panel" style={{
-                padding: '1rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderLeft: '4px solid var(--primary)'
-              }}>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '0.9rem' }}>{offers.find(o => o.id === session.offerId)?.title || 'Offer'}</h4>
-                  <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>Code: <strong style={{ color: 'var(--primary)', letterSpacing: '1px' }}>{session.shortCode}</strong></span>
+            {activeSessions.map(session => {
+              const offer = offers.find(o => o.id === session.offerId);
+              return (
+                <div key={session.id} className="glass-panel" style={{
+                  padding: '1rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderLeft: '4px solid var(--primary)'
+                }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '0.9rem' }}>{offer?.title || 'Offer'}</h4>
+                    <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>Code: <strong style={{ color: 'var(--primary)', letterSpacing: '1px' }}>{session.shortCode}</strong></span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{
+                      fontSize: '1.2rem',
+                      fontWeight: 700,
+                      color: 'var(--primary)'
+                    }}>
+                      {user && offer && formatCurrency(offer.rewardAmount, user.currency)}
+                    </div>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.4 }}>{t.waiting}</span>
+                  </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{
-                    fontSize: '1.2rem',
-                    fontWeight: 700,
-                    color: 'var(--primary)'
-                  }}>${offers.find(o => o.id === session.offerId)?.rewardAmount.toFixed(2)}</div>
-                  <span style={{ fontSize: '0.65rem', opacity: 0.4 }}>Waiting for scan</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* Main Map/List Offers */}
       <div>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Active Offers in Bali</h3>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>{t.offersTitle}</h3>
         
         {/* Mock Map View */}
         <div className="glass-panel" style={{
@@ -192,10 +283,9 @@ export default function PartnerDashboard() {
           backgroundColor: 'rgba(0,0,0,0.2)'
         }}>
           <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.6)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--primary)' }}>
-            📍 Canggu & Seminyak Map (Mock)
+            {t.mapHint}
           </div>
-          <span style={{ opacity: 0.4, fontSize: '0.85rem' }}>Mapbox Integration Pending Token Setup</span>
-          {/* Mock Marker */}
+          <span style={{ opacity: 0.4, fontSize: '0.85rem' }}>{t.mapPending}</span>
           <div style={{
             position: 'absolute',
             top: '40%',
@@ -228,8 +318,10 @@ export default function PartnerDashboard() {
                   <p style={{ fontSize: '0.8rem', opacity: 0.6, marginBottom: '0.75rem', lineHeight: '1.4' }}>{offer.conditions}</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '0.7rem', opacity: 0.5, display: 'block' }}>Reward</span>
-                  <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>${offer.rewardAmount.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.7rem', opacity: 0.5, display: 'block' }}>{t.rewardLabel}</span>
+                  <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>
+                    {user && formatCurrency(offer.rewardAmount, user.currency)}
+                  </span>
                 </div>
               </div>
               <button
@@ -237,7 +329,7 @@ export default function PartnerDashboard() {
                 onClick={() => handleCreateSession(offer)}
                 style={{ width: '100%', padding: '10px', fontSize: '0.9rem', marginTop: '0.5rem' }}
               >
-                Generate Referral Code
+                {t.generateBtn}
               </button>
             </div>
           ))}
@@ -264,12 +356,12 @@ export default function PartnerDashboard() {
             maxWidth: '380px',
             padding: '2rem',
             textAlign: 'center',
-            background: '#0d0d0d',
+            background: 'var(--background)',
             border: '1px solid var(--primary)'
           }}>
-            <h3 style={{ marginBottom: '0.5rem' }}>Referral Active</h3>
+            <h3 style={{ marginBottom: '0.5rem' }}>{t.modalTitle}</h3>
             <p style={{ fontSize: '0.85rem', opacity: 0.6, marginBottom: '1.5rem' }}>
-              Show this code or QR to the venue manager to confirm attribution.
+              {t.modalHint}
             </p>
 
             <div style={{
@@ -298,7 +390,7 @@ export default function PartnerDashboard() {
                   backgroundSize: '8px 8px'
                 }}></div>
               </div>
-              <span style={{ fontSize: '0.75rem', opacity: 0.4, display: 'block', marginBottom: '0.25rem' }}>SHORT CODE</span>
+              <span style={{ fontSize: '0.75rem', opacity: 0.4, display: 'block', marginBottom: '0.25rem' }}>{t.shortCodeLabel}</span>
               <div style={{
                 fontSize: '2rem',
                 fontWeight: 800,
@@ -314,7 +406,7 @@ export default function PartnerDashboard() {
               onClick={() => setGeneratedSession(null)}
               style={{ width: '100%' }}
             >
-              Done
+              {t.done}
             </button>
           </div>
         </div>

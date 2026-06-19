@@ -26,12 +26,14 @@ export default function LoginPage() {
         await authService.signIn(email, password);
       }
       
-      // Направляем в соответствующий дашборд
+      // Направляем на onboarding, если карта не привязана, иначе в дашборд
       const user = await authService.getCurrentUser();
-      if (user?.role === 'partner') {
-        router.push('/partner');
-      } else if (user?.role === 'business') {
-        router.push('/business');
+      if (user) {
+        if (!user.cardBound) {
+          router.push('/onboarding');
+        } else {
+          router.push(`/${user.role}`);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Authentication failed');

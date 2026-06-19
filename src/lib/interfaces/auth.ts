@@ -4,6 +4,13 @@ export interface UserProfile {
   fullName: string | null;
   avatarUrl: string | null;
   createdAt: string;
+  
+  // Новые поля для Phase 1.1 Onboarding & Settings
+  cardBound: boolean;
+  cardNumber: string | null;
+  currency: 'USD' | 'IDR' | 'EUR';
+  language: 'ru' | 'en' | 'id';
+  theme: 'dark' | 'neon' | 'light';
 }
 
 export interface IAuthService {
@@ -11,4 +18,5 @@ export interface IAuthService {
   signUp(email: string, password: string, role: 'partner' | 'business', fullName?: string): Promise<UserProfile>;
   signIn(email: string, password: string): Promise<UserProfile>;
   signOut(): Promise<void>;
+  updateProfile(updates: Partial<UserProfile>): Promise<UserProfile>;
 }

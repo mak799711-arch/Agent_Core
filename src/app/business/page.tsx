@@ -5,6 +5,94 @@ import { useRouter } from 'next/navigation';
 import { authService, offerRepository, referralRepository, walletRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
 import { Offer } from '@/lib/interfaces/offers';
+import { formatCurrency } from '@/lib/utils/currency';
+
+const translations = {
+  en: {
+    venue: 'Venue Manager',
+    exit: 'Exit',
+    settings: 'Settings ⚙️',
+    balanceLabel: 'Active Reserve Balance',
+    depositBtn: 'Deposit $100',
+    reserveNote: '🔒 Reserve Protection Active: Offers will automatically de-activate if reward amount exceeds your current reserve balance.',
+    attributeTitle: 'Attribute Referral Code',
+    verifyBtn: 'Verify & Pay',
+    offersTitle: 'Your Active Offers',
+    rewardLabel: 'Reward',
+    statusActive: 'ACTIVE',
+    statusPaused: 'PAUSED (Low Balance)',
+    noOffers: 'No offers created yet',
+    createTitle: 'Create New Offer',
+    offerTitleLabel: 'Offer Title',
+    offerTitlePlaceholder: 'e.g. Free Drink at Entrance',
+    rewardAmountLabel: 'Promoter Reward Amount (in USD equivalent)',
+    conditionsLabel: 'Conditions / Description',
+    conditionsPlaceholder: 'Describe conversion terms (e.g. purchase of main dish is required)',
+    createBtn: 'Create Offer',
+    codeError: 'Active referral code not found or expired',
+    offerError: 'Offer not found',
+    balanceError: 'Insufficient reserve balance to pay the reward',
+    successPrefix: 'Referral confirmed!',
+    depositSuccess: 'successfully added to your reserve balance.',
+    loading: 'Loading Business Portal...'
+  },
+  ru: {
+    venue: 'Менеджер заведения',
+    exit: 'Выйти',
+    settings: 'Настройки ⚙️',
+    balanceLabel: 'Активный баланс резерва',
+    depositBtn: 'Пополнить на $100',
+    reserveNote: '🔒 Защита резервов активна: офферы автоматически отключаются, если сумма награды превышает текущий баланс резерва.',
+    attributeTitle: 'Подтвердить реферальный код',
+    verifyBtn: 'Проверить и выплатить',
+    offersTitle: 'Ваши активные предложения',
+    rewardLabel: 'Награда',
+    statusActive: 'АКТИВЕН',
+    statusPaused: 'ПАУЗА (Низкий баланс)',
+    noOffers: 'Офферы еще не созданы',
+    createTitle: 'Создать новое предложение',
+    offerTitleLabel: 'Название предложения',
+    offerTitlePlaceholder: 'например, Бесплатный коктейль на входе',
+    rewardAmountLabel: 'Сумма награды промоутеру (в эквиваленте USD)',
+    conditionsLabel: 'Условия / Описание',
+    conditionsPlaceholder: 'Опишите условия конверсии (например, обязательна покупка горячего блюда)',
+    createBtn: 'Создать предложение',
+    codeError: 'Активный реферальный код не найден или истек',
+    offerError: 'Предложение не найдено',
+    balanceError: 'Недостаточно средств в резерве для выплаты награды',
+    successPrefix: 'Реферал подтвержден!',
+    depositSuccess: 'успешно добавлено к вашему балансу резерва.',
+    loading: 'Загрузка портала бизнеса...'
+  },
+  id: {
+    venue: 'Manajer Tempat',
+    exit: 'Keluar',
+    settings: 'Pengaturan ⚙️',
+    balanceLabel: 'Saldo Cadangan Aktif',
+    depositBtn: 'Setor $100',
+    reserveNote: '🔒 Perlindungan Cadangan Aktif: Penawaran akan dinonaktifkan secara otomatis jika jumlah hadiah melebihi saldo cadangan Anda saat ini.',
+    attributeTitle: 'Atribusikan Kode Rujukan',
+    verifyBtn: 'Verifikasi & Bayar',
+    offersTitle: 'Penawaran Aktif Anda',
+    rewardLabel: 'Hadiah',
+    statusActive: 'AKTIF',
+    statusPaused: 'DITANGGUHKAN (Saldo Rendah)',
+    noOffers: 'Belum ada penawaran yang dibuat',
+    createTitle: 'Buat Penawaran Baru',
+    offerTitleLabel: 'Judul Penawaran',
+    offerTitlePlaceholder: 'mis. Minuman Gratis di Pintu Masuk',
+    rewardAmountLabel: 'Jumlah Hadiah Promotor (dalam ekivalen USD)',
+    conditionsLabel: 'Kondisi / Deskripsi',
+    conditionsPlaceholder: 'Jelaskan persyaratan konversi (misalnya, pembelian hidangan utama diperlukan)',
+    createBtn: 'Buat Penawaran',
+    codeError: 'Kode rujukan aktif tidak ditemukan atau kedaluwarsa',
+    offerError: 'Penawaran tidak ditemukan',
+    balanceError: 'Saldo cadangan tidak mencukupi untuk membayar hadiah',
+    successPrefix: 'Rujukan dikonfirmasi!',
+    depositSuccess: 'berhasil ditambahkan ke saldo cadangan Anda.',
+    loading: 'Memuat Panel Bisnis...'
+  }
+};
 
 export default function BusinessDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -19,18 +107,31 @@ export default function BusinessDashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const lang = user?.language || 'en';
+  const t = translations[lang];
+
   useEffect(() => {
     async function loadData() {
       try {
         let currentUser = await authService.getCurrentUser();
         if (!currentUser || currentUser.role !== 'business') {
-          // Авто-вход демо-бизнеса для удобства разработки
           await authService.signIn('business@agent.core', 'password123');
           currentUser = await authService.getCurrentUser();
         }
-        setUser(currentUser);
 
         if (currentUser) {
+          // Защита роута: если карта не привязана, перенаправляем на onboarding
+          if (!currentUser.cardBound) {
+            router.push('/onboarding');
+            return;
+          }
+
+          setUser(currentUser);
+          
+          // Применяем тему
+          const activeTheme = localStorage.getItem('theme') || currentUser.theme;
+          document.documentElement.setAttribute('data-theme', activeTheme);
+
           await refreshData(currentUser.id);
         }
       } catch (err) {
@@ -49,7 +150,6 @@ export default function BusinessDashboard() {
     const businessOffers = await offerRepository.getOffers({ businessId: userId });
     
     // Reserve Protection Layer Logic:
-    // Автоматически отключаем офферы, на которые у бизнеса не хватает баланса
     const updatedOffers = await Promise.all(businessOffers.map(async (offer) => {
       const isBalanceSufficient = bal >= offer.rewardAmount;
       if (offer.isActive !== isBalanceSufficient) {
@@ -67,31 +167,25 @@ export default function BusinessDashboard() {
     if (!user) return;
 
     try {
-      // 1. Ищем сессию по коду
       const session = await referralRepository.getSessionByCode(shortCode);
       if (!session) {
-        setStatusMessage({ text: 'Active referral code not found or expired', type: 'error' });
+        setStatusMessage({ text: t.codeError, type: 'error' });
         return;
       }
 
-      // 2. Получаем оффер для проверки цены
       const offer = await offerRepository.getOfferById(session.offerId);
       if (!offer) {
-        setStatusMessage({ text: 'Offer not found', type: 'error' });
+        setStatusMessage({ text: t.offerError, type: 'error' });
         return;
       }
 
-      // 3. Проверка Reserve Protection Layer
       if (balance < offer.rewardAmount) {
-        setStatusMessage({ text: 'Insufficient reserve balance to pay the reward', type: 'error' });
+        setStatusMessage({ text: t.balanceError, type: 'error' });
         return;
       }
 
-      // 4. Завершаем сессию
       await referralRepository.completeSession(session.id);
 
-      // 5. Проводим транзакции
-      // Списание с баланса бизнеса
       await walletRepository.createTransaction({
         userId: user.id,
         amount: offer.rewardAmount,
@@ -100,7 +194,6 @@ export default function BusinessDashboard() {
         status: 'completed'
       });
 
-      // Начисление партнеру
       await walletRepository.createTransaction({
         userId: session.partnerId,
         amount: offer.rewardAmount,
@@ -109,7 +202,7 @@ export default function BusinessDashboard() {
         status: 'completed'
       });
 
-      setStatusMessage({ text: `Referral confirmed! $${offer.rewardAmount} paid to promoter.`, type: 'success' });
+      setStatusMessage({ text: `${t.successPrefix} ${formatCurrency(offer.rewardAmount, user.currency)} paid to promoter.`, type: 'success' });
       setShortCode('');
       await refreshData(user.id);
     } catch (err: any) {
@@ -147,16 +240,15 @@ export default function BusinessDashboard() {
   const handleDepositReserve = async () => {
     if (!user) return;
     try {
-      // Имитируем пополнение баланса резерва на $100
       await walletRepository.createTransaction({
         userId: user.id,
-        amount: 100.00,
+        amount: 100.00, // Пополняем на $100 USD эквивалент
         type: 'deposit',
         sessionId: null,
         status: 'completed'
       });
       await refreshData(user.id);
-      setStatusMessage({ text: '$100.00 successfully added to your reserve balance.', type: 'success' });
+      setStatusMessage({ text: `${formatCurrency(100.00, user.currency)} ${t.depositSuccess}`, type: 'success' });
     } catch (err) {
       alert('Deposit failed');
     }
@@ -170,7 +262,7 @@ export default function BusinessDashboard() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <p style={{ color: 'var(--primary)' }}>Loading Business Portal...</p>
+        <p style={{ color: 'var(--primary)' }}>{t?.loading || 'Loading...'}</p>
       </div>
     );
   }
@@ -178,8 +270,8 @@ export default function BusinessDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(to bottom, #0d0d0d, #050505)',
-      color: 'white',
+      background: 'linear-gradient(to bottom, var(--background), #050505)',
+      color: 'var(--foreground)',
       padding: '2rem',
       fontFamily: 'Inter, sans-serif'
     }}>
@@ -200,20 +292,34 @@ export default function BusinessDashboard() {
           />
           <div>
             <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{user?.fullName}</h4>
-            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>Venue Manager</span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.venue}</span>
           </div>
         </div>
-        <button onClick={handleLogout} style={{
-          background: 'rgba(255,255,255,0.05)',
-          border: 'none',
-          color: 'var(--error)',
-          padding: '6px 12px',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '0.8rem'
-        }}>
-          Exit
-        </button>
+        
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={() => router.push('/business/settings')} style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--surface-border)',
+            color: 'white',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}>
+            {t.settings}
+          </button>
+          <button onClick={handleLogout} style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: 'none',
+            color: 'var(--error)',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}>
+            {t.exit}
+          </button>
+        </div>
       </header>
 
       {/* Main Grid Layout */}
@@ -227,11 +333,13 @@ export default function BusinessDashboard() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
-                <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>Active Reserve Balance</span>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: 800 }}>${balance.toFixed(2)}</h2>
+                <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.balanceLabel}</span>
+                <h2 style={{ fontSize: '2.5rem', fontWeight: 800 }}>
+                  {user && formatCurrency(balance, user.currency)}
+                </h2>
               </div>
               <button className="btn-primary" onClick={handleDepositReserve} style={{ background: 'var(--accent)' }}>
-                Deposit $100
+                {user && t.depositBtn.replace('$100', formatCurrency(100.00, user.currency))}
               </button>
             </div>
             <div style={{
@@ -242,13 +350,13 @@ export default function BusinessDashboard() {
               fontSize: '0.8rem',
               opacity: 0.8
             }}>
-              🔒 <strong>Reserve Protection Active:</strong> Offers will automatically de-activate if reward amount exceeds your current reserve balance.
+              {t.reserveNote}
             </div>
           </div>
 
           {/* Confirm Referral Code Form */}
           <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ marginBottom: '1rem' }}>Attribute Referral Code</h3>
+            <h3 style={{ marginBottom: '1rem' }}>{t.attributeTitle}</h3>
             
             {statusMessage && (
               <div style={{
@@ -269,7 +377,7 @@ export default function BusinessDashboard() {
                 type="text"
                 value={shortCode}
                 onChange={(e) => setShortCode(e.target.value)}
-                placeholder="Enter 6-digit code"
+                placeholder="000000"
                 required
                 maxLength={6}
                 style={{
@@ -286,14 +394,14 @@ export default function BusinessDashboard() {
                 }}
               />
               <button type="submit" className="btn-primary" style={{ padding: '12px 24px' }}>
-                Verify & Pay
+                {t.verifyBtn}
               </button>
             </form>
           </div>
 
           {/* Offers List */}
           <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ marginBottom: '1rem' }}>Your Active Offers</h3>
+            <h3 style={{ marginBottom: '1rem' }}>{t.offersTitle}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {offers.map(offer => (
                 <div key={offer.id} style={{
@@ -307,7 +415,9 @@ export default function BusinessDashboard() {
                 }}>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{offer.title}</h4>
-                    <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>Reward: ${offer.rewardAmount}</span>
+                    <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                      {t.rewardLabel}: {user && formatCurrency(offer.rewardAmount, user.currency)}
+                    </span>
                   </div>
                   <div>
                     <span style={{
@@ -319,13 +429,13 @@ export default function BusinessDashboard() {
                       background: offer.isActive ? 'rgba(82,196,26,0.1)' : 'rgba(255,77,79,0.1)',
                       color: offer.isActive ? 'var(--success)' : 'var(--error)'
                     }}>
-                      {offer.isActive ? 'ACTIVE' : 'PAUSED (Low Balance)'}
+                      {offer.isActive ? t.statusActive : t.statusPaused}
                     </span>
                   </div>
                 </div>
               ))}
               {offers.length === 0 && (
-                <p style={{ opacity: 0.4, fontSize: '0.85rem' }}>No offers created yet</p>
+                <p style={{ opacity: 0.4, fontSize: '0.85rem' }}>{t.noOffers}</p>
               )}
             </div>
           </div>
@@ -333,15 +443,15 @@ export default function BusinessDashboard() {
 
         {/* Right Column - Create Offer Form */}
         <div className="glass-panel" style={{ padding: '1.5rem', alignSelf: 'start' }}>
-          <h3 style={{ marginBottom: '1.5rem' }}>Create New Offer</h3>
+          <h3 style={{ marginBottom: '1.5rem' }}>{t.createTitle}</h3>
           <form onSubmit={handleCreateOffer} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Offer Title</label>
+              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.offerTitleLabel}</label>
               <input
                 type="text"
                 value={newOfferTitle}
                 onChange={(e) => setNewOfferTitle(e.target.value)}
-                placeholder="e.g. Free Drink at Entrance"
+                placeholder={t.offerTitlePlaceholder}
                 required
                 style={{
                   background: 'rgba(255,255,255,0.05)',
@@ -355,12 +465,12 @@ export default function BusinessDashboard() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Promoter Reward Amount ($ USD)</label>
+              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.rewardAmountLabel}</label>
               <input
                 type="number"
                 value={newOfferReward}
                 onChange={(e) => setNewOfferReward(e.target.value)}
-                placeholder="e.g. 5.00"
+                placeholder="5.00"
                 required
                 min="0.01"
                 step="0.01"
@@ -376,11 +486,11 @@ export default function BusinessDashboard() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Conditions / Description</label>
+              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.conditionsLabel}</label>
               <textarea
                 value={newOfferConditions}
                 onChange={(e) => setNewOfferConditions(e.target.value)}
-                placeholder="Describe conversion terms (e.g. purchase of main dish is required)"
+                placeholder={t.conditionsPlaceholder}
                 rows={4}
                 style={{
                   background: 'rgba(255,255,255,0.05)',
@@ -396,7 +506,7 @@ export default function BusinessDashboard() {
             </div>
 
             <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>
-              Create Offer
+              {t.createBtn}
             </button>
           </form>
         </div>
