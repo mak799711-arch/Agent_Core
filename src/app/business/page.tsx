@@ -24,11 +24,17 @@ const translations = {
     noOffers: 'No offers created yet',
     createTitle: 'Create New Offer',
     offerTitleLabel: 'Offer Title',
-    offerTitlePlaceholder: 'e.g. Free Drink at Entrance',
-    rewardAmountLabel: 'Promoter Reward Amount (in USD equivalent)',
+    offerTitlePlaceholder: 'e.g. Special Promotion',
+    rewardTypeLabel: 'Reward Type',
+    fixedReward: 'Fixed Amount',
+    percentageReward: 'Percentage of Bill',
+    rewardAmountLabel: 'Promoter Reward Amount (in USD)',
+    avgBillLabel: 'Average Bill (in USD)',
+    percentLabel: 'Reward Percentage (%)',
     conditionsLabel: 'Conditions / Description',
     conditionsPlaceholder: 'Describe conversion terms (e.g. purchase of main dish is required)',
     createBtn: 'Create Offer',
+    cancelBtn: 'Cancel',
     codeError: 'Active referral code not found or expired',
     offerError: 'Offer not found',
     balanceError: 'Insufficient reserve balance to pay the reward',
@@ -52,11 +58,17 @@ const translations = {
     noOffers: 'Офферы еще не созданы',
     createTitle: 'Создать новое предложение',
     offerTitleLabel: 'Название предложения',
-    offerTitlePlaceholder: 'например, Бесплатный коктейль на входе',
-    rewardAmountLabel: 'Сумма награды промоутеру (в эквиваленте USD)',
+    offerTitlePlaceholder: 'например, Специальное предложение',
+    rewardTypeLabel: 'Тип вознаграждения',
+    fixedReward: 'Фиксированная сумма',
+    percentageReward: 'Процент от чека',
+    rewardAmountLabel: 'Сумма награды промоутеру (в USD)',
+    avgBillLabel: 'Средний чек (в USD)',
+    percentLabel: 'Процент вознаграждения (%)',
     conditionsLabel: 'Условия / Описание',
     conditionsPlaceholder: 'Опишите условия конверсии (например, обязательна покупка горячего блюда)',
     createBtn: 'Создать предложение',
+    cancelBtn: 'Отмена',
     codeError: 'Активный реферальный код не найден или истек',
     offerError: 'Предложение не найдено',
     balanceError: 'Недостаточно средств в резерве для выплаты награды',
@@ -80,11 +92,17 @@ const translations = {
     noOffers: 'Belum ada penawaran yang dibuat',
     createTitle: 'Buat Penawaran Baru',
     offerTitleLabel: 'Judul Penawaran',
-    offerTitlePlaceholder: 'mis. Minuman Gratis di Pintu Masuk',
-    rewardAmountLabel: 'Jumlah Hadiah Promotor (dalam ekivalen USD)',
+    offerTitlePlaceholder: 'mis. Promosi Spesial',
+    rewardTypeLabel: 'Jenis Hadiah',
+    fixedReward: 'Jumlah Tetap',
+    percentageReward: 'Persentase Tagihan',
+    rewardAmountLabel: 'Jumlah Hadiah Promotor (dalam USD)',
+    avgBillLabel: 'Rata-rata Tagihan (dalam USD)',
+    percentLabel: 'Persentase Hadiah (%)',
     conditionsLabel: 'Kondisi / Deskripsi',
     conditionsPlaceholder: 'Jelaskan persyaratan konversi (misalnya, pembelian hidangan utama diperlukan)',
     createBtn: 'Buat Penawaran',
+    cancelBtn: 'Batal',
     codeError: 'Kode rujukan aktif tidak ditemukan atau kedaluwarsa',
     offerError: 'Penawaran tidak ditemukan',
     balanceError: 'Saldo cadangan tidak mencukupi untuk membayar hadiah',
@@ -99,8 +117,14 @@ export default function BusinessDashboard() {
   const [balance, setBalance] = useState(0);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [shortCode, setShortCode] = useState('');
+  
+  // Modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [newOfferTitle, setNewOfferTitle] = useState('');
+  const [rewardType, setRewardType] = useState<'fixed' | 'percentage'>('fixed');
   const [newOfferReward, setNewOfferReward] = useState('');
+  const [newOfferPercent, setNewOfferPercent] = useState('');
+  const [newOfferAvgBill, setNewOfferAvgBill] = useState('');
   const [newOfferConditions, setNewOfferConditions] = useState('');
   
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -120,7 +144,6 @@ export default function BusinessDashboard() {
         }
 
         if (currentUser) {
-          // Защита роута: если карта не привязана, перенаправляем на onboarding
           if (!currentUser.cardBound) {
             router.push('/onboarding');
             return;
@@ -128,7 +151,6 @@ export default function BusinessDashboard() {
 
           setUser(currentUser);
           
-          // Применяем тему
           const activeTheme = localStorage.getItem('theme') || currentUser.theme;
           document.documentElement.setAttribute('data-theme', activeTheme);
 
@@ -214,9 +236,26 @@ export default function BusinessDashboard() {
     e.preventDefault();
     if (!user) return;
 
-    const reward = parseFloat(newOfferReward);
-    if (isNaN(reward) || reward <= 0) {
-      alert('Invalid reward amount');
+    let computedReward = 0;
+    let percentVal: number | null = null;
+    let avgBillVal: number | null = null;
+
+    if (rewardType === 'fixed') {
+      computedReward = parseFloat(newOfferReward);
+    } else {
+      const pct = parseFloat(newOfferPercent);
+      const bill = parseFloat(newOfferAvgBill);
+      if (isNaN(pct) || pct <= 0 || isNaN(bill) || bill <= 0) {
+        alert('Invalid percentage or average bill value');
+        return;
+      }
+      computedReward = (bill * pct) / 100;
+      percentVal = pct;
+      avgBillVal = bill;
+    }
+
+    if (isNaN(computedReward) || computedReward <= 0) {
+      alert('Invalid reward calculation');
       return;
     }
 
@@ -224,13 +263,19 @@ export default function BusinessDashboard() {
       await offerRepository.createOffer({
         businessId: user.id,
         title: newOfferTitle,
-        rewardAmount: reward,
+        rewardAmount: computedReward,
+        rewardType,
+        rewardPercent: percentVal,
+        averageBill: avgBillVal,
         conditions: newOfferConditions || null
       });
 
       setNewOfferTitle('');
       setNewOfferReward('');
+      setNewOfferPercent('');
+      setNewOfferAvgBill('');
       setNewOfferConditions('');
+      setShowCreateModal(false);
       await refreshData(user.id);
     } catch (err) {
       alert('Failed to create offer');
@@ -242,7 +287,7 @@ export default function BusinessDashboard() {
     try {
       await walletRepository.createTransaction({
         userId: user.id,
-        amount: 100.00, // Пополняем на $100 USD эквивалент
+        amount: 100.00,
         type: 'deposit',
         sessionId: null,
         status: 'completed'
@@ -322,195 +367,347 @@ export default function BusinessDashboard() {
         </div>
       </header>
 
-      {/* Main Grid Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-        {/* Left Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {/* Reserve Protection Widget */}
-          <div className="glass-panel" style={{
-            padding: '1.5rem',
-            background: 'linear-gradient(135deg, rgba(255, 0, 127, 0.1) 0%, rgba(0, 210, 255, 0.05) 100%)'
+      {/* Centered Single Column Layout */}
+      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        
+        {/* Reserve Protection Widget */}
+        <div className="glass-panel" style={{
+          padding: '1.5rem',
+          background: 'linear-gradient(135deg, rgba(255, 0, 127, 0.1) 0%, rgba(0, 210, 255, 0.05) 100%)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+            <div>
+              <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.balanceLabel}</span>
+              <h2 style={{ fontSize: '2.5rem', fontWeight: 800 }}>
+                {user && formatCurrency(balance, user.currency)}
+              </h2>
+            </div>
+            <button className="btn-primary" onClick={handleDepositReserve} style={{ background: 'var(--accent)' }}>
+              {user && t.depositBtn.replace('$100', formatCurrency(100.00, user.currency))}
+            </button>
+          </div>
+          <div style={{
+            background: 'rgba(0,0,0,0.2)',
+            padding: '0.75rem',
+            borderRadius: '8px',
+            border: '1px solid var(--surface-border)',
+            fontSize: '0.8rem',
+            opacity: 0.8
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div>
-                <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.balanceLabel}</span>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: 800 }}>
-                  {user && formatCurrency(balance, user.currency)}
-                </h2>
-              </div>
-              <button className="btn-primary" onClick={handleDepositReserve} style={{ background: 'var(--accent)' }}>
-                {user && t.depositBtn.replace('$100', formatCurrency(100.00, user.currency))}
-              </button>
-            </div>
-            <div style={{
-              background: 'rgba(0,0,0,0.2)',
-              padding: '0.75rem',
-              borderRadius: '8px',
-              border: '1px solid var(--surface-border)',
-              fontSize: '0.8rem',
-              opacity: 0.8
-            }}>
-              {t.reserveNote}
-            </div>
-          </div>
-
-          {/* Confirm Referral Code Form */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ marginBottom: '1rem' }}>{t.attributeTitle}</h3>
-            
-            {statusMessage && (
-              <div style={{
-                background: statusMessage.type === 'success' ? 'rgba(82, 196, 26, 0.1)' : 'rgba(255, 77, 79, 0.1)',
-                border: `1px solid ${statusMessage.type === 'success' ? 'var(--success)' : 'var(--error)'}`,
-                color: statusMessage.type === 'success' ? 'var(--success)' : 'var(--error)',
-                padding: '0.75rem',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                marginBottom: '1.2rem'
-              }}>
-                {statusMessage.text}
-              </div>
-            )}
-
-            <form onSubmit={handleConfirmReferral} style={{ display: 'flex', gap: '0.5rem' }}>
-              <input
-                type="text"
-                value={shortCode}
-                onChange={(e) => setShortCode(e.target.value)}
-                placeholder="000000"
-                required
-                maxLength={6}
-                style={{
-                  flex: 1,
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid var(--surface-border)',
-                  borderRadius: '8px',
-                  padding: '12px 14px',
-                  color: 'white',
-                  fontSize: '1.1rem',
-                  letterSpacing: '2px',
-                  textAlign: 'center',
-                  outline: 'none'
-                }}
-              />
-              <button type="submit" className="btn-primary" style={{ padding: '12px 24px' }}>
-                {t.verifyBtn}
-              </button>
-            </form>
-          </div>
-
-          {/* Offers List */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ marginBottom: '1rem' }}>{t.offersTitle}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {offers.map(offer => (
-                <div key={offer.id} style={{
-                  padding: '1rem',
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid var(--surface-border)',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{offer.title}</h4>
-                    <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>
-                      {t.rewardLabel}: {user && formatCurrency(offer.rewardAmount, user.currency)}
-                    </span>
-                  </div>
-                  <div>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      background: offer.isActive ? 'rgba(82,196,26,0.1)' : 'rgba(255,77,79,0.1)',
-                      color: offer.isActive ? 'var(--success)' : 'var(--error)'
-                    }}>
-                      {offer.isActive ? t.statusActive : t.statusPaused}
-                    </span>
-                  </div>
-                </div>
-              ))}
-              {offers.length === 0 && (
-                <p style={{ opacity: 0.4, fontSize: '0.85rem' }}>{t.noOffers}</p>
-              )}
-            </div>
+            {t.reserveNote}
           </div>
         </div>
 
-        {/* Right Column - Create Offer Form */}
-        <div className="glass-panel" style={{ padding: '1.5rem', alignSelf: 'start' }}>
-          <h3 style={{ marginBottom: '1.5rem' }}>{t.createTitle}</h3>
-          <form onSubmit={handleCreateOffer} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.offerTitleLabel}</label>
-              <input
-                type="text"
-                value={newOfferTitle}
-                onChange={(e) => setNewOfferTitle(e.target.value)}
-                placeholder={t.offerTitlePlaceholder}
-                required
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid var(--surface-border)',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  color: 'white',
-                  outline: 'none'
-                }}
-              />
+        {/* Confirm Referral Code Form */}
+        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>{t.attributeTitle}</h3>
+          
+          {statusMessage && (
+            <div style={{
+              background: statusMessage.type === 'success' ? 'rgba(82, 196, 26, 0.1)' : 'rgba(255, 77, 79, 0.1)',
+              border: `1px solid ${statusMessage.type === 'success' ? 'var(--success)' : 'var(--error)'}`,
+              color: statusMessage.type === 'success' ? 'var(--success)' : 'var(--error)',
+              padding: '0.75rem',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              marginBottom: '1.2rem'
+            }}>
+              {statusMessage.text}
             </div>
+          )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.rewardAmountLabel}</label>
-              <input
-                type="number"
-                value={newOfferReward}
-                onChange={(e) => setNewOfferReward(e.target.value)}
-                placeholder="5.00"
-                required
-                min="0.01"
-                step="0.01"
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid var(--surface-border)',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  color: 'white',
-                  outline: 'none'
-                }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.conditionsLabel}</label>
-              <textarea
-                value={newOfferConditions}
-                onChange={(e) => setNewOfferConditions(e.target.value)}
-                placeholder={t.conditionsPlaceholder}
-                rows={4}
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid var(--surface-border)',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  color: 'white',
-                  outline: 'none',
-                  resize: 'none',
-                  fontFamily: 'inherit'
-                }}
-              />
-            </div>
-
-            <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>
-              {t.createBtn}
+          <form onSubmit={handleConfirmReferral} style={{ display: 'flex', gap: '0.5rem' }}>
+            <input
+              type="text"
+              value={shortCode}
+              onChange={(e) => setShortCode(e.target.value)}
+              placeholder="000000"
+              required
+              maxLength={6}
+              style={{
+                flex: 1,
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid var(--surface-border)',
+                borderRadius: '8px',
+                padding: '12px 14px',
+                color: 'white',
+                fontSize: '1.1rem',
+                letterSpacing: '2px',
+                textAlign: 'center',
+                outline: 'none'
+              }}
+            />
+            <button type="submit" className="btn-primary" style={{ padding: '12px 24px' }}>
+              {t.verifyBtn}
             </button>
           </form>
         </div>
+
+        {/* Offers List */}
+        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ margin: 0 }}>{t.offersTitle}</h3>
+            {/* Small Plus Button */}
+            <button
+              onClick={() => setShowCreateModal(true)}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: 'var(--accent)',
+                color: 'white',
+                border: 'none',
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 10px rgba(255, 0, 127, 0.3)',
+                transition: 'transform 0.1s ease'
+              }}
+              onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
+              onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            >
+              +
+            </button>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {offers.map(offer => (
+              <div key={offer.id} style={{
+                padding: '1rem',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid var(--surface-border)',
+                borderRadius: '10px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{offer.title}</h4>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginTop: '4px' }}>
+                    {t.rewardLabel}: <strong>{user && formatCurrency(offer.rewardAmount, user.currency)}</strong>
+                    {offer.rewardType === 'percentage' && ` (${offer.rewardPercent}% of ${formatCurrency(offer.averageBill || 0, user.currency)} check)`}
+                  </span>
+                  {offer.conditions && (
+                    <span style={{ fontSize: '0.75rem', opacity: 0.4, display: 'block', marginTop: '2px' }}>
+                      {offer.conditions}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <span style={{
+                    display: 'inline-block',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    background: offer.isActive ? 'rgba(82,196,26,0.1)' : 'rgba(255,77,79,0.1)',
+                    color: offer.isActive ? 'var(--success)' : 'var(--error)'
+                  }}>
+                    {offer.isActive ? t.statusActive : t.statusPaused}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {offers.length === 0 && (
+              <p style={{ opacity: 0.4, fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>{t.noOffers}</p>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Modal dialog for creating new offer */}
+      {showCreateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div className="glass-panel" style={{
+            width: '100%',
+            maxWidth: '480px',
+            padding: '2rem',
+            background: 'var(--background)',
+            border: '1px solid var(--accent)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.5)'
+          }}>
+            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: 700 }}>{t.createTitle}</h3>
+            
+            <form onSubmit={handleCreateOffer} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.offerTitleLabel}</label>
+                <input
+                  type="text"
+                  value={newOfferTitle}
+                  onChange={(e) => setNewOfferTitle(e.target.value)}
+                  placeholder={t.offerTitlePlaceholder}
+                  required
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid var(--surface-border)',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    color: 'white',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              {/* Reward Type Selection */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.rewardTypeLabel}</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setRewardType('fixed')}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      borderRadius: '6px',
+                      border: '1px solid',
+                      borderColor: rewardType === 'fixed' ? 'var(--accent)' : 'var(--surface-border)',
+                      background: rewardType === 'fixed' ? 'rgba(255, 0, 127, 0.1)' : 'transparent',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    {t.fixedReward}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRewardType('percentage')}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      borderRadius: '6px',
+                      border: '1px solid',
+                      borderColor: rewardType === 'percentage' ? 'var(--accent)' : 'var(--surface-border)',
+                      background: rewardType === 'percentage' ? 'rgba(255, 0, 127, 0.1)' : 'transparent',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    {t.percentageReward}
+                  </button>
+                </div>
+              </div>
+
+              {rewardType === 'fixed' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.rewardAmountLabel}</label>
+                  <input
+                    type="number"
+                    value={newOfferReward}
+                    onChange={(e) => setNewOfferReward(e.target.value)}
+                    placeholder="5.00"
+                    required
+                    min="0.01"
+                    step="0.01"
+                    style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid var(--surface-border)',
+                      borderRadius: '8px',
+                      padding: '10px 14px',
+                      color: 'white',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.avgBillLabel}</label>
+                    <input
+                      type="number"
+                      value={newOfferAvgBill}
+                      onChange={(e) => setNewOfferAvgBill(e.target.value)}
+                      placeholder="100.00"
+                      required
+                      min="1"
+                      step="0.01"
+                      style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid var(--surface-border)',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        color: 'white',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.percentLabel}</label>
+                    <input
+                      type="number"
+                      value={newOfferPercent}
+                      onChange={(e) => setNewOfferPercent(e.target.value)}
+                      placeholder="10"
+                      required
+                      min="0.1"
+                      max="100"
+                      step="0.1"
+                      style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid var(--surface-border)',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        color: 'white',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.conditionsLabel}</label>
+                <textarea
+                  value={newOfferConditions}
+                  onChange={(e) => setNewOfferConditions(e.target.value)}
+                  placeholder={t.conditionsPlaceholder}
+                  rows={3}
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid var(--surface-border)',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    color: 'white',
+                    outline: 'none',
+                    resize: 'none',
+                    fontFamily: 'inherit'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="btn-primary"
+                  style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)' }}
+                >
+                  {t.cancelBtn}
+                </button>
+                <button type="submit" className="btn-primary" style={{ flex: 2, background: 'var(--accent)' }}>
+                  {t.createBtn}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,9 +5,12 @@ export class MockOfferRepository implements IOfferRepository {
     {
       id: 'offer-1',
       businessId: 'mock-business-uuid',
-      title: 'Free Drink at La Brisa',
+      title: 'La Brisa Promo',
       rewardAmount: 5.00,
-      conditions: 'Referral must buy a main dish. Reward is $5 per client.',
+      rewardType: 'fixed',
+      rewardPercent: null,
+      averageBill: null,
+      conditions: 'Reward is $5 per customer.',
       isActive: true,
       createdAt: new Date().toISOString()
     },
@@ -16,7 +19,10 @@ export class MockOfferRepository implements IOfferRepository {
       businessId: 'mock-business-uuid',
       title: 'Potato Head VIP Entry',
       rewardAmount: 12.50,
-      conditions: 'Min party size: 2 people. Reward is $12.5 per referral group.',
+      rewardType: 'fixed',
+      rewardPercent: null,
+      averageBill: null,
+      conditions: 'Reward is $12.5 per referral group.',
       isActive: true,
       createdAt: new Date().toISOString()
     },
@@ -25,8 +31,11 @@ export class MockOfferRepository implements IOfferRepository {
       businessId: 'mock-business-uuid',
       title: 'Savaya Table Booking',
       rewardAmount: 50.00,
-      conditions: 'Minimum spend table referral.',
-      isActive: false, // Отключено по правилу Reserve Protection (допустим, нет баланса)
+      rewardType: 'percentage',
+      rewardPercent: 10,
+      averageBill: 500.00,
+      conditions: '10% of total table spend. Estimated reward: $50.',
+      isActive: true,
       createdAt: new Date().toISOString()
     }
   ];
