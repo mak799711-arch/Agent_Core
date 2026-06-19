@@ -115,6 +115,7 @@ export default function PartnerDashboard() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   
   const [generatedSession, setGeneratedSession] = useState<ReferralSession | null>(null);
   const [loading, setLoading] = useState(true);
