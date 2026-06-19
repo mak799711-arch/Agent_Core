@@ -1,8 +1,13 @@
 import { IAuthService, UserProfile } from '../../interfaces/auth';
 
+export interface MockUser extends UserProfile {
+  email: string;
+  password?: string;
+}
+
 export class MockAuthService implements IAuthService {
   private currentUser: UserProfile | null = null;
-  private users: Map<string, UserProfile & { email: string }> = new Map();
+  private users: Map<string, MockUser> = new Map();
 
   constructor() {
     // Дефолтные тестовые аккаунты (уже завершили onboarding для удобства тестов)
@@ -16,6 +21,7 @@ export class MockAuthService implements IAuthService {
       avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
       createdAt: new Date().toISOString(),
       email: 'partner@agent.core',
+      password: 'password123',
       cardBound: true,
       cardNumber: '4242 4242 4242 4242',
       currency: 'USD',
@@ -30,6 +36,7 @@ export class MockAuthService implements IAuthService {
       avatarUrl: 'https://api.dicebear.com/7.x/identicon/svg?seed=LaBrisa',
       createdAt: new Date().toISOString(),
       email: 'business@agent.core',
+      password: 'password123',
       cardBound: true,
       cardNumber: '5555 5555 5555 5555',
       currency: 'USD',
@@ -44,6 +51,7 @@ export class MockAuthService implements IAuthService {
       avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=Mak',
       createdAt: new Date().toISOString(),
       email: 'mak799711@gmail.com',
+      password: 'MAKADMIN1551',
       cardBound: true,
       cardNumber: '7777 7777 7777 7777',
       currency: 'USD',
@@ -59,13 +67,14 @@ export class MockAuthService implements IAuthService {
   async signUp(email: string, password: string, role: 'partner' | 'business', fullName?: string): Promise<UserProfile> {
     const id = `mock-user-${Math.random().toString(36).substr(2, 9)}`;
     const lowerEmail = email.toLowerCase();
-    const user: UserProfile & { email: string } = {
+    const user: MockUser = {
       id,
       role,
       fullName: fullName || null,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${fullName || id}`,
       createdAt: new Date().toISOString(),
       email: lowerEmail,
+      password,
       cardBound: false, // Новый пользователь должен пройти Onboarding!
       cardNumber: null,
       currency: 'USD',
@@ -81,6 +90,9 @@ export class MockAuthService implements IAuthService {
     const user = this.users.get(email.toLowerCase());
     if (!user) {
       throw new Error('User not found');
+    }
+    if (user.password && user.password !== password) {
+      throw new Error('Incorrect password');
     }
     this.currentUser = user;
     return user;
@@ -100,7 +112,6 @@ export class MockAuthService implements IAuthService {
       ...updates
     };
 
-    // Находим почту текущего юзера
     let userEmail = '';
     for (const [email, user] of this.users.entries()) {
       if (user.id === this.currentUser.id) {
