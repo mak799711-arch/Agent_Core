@@ -200,7 +200,7 @@ export default function BusinessDashboard() {
           />
           <div>
             <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{user?.fullName}</h4>
-            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', tracking: '1px' }}>Venue Manager</span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>Venue Manager</span>
           </div>
         </div>
         <button onClick={handleLogout} style={{
