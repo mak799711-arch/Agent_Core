@@ -66,14 +66,14 @@ export class MockAuthService implements IAuthService {
 
   async signUp(email: string, password: string, role: 'partner' | 'business', fullName?: string): Promise<UserProfile> {
     const id = `mock-user-${Math.random().toString(36).substr(2, 9)}`;
-    const lowerEmail = email.toLowerCase();
+    const cleanEmail = email.trim().toLowerCase();
     const user: MockUser = {
       id,
       role,
       fullName: fullName || null,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${fullName || id}`,
       createdAt: new Date().toISOString(),
-      email: lowerEmail,
+      email: cleanEmail,
       password,
       cardBound: false, // Новый пользователь должен пройти Onboarding!
       cardNumber: null,
@@ -81,13 +81,14 @@ export class MockAuthService implements IAuthService {
       language: 'en',
       theme: 'neon'
     };
-    this.users.set(lowerEmail, user);
+    this.users.set(cleanEmail, user);
     this.currentUser = user;
     return user;
   }
 
   async signIn(email: string, password: string): Promise<UserProfile> {
-    const user = this.users.get(email.toLowerCase());
+    const cleanEmail = email.trim().toLowerCase();
+    const user = this.users.get(cleanEmail);
     if (!user) {
       throw new Error('User not found');
     }
