@@ -10,6 +10,7 @@ export class MockOfferRepository implements IOfferRepository {
       rewardType: 'fixed',
       rewardPercent: null,
       averageBill: null,
+      category: 'restaurant',
       conditions: 'Reward is $5 per customer.',
       isActive: true,
       createdAt: new Date().toISOString()
@@ -22,6 +23,7 @@ export class MockOfferRepository implements IOfferRepository {
       rewardType: 'fixed',
       rewardPercent: null,
       averageBill: null,
+      category: 'nightlife',
       conditions: 'Reward is $12.5 per referral group.',
       isActive: true,
       createdAt: new Date().toISOString()
@@ -34,7 +36,34 @@ export class MockOfferRepository implements IOfferRepository {
       rewardType: 'percentage',
       rewardPercent: 10,
       averageBill: 500.00,
+      category: 'nightlife',
       conditions: '10% of total table spend. Estimated reward: $50.',
+      isActive: true,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'offer-4',
+      businessId: 'mock-business-uuid',
+      title: 'Canggu Villa Booking',
+      rewardAmount: 100.00,
+      rewardType: 'fixed',
+      rewardPercent: null,
+      averageBill: null,
+      category: 'villa',
+      conditions: 'Reward is $100 for verified 3+ nights stay.',
+      isActive: true,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'offer-5',
+      businessId: 'mock-business-uuid',
+      title: 'Surf Lessons Canggu',
+      rewardAmount: 8.00,
+      rewardType: 'fixed',
+      rewardPercent: null,
+      averageBill: null,
+      category: 'activity',
+      conditions: 'Reward is $8 per referral booking.',
       isActive: true,
       createdAt: new Date().toISOString()
     }

@@ -25,6 +25,7 @@ const translations = {
     createTitle: 'Create New Offer',
     offerTitleLabel: 'Offer Title',
     offerTitlePlaceholder: 'e.g. Special Promotion',
+    categoryLabel: 'Category',
     rewardTypeLabel: 'Reward Type',
     fixedReward: 'Fixed Amount',
     percentageReward: 'Percentage of Bill',
@@ -59,6 +60,7 @@ const translations = {
     createTitle: 'Создать новое предложение',
     offerTitleLabel: 'Название предложения',
     offerTitlePlaceholder: 'например, Специальное предложение',
+    categoryLabel: 'Категория',
     rewardTypeLabel: 'Тип вознаграждения',
     fixedReward: 'Фиксированная сумма',
     percentageReward: 'Процент от чека',
@@ -93,6 +95,7 @@ const translations = {
     createTitle: 'Buat Penawaran Baru',
     offerTitleLabel: 'Judul Penawaran',
     offerTitlePlaceholder: 'mis. Promosi Spesial',
+    categoryLabel: 'Kategori',
     rewardTypeLabel: 'Jenis Hadiah',
     fixedReward: 'Jumlah Tetap',
     percentageReward: 'Persentase Tagihan',
@@ -121,6 +124,7 @@ export default function BusinessDashboard() {
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newOfferTitle, setNewOfferTitle] = useState('');
+  const [newOfferCategory, setNewOfferCategory] = useState<'nightlife' | 'restaurant' | 'villa' | 'activity'>('restaurant');
   const [rewardType, setRewardType] = useState<'fixed' | 'percentage'>('fixed');
   const [newOfferReward, setNewOfferReward] = useState('');
   const [newOfferPercent, setNewOfferPercent] = useState('');
@@ -267,6 +271,7 @@ export default function BusinessDashboard() {
         rewardType,
         rewardPercent: percentVal,
         averageBill: avgBillVal,
+        category: newOfferCategory,
         conditions: newOfferConditions || null
       });
 
@@ -275,6 +280,7 @@ export default function BusinessDashboard() {
       setNewOfferPercent('');
       setNewOfferAvgBill('');
       setNewOfferConditions('');
+      setNewOfferCategory('restaurant');
       setShowCreateModal(false);
       await refreshData(user.id);
     } catch (err) {
@@ -488,7 +494,10 @@ export default function BusinessDashboard() {
                   <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{offer.title}</h4>
                   <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginTop: '4px' }}>
                     {t.rewardLabel}: <strong>{user && formatCurrency(offer.rewardAmount, user.currency)}</strong>
-                    {offer.rewardType === 'percentage' && user && ` (${offer.rewardPercent}% of ${formatCurrency(offer.averageBill || 0, user.currency)} check)`}
+                    {offer.rewardType === 'percentage' && ` (${offer.rewardPercent}% of ${formatCurrency(offer.averageBill || 0, user.currency)} check)`}
+                  </span>
+                  <span style={{ fontSize: '0.7rem', opacity: 0.4, display: 'block', marginTop: '2px' }}>
+                    Category: <strong style={{ textTransform: 'uppercase' }}>{offer.category}</strong>
                   </span>
                   {offer.conditions && (
                     <span style={{ fontSize: '0.75rem', opacity: 0.4, display: 'block', marginTop: '2px' }}>
@@ -561,6 +570,28 @@ export default function BusinessDashboard() {
                     outline: 'none'
                   }}
                 />
+              </div>
+
+              {/* Category Selector */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.categoryLabel}</label>
+                <select
+                  value={newOfferCategory}
+                  onChange={(e) => setNewOfferCategory(e.target.value as any)}
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid var(--surface-border)',
+                    color: 'white',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    outline: 'none'
+                  }}
+                >
+                  <option value="restaurant" style={{ background: 'var(--background)' }}>Restaurant 🍕</option>
+                  <option value="nightlife" style={{ background: 'var(--background)' }}>Nightlife 🍸</option>
+                  <option value="villa" style={{ background: 'var(--background)' }}>Villa 🏡</option>
+                  <option value="activity" style={{ background: 'var(--background)' }}>Activity 🏄</option>
+                </select>
               </div>
 
               {/* Reward Type Selection */}

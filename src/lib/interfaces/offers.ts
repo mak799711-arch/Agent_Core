@@ -2,10 +2,11 @@ export interface Offer {
   id: string;
   businessId: string;
   title: string;
-  rewardAmount: number; // Для процента это будет вычисленное значение (средний чек * процент) или фиксированная сумма
+  rewardAmount: number;
   rewardType: 'fixed' | 'percentage';
   rewardPercent: number | null;
   averageBill: number | null;
+  category: 'nightlife' | 'restaurant' | 'villa' | 'activity'; // Категории для фильтрации
   conditions: string | null;
   isActive: boolean;
   createdAt: string;
