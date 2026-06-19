@@ -494,7 +494,7 @@ export default function BusinessDashboard() {
                   <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{offer.title}</h4>
                   <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginTop: '4px' }}>
                     {t.rewardLabel}: <strong>{user && formatCurrency(offer.rewardAmount, user.currency)}</strong>
-                    {offer.rewardType === 'percentage' && ` (${offer.rewardPercent}% of ${formatCurrency(offer.averageBill || 0, user.currency)} check)`}
+                    {offer.rewardType === 'percentage' && user && ` (${offer.rewardPercent}% of ${formatCurrency(offer.averageBill || 0, user.currency)} check)`}
                   </span>
                   <span style={{ fontSize: '0.7rem', opacity: 0.4, display: 'block', marginTop: '2px' }}>
                     Category: <strong style={{ textTransform: 'uppercase' }}>{offer.category}</strong>
