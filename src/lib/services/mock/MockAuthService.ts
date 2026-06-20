@@ -128,4 +128,8 @@ export class MockAuthService implements IAuthService {
     this.currentUser = updatedUser;
     return updatedUser;
   }
+
+  async getAllUsers(): Promise<UserProfile[]> {
+    return Array.from(this.users.values()).map(({ password, ...user }) => user);
+  }
 }

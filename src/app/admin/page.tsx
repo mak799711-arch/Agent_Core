@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService } from '@/lib/services';
+import { authService, walletRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
 import { formatCurrency } from '@/lib/utils/currency';
 import VerificationBadge from '@/app/components/VerificationBadge';
@@ -39,8 +39,8 @@ const translations = {
     btnCancel: 'Cancel',
     unban: 'Unban User',
     successUpdate: 'Action completed successfully!',
-    promoters: 'Top 10 Promoters & Agents',
-    merchants: 'Top 10 Restaurants & Beach Clubs'
+    promoters: 'Active Promoters & Agents',
+    merchants: 'Active Restaurants & Beach Clubs'
   },
   ru: {
     admin: 'Администратор платформы',
@@ -73,8 +73,8 @@ const translations = {
     btnCancel: 'Отмена',
     unban: 'Разбанить',
     successUpdate: 'Действие успешно выполнено!',
-    promoters: 'ТОП-10 Агентов и Промоутеров',
-    merchants: 'ТОП-10 Ресторанов и Заведений'
+    promoters: 'Активные Агенты и Промоутеры',
+    merchants: 'Активные Рестораны и Заведений'
   }
 };
 
@@ -83,45 +83,85 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'banned' | 'requests'>('active');
-  const [selectedBanUser, setSelectedBanUser] = useState<{ id: string; name: string; list: 'agents' | 'restaurants' } | null>(null);
+  const [selectedBanUser, setSelectedBanUser] = useState<{ id: string; name: string } | null>(null);
   const router = useRouter();
 
-  // Top 10 Agents state
-  const [agents, setAgents] = useState([
-    { id: 'agent-1', fullName: 'Wayan Bali Guide', email: 'wayan@bali.guide', role: 'partner', status: 'verified', volume: 5400, banDuration: '' },
-    { id: 'agent-2', fullName: 'Made Indrawan', email: 'made.indra@gmail.com', role: 'partner', status: 'verified', volume: 4800, banDuration: '' },
-    { id: 'agent-3', fullName: 'Ketut Sudarsana', email: 'ketut.sud@outlook.com', role: 'partner', status: 'verified', volume: 4200, banDuration: '' },
-    { id: 'agent-4', fullName: 'Nyoman Ari', email: 'nyoman.ari@yahoo.com', role: 'partner', status: 'unverified', volume: 3900, banDuration: '' },
-    { id: 'agent-5', fullName: 'Gede Pratama', email: 'gede.prat@bali.id', role: 'partner', status: 'verified', volume: 3500, banDuration: '' },
-    { id: 'agent-6', fullName: 'John Bali Promoter', email: 'partner@agent.core', role: 'partner', status: 'verified', volume: 3200, banDuration: '' },
-    { id: 'agent-7', fullName: 'Sarah Wanderlust', email: 'sarah.explore@gmail.com', role: 'partner', status: 'verified', volume: 2900, banDuration: '' },
-    { id: 'agent-8', fullName: 'Alex Nomadic', email: 'alex.nomad@outlook.com', role: 'partner', status: 'verified', volume: 2600, banDuration: '' },
-    { id: 'agent-9', fullName: 'Elena Sunset', email: 'elena.sun@gmail.com', role: 'partner', status: 'verified', volume: 2300, banDuration: '' },
-    { id: 'agent-10', fullName: 'Dmitry Bali Life', email: 'dmitry.life@mail.ru', role: 'partner', status: 'verified', volume: 2100, banDuration: '' }
-  ]);
-
-  // Top 10 Businesses state
-  const [restaurants, setRestaurants] = useState([
-    { id: 'res-1', fullName: 'La Brisa Bali', email: 'business@agent.core', role: 'business', status: 'verified', volume: 15400, escrowAmount: 1200, banDuration: '' },
-    { id: 'res-2', fullName: 'Potato Head Beach Club', email: 'manager@potatohead.co', role: 'business', status: 'verified', volume: 14200, escrowAmount: 900, banDuration: '' },
-    { id: 'res-3', fullName: 'Finns VIP Beach Club', email: 'vip@finnsbeachclub.com', role: 'business', status: 'verified', volume: 12800, escrowAmount: 1500, banDuration: '' },
-    { id: 'res-4', fullName: 'Naughty Nuri\'s Seminyak', email: 'info@naughtynuris.com', role: 'business', status: 'verified', volume: 9800, escrowAmount: 400, banDuration: '' },
-    { id: 'res-5', fullName: 'Mason Canggu', email: 'bookings@masonbali.com', role: 'business', status: 'verified', volume: 8900, escrowAmount: 600, banDuration: '' },
-    { id: 'res-6', fullName: 'Milk & Madu', email: 'canggu@milkandmadu.com', role: 'business', status: 'verified', volume: 7600, escrowAmount: 300, banDuration: '' },
-    { id: 'res-7', fullName: 'Shady Shack', email: 'hello@shadyshack.com', role: 'business', status: 'verified', volume: 6400, escrowAmount: 200, banDuration: '' },
-    { id: 'res-8', fullName: 'Sisterfields Cafe', email: 'manager@sisterfields.com', role: 'business', status: 'verified', volume: 5900, escrowAmount: 150, banDuration: '' },
-    { id: 'res-9', fullName: 'Motel Mexicola', email: 'fiesta@motelmexicola.info', role: 'business', status: 'verified', volume: 5200, escrowAmount: 800, banDuration: '' },
-    { id: 'res-10', fullName: 'Barbacoa Bali', email: 'info@barbacoabali.com', role: 'business', status: 'verified', volume: 4800, escrowAmount: 500, banDuration: '' }
-  ]);
-
-  // Combined Ban list state
+  // Dynamic state populated from real authService database
+  const [agents, setAgents] = useState<any[]>([]);
+  const [restaurants, setRestaurants] = useState<any[]>([]);
   const [bannedUsers, setBannedUsers] = useState<any[]>([]);
-
-  // Verification requests state (loaded from local storage + default mock)
   const [requests, setRequests] = useState<any[]>([]);
 
   const lang = user?.language === 'ru' ? 'ru' : 'en';
   const t = translations[lang];
+
+  const loadPlatformData = async () => {
+    try {
+      const allUsers = await authService.getAllUsers();
+      
+      const enrichedUsers = await Promise.all(allUsers.map(async (u) => {
+        // Fetch balance
+        const balance = await walletRepository.getBalance(u.id);
+        
+        // Fetch transactions to compute turnover volume and escrow
+        const txs = await walletRepository.getTransactions(u.id);
+        const volume = txs
+          .filter(t => t.status === 'completed')
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        const escrow = txs
+          .filter(t => t.type === 'escrow_hold' && t.status === 'completed')
+          .reduce((sum, t) => sum + t.amount, 0) - 
+          txs
+          .filter(t => t.type === 'escrow_release' && t.status === 'completed')
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        // Persistent status & ban duration overrides in localStorage
+        const storedStatus = localStorage.getItem(`user_status_${u.id}`);
+        const status = storedStatus || u.status || 'unverified';
+        const banDuration = localStorage.getItem(`user_ban_dur_${u.id}`) || '';
+
+        return {
+          ...u,
+          status,
+          volume: volume || (u.role === 'partner' ? 3200 : 15400), // Default mock values if no transactions yet
+          escrowAmount: Math.max(escrow, 0),
+          banDuration
+        };
+      }));
+
+      // Filter out admin themselves and segment by role and status
+      const nonAdminUsers = enrichedUsers.filter(u => u.role !== 'admin');
+      
+      const activeAgents = nonAdminUsers.filter(u => u.role === 'partner' && u.status !== 'banned');
+      const activeRestaurants = nonAdminUsers.filter(u => u.role === 'business' && u.status !== 'banned');
+      const banned = nonAdminUsers.filter(u => u.status === 'banned');
+
+      setAgents(activeAgents.sort((a, b) => b.volume - a.volume));
+      setRestaurants(activeRestaurants.sort((a, b) => b.volume - a.volume));
+      setBannedUsers(banned);
+
+      // Load verification requests
+      const pendingReqs: any[] = [];
+      nonAdminUsers.forEach(u => {
+        const hasPendingRequest = localStorage.getItem(`verification_requested_${u.id}`) === 'true';
+        if (hasPendingRequest && u.status !== 'verified' && u.status !== 'banned') {
+          pendingReqs.push({
+            id: `req-${u.id}`,
+            targetId: u.id,
+            fullName: u.fullName || 'Unnamed',
+            email: u.email || '',
+            role: u.role,
+            dealsCount: parseInt(localStorage.getItem(`simulated_deals_${u.id}`) || '105')
+          });
+        }
+      });
+      setRequests(pendingReqs);
+
+    } catch (err) {
+      console.error('Error loading platform data:', err);
+    }
+  };
 
   useEffect(() => {
     async function checkAdminAndLoad() {
@@ -136,43 +176,7 @@ export default function AdminDashboard() {
         const activeTheme = localStorage.getItem('theme') || currentUser.theme;
         document.documentElement.setAttribute('data-theme', activeTheme);
 
-        // Load verification requests from mock local storage
-        const defaultRequests = [
-          { id: 'req-1', targetId: 'agent-4', fullName: 'Nyoman Ari', email: 'nyoman.ari@yahoo.com', role: 'partner', dealsCount: 105 },
-          { id: 'req-2', targetId: 'agent-12', fullName: 'Kadek Wirawan', email: 'kadek.w@yahoo.com', role: 'partner', dealsCount: 102 }
-        ];
-
-        // Scan local storage for user created verification requests
-        const keys = Object.keys(localStorage);
-        const dynamicRequests: any[] = [];
-        keys.forEach(key => {
-          if (key.startsWith('verification_requested_')) {
-            const userId = key.replace('verification_requested_', '');
-            // Prevent duplicate
-            if (userId === 'mock-partner-uuid' && !dynamicRequests.some(r => r.targetId === userId)) {
-              dynamicRequests.push({
-                id: `req-dyn-${userId}`,
-                targetId: userId,
-                fullName: 'John Bali Promoter',
-                email: 'partner@agent.core',
-                role: 'partner',
-                dealsCount: 105
-              });
-            } else if (userId === 'mock-business-uuid' && !dynamicRequests.some(r => r.targetId === userId)) {
-              dynamicRequests.push({
-                id: `req-dyn-${userId}`,
-                targetId: userId,
-                fullName: 'La Brisa Bali Manager',
-                email: 'business@agent.core',
-                role: 'business',
-                dealsCount: 105
-              });
-            }
-          }
-        });
-
-        setRequests([...defaultRequests, ...dynamicRequests]);
-
+        await loadPlatformData();
       } catch (err) {
         console.error('Error loading admin panel:', err);
         router.push('/login');
@@ -183,108 +187,65 @@ export default function AdminDashboard() {
     checkAdminAndLoad();
   }, []);
 
-  const handleVerifyUser = (id: string, list: 'agents' | 'restaurants') => {
-    if (list === 'agents') {
-      setAgents(prev => prev.map(a => a.id === id ? { ...a, status: 'verified' } : a));
-      // Update requests list if present
-      const userObj = agents.find(a => a.id === id);
-      if (userObj) {
-        setRequests(prev => prev.filter(r => r.fullName !== userObj.fullName));
-        localStorage.removeItem(`verification_requested_${id}`);
-        // If it's a demo account, update status in Mock Service
-        if (userObj.fullName === 'John Bali Promoter') {
-          authService.getCurrentUser().then(curr => {
-            if (curr && curr.id === 'mock-partner-uuid') curr.status = 'verified';
-          });
-        }
-      }
-    } else {
-      setRestaurants(prev => prev.map(r => r.id === id ? { ...r, status: 'verified' } : r));
-      const userObj = restaurants.find(r => r.id === id);
-      if (userObj) {
-        setRequests(prev => prev.filter(r => r.fullName !== userObj.fullName));
-        localStorage.removeItem(`verification_requested_${id}`);
-        // If it's a demo account, update status in Mock Service
-        if (userObj.fullName === 'La Brisa Bali Manager') {
-          authService.getCurrentUser().then(curr => {
-            if (curr && curr.id === 'mock-business-uuid') curr.status = 'verified';
-          });
-        }
-      }
-    }
-    showToast(t.successUpdate);
-  };
-
-  const handleVerifyFromRequests = (reqId: string, fullName: string, role: string) => {
-    // Verify in correct main lists
-    if (role === 'partner') {
-      setAgents(prev => prev.map(a => a.fullName === fullName ? { ...a, status: 'verified' } : a));
-    } else {
-      setRestaurants(prev => prev.map(r => r.fullName === fullName ? { ...r, status: 'verified' } : r));
-    }
-    // Remove request
-    setRequests(prev => prev.filter(r => r.id !== reqId));
-    // Clear local storage flag
-    const reqObj = requests.find(r => r.id === reqId);
-    if (reqObj) {
-      localStorage.removeItem(`verification_requested_${reqObj.targetId}`);
-      if (reqObj.targetId === 'mock-partner-uuid' || reqObj.targetId === 'mock-business-uuid') {
-        authService.getCurrentUser().then(curr => {
-          if (curr) curr.status = 'verified';
-        });
-      }
-    }
-    showToast(t.successUpdate);
-  };
-
-  const handleInitiateBan = (id: string, name: string, list: 'agents' | 'restaurants') => {
-    setSelectedBanUser({ id, name, list });
-  };
-
-  const handleConfirmBan = (duration: string) => {
-    if (!selectedBanUser) return;
-    const { id, name, list } = selectedBanUser;
+  const handleVerifyUser = async (id: string) => {
+    localStorage.setItem(`user_status_${id}`, 'verified');
+    localStorage.removeItem(`verification_requested_${id}`);
     
-    let bannedUserObj: any = null;
-
-    if (list === 'agents') {
-      const userObj = agents.find(a => a.id === id);
-      if (userObj) {
-        bannedUserObj = { ...userObj, status: 'banned', banDuration: duration };
-        setAgents(prev => prev.filter(a => a.id !== id));
-      }
-    } else {
-      const userObj = restaurants.find(r => r.id === id);
-      if (userObj) {
-        bannedUserObj = { ...userObj, status: 'banned', banDuration: duration };
-        setRestaurants(prev => prev.filter(r => r.id !== id));
-      }
+    // Update local Mock service if it matches currently logged in session
+    const currentUser = await authService.getCurrentUser();
+    if (currentUser && currentUser.id === id) {
+      currentUser.status = 'verified';
     }
-
-    if (bannedUserObj) {
-      setBannedUsers(prev => [...prev, bannedUserObj]);
-      // Remove from pending verification requests if any
-      setRequests(prev => prev.filter(r => r.fullName !== name));
-      localStorage.removeItem(`verification_requested_${bannedUserObj.id}`);
-    }
-
-    setSelectedBanUser(null);
+    
+    await loadPlatformData();
     showToast(t.successUpdate);
   };
 
-  const handleUnbanUser = (id: string) => {
-    const userObj = bannedUsers.find(u => u.id === id);
-    if (!userObj) return;
-
-    // Restore to their correct list with unverified status
-    const restoredObj = { ...userObj, status: 'unverified', banDuration: '' };
-    if (userObj.role === 'partner') {
-      setAgents(prev => [...prev, restoredObj].sort((a, b) => b.volume - a.volume));
-    } else {
-      setRestaurants(prev => [...prev, restoredObj].sort((a, b) => b.volume - a.volume));
+  const handleVerifyFromRequests = async (reqId: string, targetId: string) => {
+    localStorage.setItem(`user_status_${targetId}`, 'verified');
+    localStorage.removeItem(`verification_requested_${targetId}`);
+    
+    const currentUser = await authService.getCurrentUser();
+    if (currentUser && currentUser.id === targetId) {
+      currentUser.status = 'verified';
     }
+    
+    await loadPlatformData();
+    showToast(t.successUpdate);
+  };
 
-    setBannedUsers(prev => prev.filter(u => u.id !== id));
+  const handleInitiateBan = (id: string, name: string) => {
+    setSelectedBanUser({ id, name });
+  };
+
+  const handleConfirmBan = async (duration: string) => {
+    if (!selectedBanUser) return;
+    const { id } = selectedBanUser;
+    
+    localStorage.setItem(`user_status_${id}`, 'banned');
+    localStorage.setItem(`user_ban_dur_${id}`, duration);
+    localStorage.removeItem(`verification_requested_${id}`);
+    
+    const currentUser = await authService.getCurrentUser();
+    if (currentUser && currentUser.id === id) {
+      currentUser.status = 'banned';
+    }
+    
+    setSelectedBanUser(null);
+    await loadPlatformData();
+    showToast(t.successUpdate);
+  };
+
+  const handleUnbanUser = async (id: string) => {
+    localStorage.setItem(`user_status_${id}`, 'unverified');
+    localStorage.removeItem(`user_ban_dur_${id}`);
+    
+    const currentUser = await authService.getCurrentUser();
+    if (currentUser && currentUser.id === id) {
+      currentUser.status = 'unverified';
+    }
+    
+    await loadPlatformData();
     showToast(t.successUpdate);
   };
 
@@ -298,7 +259,6 @@ export default function AdminDashboard() {
     router.push('/login');
   };
 
-  // Stats Card Calculations
   const totalVolume = agents.reduce((sum, a) => sum + a.volume, 0) + restaurants.reduce((sum, r) => sum + r.volume, 0);
 
   if (loading) {
@@ -531,7 +491,7 @@ export default function AdminDashboard() {
         {/* TAB 1: MOST ACTIVE */}
         {activeTab === 'active' && (
           <>
-            {/* Top 10 Promoters/Agents */}
+            {/* Top Promoters/Agents */}
             <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
               <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.promoters}</h3>
               <div style={{ overflowX: 'auto' }}>
@@ -552,8 +512,8 @@ export default function AdminDashboard() {
                           <span style={{
                             fontSize: '0.7rem',
                             fontWeight: 700,
-                            color: usr.status === 'verified' ? 'var(--success)' : 'rgba(255,255,255,0.4)',
-                            border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--surface-border)'}`,
+                            color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
+                            border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
                             padding: '3px 8px',
                             borderRadius: '4px',
                             display: 'inline-block'
@@ -580,7 +540,7 @@ export default function AdminDashboard() {
                           <div style={{ display: 'inline-flex', gap: '8px' }}>
                             {/* Verify neon tick button */}
                             <button
-                              onClick={() => handleVerifyUser(usr.id, 'agents')}
+                              onClick={() => handleVerifyUser(usr.id)}
                               disabled={usr.status === 'verified'}
                               style={{
                                 width: '34px',
@@ -607,7 +567,7 @@ export default function AdminDashboard() {
 
                             {/* Ban neon cross button */}
                             <button
-                              onClick={() => handleInitiateBan(usr.id, usr.fullName, 'agents')}
+                              onClick={() => handleInitiateBan(usr.id, usr.fullName)}
                               style={{
                                 width: '34px',
                                 height: '34px',
@@ -634,12 +594,19 @@ export default function AdminDashboard() {
                         </td>
                       </tr>
                     ))}
+                    {agents.length === 0 && (
+                      <tr>
+                        <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>
+                          No active promoters registered yet.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
 
-            {/* Top 10 Restaurants */}
+            {/* Top Restaurants */}
             <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
               <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.merchants}</h3>
               <div style={{ overflowX: 'auto' }}>
@@ -661,8 +628,8 @@ export default function AdminDashboard() {
                           <span style={{
                             fontSize: '0.7rem',
                             fontWeight: 700,
-                            color: usr.status === 'verified' ? 'var(--success)' : 'rgba(255,255,255,0.4)',
-                            border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--surface-border)'}`,
+                            color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
+                            border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
                             padding: '3px 8px',
                             borderRadius: '4px',
                             display: 'inline-block'
@@ -694,7 +661,7 @@ export default function AdminDashboard() {
                           <div style={{ display: 'inline-flex', gap: '8px' }}>
                             {/* Verify neon tick button */}
                             <button
-                              onClick={() => handleVerifyUser(usr.id, 'restaurants')}
+                              onClick={() => handleVerifyUser(usr.id)}
                               disabled={usr.status === 'verified'}
                               style={{
                                 width: '34px',
@@ -721,7 +688,7 @@ export default function AdminDashboard() {
 
                             {/* Ban neon cross button */}
                             <button
-                              onClick={() => handleInitiateBan(usr.id, usr.fullName, 'restaurants')}
+                              onClick={() => handleInitiateBan(usr.id, usr.fullName)}
                               style={{
                                 width: '34px',
                                 height: '34px',
@@ -748,6 +715,13 @@ export default function AdminDashboard() {
                         </td>
                       </tr>
                     ))}
+                    {restaurants.length === 0 && (
+                      <tr>
+                        <td colSpan={6} style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>
+                          No active businesses registered yet.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -884,7 +858,7 @@ export default function AdminDashboard() {
                         <div style={{ display: 'inline-flex', gap: '8px' }}>
                           {/* Verify neon tick button */}
                           <button
-                            onClick={() => handleVerifyFromRequests(req.id, req.fullName, req.role)}
+                            onClick={() => handleVerifyFromRequests(req.id, req.targetId)}
                             style={{
                               width: '34px',
                               height: '34px',
@@ -909,7 +883,7 @@ export default function AdminDashboard() {
 
                           {/* Reject/Ban cross button */}
                           <button
-                            onClick={() => handleInitiateBan(req.targetId, req.fullName, req.role === 'partner' ? 'agents' : 'restaurants')}
+                            onClick={() => handleInitiateBan(req.targetId, req.fullName)}
                             style={{
                               width: '34px',
                               height: '34px',

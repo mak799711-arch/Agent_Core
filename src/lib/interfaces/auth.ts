@@ -12,6 +12,7 @@ export interface UserProfile {
   language: 'ru' | 'en' | 'id';
   theme: 'dark' | 'neon' | 'light';
   status?: 'verified' | 'unverified' | 'banned' | string;
+  email?: string;
 }
 
 export interface IAuthService {
@@ -20,4 +21,5 @@ export interface IAuthService {
   signIn(email: string, password: string): Promise<UserProfile>;
   signOut(): Promise<void>;
   updateProfile(updates: Partial<UserProfile>): Promise<UserProfile>;
+  getAllUsers(): Promise<UserProfile[]>;
 }
