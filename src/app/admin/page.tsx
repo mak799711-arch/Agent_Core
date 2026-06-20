@@ -38,7 +38,9 @@ const translations = {
     banOptionForever: 'Forever',
     btnCancel: 'Cancel',
     unban: 'Unban User',
-    successUpdate: 'Action completed successfully!'
+    successUpdate: 'Action completed successfully!',
+    promoters: 'Top 10 Promoters & Agents',
+    merchants: 'Top 10 Restaurants & Beach Clubs'
   },
   ru: {
     admin: 'Администратор платформы',
@@ -70,7 +72,9 @@ const translations = {
     banOptionForever: 'Навсегда',
     btnCancel: 'Отмена',
     unban: 'Разбанить',
-    successUpdate: 'Действие успешно выполнено!'
+    successUpdate: 'Действие успешно выполнено!',
+    promoters: 'ТОП-10 Агентов и Промоутеров',
+    merchants: 'ТОП-10 Ресторанов и Заведений'
   }
 };
 

@@ -11,6 +11,7 @@ export interface UserProfile {
   currency: 'USD' | 'IDR' | 'EUR';
   language: 'ru' | 'en' | 'id';
   theme: 'dark' | 'neon' | 'light';
+  status?: 'verified' | 'unverified' | 'banned' | string;
 }
 
 export interface IAuthService {
