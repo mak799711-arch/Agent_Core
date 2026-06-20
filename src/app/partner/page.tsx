@@ -248,7 +248,7 @@ export default function PartnerDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(to bottom, var(--background), #050505)',
+      background: 'var(--background)',
       color: 'var(--foreground)',
       padding: '1.5rem',
       paddingBottom: '5rem',
@@ -279,7 +279,7 @@ export default function PartnerDashboard() {
           <button onClick={() => router.push('/partner/settings')} style={{
             background: 'var(--surface)',
             border: '1px solid var(--surface-border)',
-            color: 'white',
+            color: 'var(--foreground)',
             padding: '6px 12px',
             borderRadius: '6px',
             cursor: 'pointer',
@@ -288,7 +288,7 @@ export default function PartnerDashboard() {
             {t.settings}
           </button>
           <button onClick={handleLogout} style={{
-            background: 'rgba(255,255,255,0.05)',
+            background: 'var(--surface)',
             border: 'none',
             color: 'var(--error)',
             padding: '6px 12px',
@@ -400,7 +400,7 @@ export default function PartnerDashboard() {
                   border: '1px solid',
                   borderColor: selectedCategory === cat ? 'var(--primary)' : 'var(--surface-border)',
                   background: selectedCategory === cat ? 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)' : 'var(--surface)',
-                  color: selectedCategory === cat ? 'black' : 'white',
+                  color: selectedCategory === cat ? '#ffffff' : 'var(--foreground)',
                   fontWeight: 600,
                   fontSize: '0.85rem',
                   cursor: 'pointer',

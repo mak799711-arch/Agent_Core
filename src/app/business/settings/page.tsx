@@ -144,8 +144,8 @@ export default function BusinessSettings() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(to bottom, #0d0d0d, #050505)',
-      color: 'white',
+      background: 'var(--background)',
+      color: 'var(--foreground)',
       padding: '2rem',
       fontFamily: 'Inter, sans-serif'
     }}>
@@ -172,8 +172,8 @@ export default function BusinessSettings() {
                     borderRadius: '8px',
                     border: '1px solid',
                     borderColor: theme === th ? 'var(--accent)' : 'var(--surface-border)',
-                    background: theme === th ? 'rgba(255, 0, 127, 0.1)' : 'rgba(255,255,255,0.02)',
-                    color: 'white',
+                    background: theme === th ? 'var(--surface)' : 'rgba(255,255,255,0.02)',
+                    color: 'var(--foreground)',
                     fontWeight: 600,
                     cursor: 'pointer'
                   }}
@@ -192,17 +192,17 @@ export default function BusinessSettings() {
                 value={lang}
                 onChange={(e) => setLang(e.target.value as any)}
                 style={{
-                  background: 'rgba(255,255,255,0.05)',
+                  background: 'var(--surface)',
                   border: '1px solid var(--surface-border)',
-                  color: 'white',
+                  color: 'var(--foreground)',
                   padding: '10px',
                   borderRadius: '6px',
                   outline: 'none'
                 }}
               >
-                <option value="en" style={{ background: '#0d0d0d' }}>English</option>
-                <option value="ru" style={{ background: '#0d0d0d' }}>Русский</option>
-                <option value="id" style={{ background: '#0d0d0d' }}>Bahasa Indonesia</option>
+                <option value="en" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>English</option>
+                <option value="ru" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>Русский</option>
+                <option value="id" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>Bahasa Indonesia</option>
               </select>
             </div>
 
@@ -212,17 +212,17 @@ export default function BusinessSettings() {
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value as any)}
                 style={{
-                  background: 'rgba(255,255,255,0.05)',
+                  background: 'var(--surface)',
                   border: '1px solid var(--surface-border)',
-                  color: 'white',
+                  color: 'var(--foreground)',
                   padding: '10px',
                   borderRadius: '6px',
                   outline: 'none'
                 }}
               >
-                <option value="USD" style={{ background: '#0d0d0d' }}>USD ($)</option>
-                <option value="IDR" style={{ background: '#0d0d0d' }}>IDR (Rp)</option>
-                <option value="EUR" style={{ background: '#0d0d0d' }}>EUR (€)</option>
+                <option value="USD" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>USD ($)</option>
+                <option value="IDR" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>IDR (Rp)</option>
+                <option value="EUR" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>EUR (€)</option>
               </select>
             </div>
           </div>
@@ -271,11 +271,11 @@ export default function BusinessSettings() {
                       required
                       style={{
                         flex: 1,
-                        background: 'rgba(255,255,255,0.05)',
+                        background: 'var(--surface)',
                         border: '1px solid var(--surface-border)',
                         borderRadius: '8px',
                         padding: '10px 14px',
-                        color: 'white',
+                        color: 'var(--foreground)',
                         outline: 'none'
                       }}
                     />

@@ -2,86 +2,115 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService, offerRepository, referralRepository, walletRepository } from '@/lib/services';
+import { authService, offerRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
-import { Offer } from '@/lib/interfaces/offers';
-import { ReferralSession } from '@/lib/interfaces/referrals';
-import { Transaction } from '@/lib/interfaces/wallet';
 import { formatCurrency } from '@/lib/utils/currency';
 
 const translations = {
   en: {
     admin: 'Platform Administrator',
     exit: 'Exit',
-    dashboardTitle: 'Admin Control Center 🔑',
+    dashboardTitle: 'Platform Command Center 🔑',
     loading: 'Loading Admin Console...',
-    totalVolume: 'Total Platform Volume',
-    activeEscrow: 'Active Escrow Holds',
-    totalUsers: 'Total Registered Users',
-    activeOffers: 'Active Offers',
-    merchants: 'Merchants & Reserves',
-    promoters: 'Promoters & Earnings',
-    escrowLedger: 'Live Escrow Ledger',
-    topUp: 'Modify Balance',
-    toggleStatus: 'Toggle Verification',
-    save: 'Save',
-    cancel: 'Cancel',
+    totalVolume: 'Platform Turnover',
+    totalAgents: 'Agents Count',
+    totalBusinesses: 'Businesses Count',
+    merchants: 'Top 15 Restaurants & Beach Clubs',
+    promoters: 'Top 15 Promoters & Agents',
+    complaints: 'User Complaints & Reports (Unlimited)',
+    toggleStatus: 'Toggle Status',
     status: 'Status',
-    amount: 'Amount',
+    role: 'Role',
+    agent: 'Agent',
+    venue: 'Venue',
+    reportedUser: 'Reported User',
+    reason: 'Reason for Complaint',
+    complaintsCount: 'Reports',
+    volume: 'Turnover',
+    escrow: 'Active Escrow',
     action: 'Action',
     verified: 'VERIFIED',
-    standard: 'STANDARD',
-    active: 'ACTIVE',
-    paused: 'PAUSED',
-    payoutRate: 'Set Platform Fee (%)',
-    systemAlert: 'System notifications',
-    successUpdate: 'Platform data updated successfully!'
+    unverified: 'UNVERIFIED',
+    successUpdate: 'Verification status updated successfully!'
   },
   ru: {
     admin: 'Администратор платформы',
     exit: 'Выйти',
     dashboardTitle: 'Центр управления платформой 🔑',
     loading: 'Загрузка панели администратора...',
-    totalVolume: 'Общий оборот платформы',
-    activeEscrow: 'Заморожено в Эскроу',
-    totalUsers: 'Всего пользователей',
-    activeOffers: 'Активных предложений',
-    merchants: 'Заведения и Резервы',
-    promoters: 'Промоутеры и Доходы',
-    escrowLedger: 'Живой реестр Эскроу',
-    topUp: 'Изменить баланс',
+    totalVolume: 'Оборот платформы',
+    totalAgents: 'Всего агентов',
+    totalBusinesses: 'Всего бизнесов',
+    merchants: 'ТОП-15 Ресторанов и Заведений',
+    promoters: 'ТОП-15 Агентов и Промоутеров',
+    complaints: 'Жалобы на пользователей (Неограниченно)',
     toggleStatus: 'Изменить статус',
-    save: 'Сохранить',
-    cancel: 'Отмена',
     status: 'Статус',
-    amount: 'Сумма',
+    role: 'Роль',
+    agent: 'Агент',
+    venue: 'Заведение',
+    reportedUser: 'Пользователь',
+    reason: 'Причина жалобы',
+    complaintsCount: 'Жалобы',
+    volume: 'Оборот',
+    escrow: 'В Эскроу',
     action: 'Действие',
-    verified: 'ПОДТВЕРЖДЕН',
-    standard: 'ОБЫЧНЫЙ',
-    active: 'АКТИВЕН',
-    paused: 'ПАУЗА',
-    payoutRate: 'Комиссия платформы (%)',
-    systemAlert: 'Системные уведомления',
-    successUpdate: 'Данные платформы успешно обновлены!'
+    verified: 'ВЕРИФИЦИРОВАН',
+    unverified: 'НЕ ВЕРИФИЦИРОВАН',
+    successUpdate: 'Статус верификации обновлен!'
   }
 };
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  // Platform Metrics
-  const [usersList, setUsersList] = useState<any[]>([]);
-  const [offersList, setOffersList] = useState<Offer[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [sessions, setSessions] = useState<ReferralSession[]>([]);
-  
-  // Custom Controls
-  const [platformFee, setPlatformFee] = useState<number>(2.5);
-  const [editingUserId, setEditingUserId] = useState<string | null>(null);
-  const [newBalanceValue, setNewBalanceValue] = useState<string>('');
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const router = useRouter();
+
+  // Top 15 Agents state
+  const [agents, setAgents] = useState([
+    { id: 'agent-1', fullName: 'Wayan Bali Guide', email: 'wayan@bali.guide', role: 'partner', status: 'verified', volume: 5400 },
+    { id: 'agent-2', fullName: 'Made Indrawan', email: 'made.indra@gmail.com', role: 'partner', status: 'verified', volume: 4800 },
+    { id: 'agent-3', fullName: 'Ketut Sudarsana', email: 'ketut.sud@outlook.com', role: 'partner', status: 'verified', volume: 4200 },
+    { id: 'agent-4', fullName: 'Nyoman Ari', email: 'nyoman.ari@yahoo.com', role: 'partner', status: 'unverified', volume: 3900 },
+    { id: 'agent-5', fullName: 'Gede Pratama', email: 'gede.prat@bali.id', role: 'partner', status: 'verified', volume: 3500 },
+    { id: 'agent-6', fullName: 'John Bali Promoter', email: 'partner@agent.core', role: 'partner', status: 'verified', volume: 3200 },
+    { id: 'agent-7', fullName: 'Sarah Wanderlust', email: 'sarah.explore@gmail.com', role: 'partner', status: 'verified', volume: 2900 },
+    { id: 'agent-8', fullName: 'Alex Nomadic', email: 'alex.nomad@outlook.com', role: 'partner', status: 'verified', volume: 2600 },
+    { id: 'agent-9', fullName: 'Elena Sunset', email: 'elena.sun@gmail.com', role: 'partner', status: 'verified', volume: 2300 },
+    { id: 'agent-10', fullName: 'Dmitry Bali Life', email: 'dmitry.life@mail.ru', role: 'partner', status: 'verified', volume: 2100 },
+    { id: 'agent-11', fullName: 'Putu Sukarta', email: 'putu.suk@gmail.com', role: 'partner', status: 'verified', volume: 1800 },
+    { id: 'agent-12', fullName: 'Kadek Wirawan', email: 'kadek.w@yahoo.com', role: 'partner', status: 'unverified', volume: 1500 },
+    { id: 'agent-13', fullName: 'Komang Budi', email: 'komang.b@gmail.com', role: 'partner', status: 'verified', volume: 1200 },
+    { id: 'agent-14', fullName: 'Michael Explorer', email: 'michael@bali.com', role: 'partner', status: 'verified', volume: 950 },
+    { id: 'agent-15', fullName: 'Anna Island Vibes', email: 'anna.vibes@gmail.com', role: 'partner', status: 'verified', volume: 800 }
+  ]);
+
+  // Top 15 Businesses state
+  const [restaurants, setRestaurants] = useState([
+    { id: 'res-1', fullName: 'La Brisa Bali', email: 'business@agent.core', role: 'business', status: 'verified', volume: 15400, escrowAmount: 1200 },
+    { id: 'res-2', fullName: 'Potato Head Beach Club', email: 'manager@potatohead.co', role: 'business', status: 'verified', volume: 14200, escrowAmount: 900 },
+    { id: 'res-3', fullName: 'Finns VIP Beach Club', email: 'vip@finnsbeachclub.com', role: 'business', status: 'verified', volume: 12800, escrowAmount: 1500 },
+    { id: 'res-4', fullName: 'Naughty Nuri\'s Seminyak', email: 'info@naughtynuris.com', role: 'business', status: 'verified', volume: 9800, escrowAmount: 400 },
+    { id: 'res-5', fullName: 'Mason Canggu', email: 'bookings@masonbali.com', role: 'business', status: 'verified', volume: 8900, escrowAmount: 600 },
+    { id: 'res-6', fullName: 'Milk & Madu', email: 'canggu@milkandmadu.com', role: 'business', status: 'verified', volume: 7600, escrowAmount: 300 },
+    { id: 'res-7', fullName: 'Shady Shack', email: 'hello@shadyshack.com', role: 'business', status: 'verified', volume: 6400, escrowAmount: 200 },
+    { id: 'res-8', fullName: 'Sisterfields Cafe', email: 'manager@sisterfields.com', role: 'business', status: 'verified', volume: 5900, escrowAmount: 150 },
+    { id: 'res-9', fullName: 'Motel Mexicola', email: 'fiesta@motelmexicola.info', role: 'business', status: 'verified', volume: 5200, escrowAmount: 800 },
+    { id: 'res-10', fullName: 'Barbacoa Bali', email: 'info@barbacoabali.com', role: 'business', status: 'verified', volume: 4800, escrowAmount: 500 },
+    { id: 'res-11', fullName: 'Da Maria', email: 'ciao@damariabali.com', role: 'business', status: 'verified', volume: 4100, escrowAmount: 350 },
+    { id: 'res-12', fullName: 'Locavore Ubud', email: 'eat@locavore.co.id', role: 'business', status: 'verified', volume: 3800, escrowAmount: 100 },
+    { id: 'res-13', fullName: 'The Lawn Canggu', email: 'hello@thelawncanggu.com', role: 'business', status: 'verified', volume: 3200, escrowAmount: 250 },
+    { id: 'res-14', fullName: 'Single Fin Uluwatu', email: 'surf@singlefin.com', role: 'business', status: 'verified', volume: 2900, escrowAmount: 150 },
+    { id: 'res-15', fullName: 'Kynd Community', email: 'love@kyndcommunity.com', role: 'business', status: 'verified', volume: 2400, escrowAmount: 100 }
+  ]);
+
+  // Complaints/Reported Users state
+  const [complaints, setComplaints] = useState([
+    { id: 'comp-1', targetId: 'agent-12', fullName: 'Kadek Wirawan', role: 'partner', status: 'unverified', reason: 'High GPS coordinates jump detected', count: 4 },
+    { id: 'comp-2', targetId: 'res-4', fullName: 'Naughty Nuri\'s Seminyak', role: 'business', status: 'verified', reason: 'Promoter reported scan code ignored by cashier', count: 2 },
+    { id: 'comp-3', targetId: 'comp-user-3', fullName: 'Igor Scammer', role: 'partner', status: 'unverified', reason: 'Fake referral email automation patterns', count: 18 }
+  ]);
 
   const lang = user?.language === 'ru' ? 'ru' : 'en';
   const t = translations[lang];
@@ -89,23 +118,17 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function checkAdminAndLoad() {
       try {
-        let currentUser = await authService.getCurrentUser();
+        const currentUser = await authService.getCurrentUser();
         if (!currentUser || currentUser.role !== 'admin') {
-          // Авто-логин под админом, если нет сессии (для демо)
-          await authService.signIn('mak799711@gmail.com', 'MAKADMIN1551');
-          currentUser = await authService.getCurrentUser();
+          router.push('/login');
+          return;
         }
 
-        if (currentUser) {
-          setUser(currentUser);
-          
-          const activeTheme = localStorage.getItem('theme') || currentUser.theme;
-          document.documentElement.setAttribute('data-theme', activeTheme);
-          
-          await loadPlatformData();
-        }
+        setUser(currentUser);
+        const activeTheme = localStorage.getItem('theme') || currentUser.theme;
+        document.documentElement.setAttribute('data-theme', activeTheme);
       } catch (err) {
-        console.error('Error initializing admin console:', err);
+        console.error('Error loading admin panel:', err);
         router.push('/login');
       } finally {
         setLoading(false);
@@ -114,83 +137,42 @@ export default function AdminDashboard() {
     checkAdminAndLoad();
   }, []);
 
-  const loadPlatformData = async () => {
-    // Вытаскиваем все офферы
-    const allOffers = await offerRepository.getOffers({});
-    setOffersList(allOffers);
-
-    // Имитируем получение всех пользователей системы из MockAuthService
-    // Так как у нас mock, мы берем дефолтных
-    const defaultUsers = [
-      { id: 'mock-partner-uuid', role: 'partner', fullName: 'John Bali Promoter', email: 'partner@agent.core', cardBound: true, status: 'verified' },
-      { id: 'mock-business-uuid', role: 'business', fullName: 'La Brisa Bali Manager', email: 'business@agent.core', cardBound: true, status: 'verified' },
-      { id: 'mock-admin-uuid', role: 'admin', fullName: 'Mak Admin', email: 'mak799711@gmail.com', cardBound: true, status: 'verified' }
-    ];
-
-    // Добавляем к ним их балансы
-    const usersWithBalances = await Promise.all(defaultUsers.map(async (u) => {
-      const bal = await walletRepository.getBalance(u.id);
-      const txs = await walletRepository.getTransactions(u.id);
-      const escrow = txs
-        .filter(t => t.type === 'escrow_hold' && t.status === 'completed')
-        .reduce((sum, t) => sum + t.amount, 0) - 
-        txs
-        .filter(t => t.type === 'escrow_release' && t.status === 'completed')
-        .reduce((sum, t) => sum + t.amount, 0);
-
-      return {
-        ...u,
-        balance: bal,
-        escrowAmount: Math.max(escrow, 0)
-      };
+  const handleToggleAgentStatus = (id: string) => {
+    setAgents(prev => prev.map(a => {
+      if (a.id === id) {
+        const nextStatus = a.status === 'verified' ? 'unverified' : 'verified';
+        // Also update matching user in complaints list if present
+        setComplaints(cPrev => cPrev.map(c => c.fullName === a.fullName ? { ...c, status: nextStatus } : c));
+        return { ...a, status: nextStatus };
+      }
+      return a;
     }));
-    setUsersList(usersWithBalances);
-
-    // Собираем транзакции со всей системы
-    // В MockWalletRepository транзакции лежат внутри синглтона. Мы получим их через getTransactions
-    const partnerTxs = await walletRepository.getTransactions('mock-partner-uuid');
-    const businessTxs = await walletRepository.getTransactions('mock-business-uuid');
-    const combinedTxs = [...partnerTxs, ...businessTxs].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    setTransactions(combinedTxs);
+    showToast(t.successUpdate);
   };
 
-  const handleUpdateBalance = async (userId: string) => {
-    const amt = parseFloat(newBalanceValue);
-    if (isNaN(amt)) return;
-
-    try {
-      // Имитируем пополнение/списание через транзакцию deposit/withdrawal
-      const current = usersList.find(u => u.id === userId)?.balance || 0;
-      const difference = amt - current;
-
-      if (difference !== 0) {
-        await walletRepository.createTransaction({
-          userId,
-          amount: Math.abs(difference),
-          type: difference > 0 ? 'deposit' : 'withdrawal',
-          sessionId: null,
-          status: 'completed'
-        });
+  const handleToggleRestaurantStatus = (id: string) => {
+    setRestaurants(prev => prev.map(r => {
+      if (r.id === id) {
+        const nextStatus = r.status === 'verified' ? 'unverified' : 'verified';
+        // Also update matching user in complaints list if present
+        setComplaints(cPrev => cPrev.map(c => c.fullName === r.fullName ? { ...c, status: nextStatus } : c));
+        return { ...r, status: nextStatus };
       }
-
-      setEditingUserId(null);
-      setNewBalanceValue('');
-      await loadPlatformData();
-      showToast(t.successUpdate);
-    } catch (err) {
-      alert('Failed to update balance');
-    }
+      return r;
+    }));
+    showToast(t.successUpdate);
   };
 
-  const handleToggleVerification = async (userId: string) => {
-    setUsersList(prev => prev.map(u => {
-      if (u.id === userId) {
-        const nextStatus = u.status === 'verified' ? 'standard' : 'verified';
-        return { ...u, status: nextStatus };
+  const handleToggleComplaintUserStatus = (complaintId: string) => {
+    setComplaints(prev => prev.map(c => {
+      if (c.id === complaintId) {
+        const nextStatus = c.status === 'verified' ? 'unverified' : 'verified';
+        // Synchronize with agents or restaurants list
+        setAgents(aPrev => aPrev.map(a => a.fullName === c.fullName ? { ...a, status: nextStatus } : a));
+        setRestaurants(rPrev => rPrev.map(r => r.fullName === c.fullName ? { ...r, status: nextStatus } : r));
+        return { ...c, status: nextStatus };
       }
-      return u;
+      return c;
     }));
     showToast(t.successUpdate);
   };
@@ -205,19 +187,13 @@ export default function AdminDashboard() {
     router.push('/login');
   };
 
-  // Вычисления для дашборда
-  const totalVolume = transactions
-    .filter(tx => tx.type === 'reward' && tx.status === 'completed')
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  const activeEscrow = usersList
-    .filter(u => u.role === 'business')
-    .reduce((sum, u) => sum + u.escrowAmount, 0);
+  // Calculations for Admin Stats Cards
+  const totalVolume = agents.reduce((sum, a) => sum + a.volume, 0) + restaurants.reduce((sum, r) => sum + r.volume, 0);
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <p style={{ color: 'var(--primary)' }}>{t?.loading || 'Loading Admin Console...'}</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
+        <p style={{ color: 'var(--primary)', fontFamily: 'Inter, sans-serif' }}>{t?.loading || 'Loading Admin Console...'}</p>
       </div>
     );
   }
@@ -225,7 +201,7 @@ export default function AdminDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(to bottom, var(--background), #050505)',
+      background: 'var(--background)',
       color: 'var(--foreground)',
       padding: '2.5rem',
       fontFamily: 'Inter, sans-serif'
@@ -243,46 +219,21 @@ export default function AdminDashboard() {
           <h2 style={{ fontSize: '1.8rem', fontWeight: 800, background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>
             {t.dashboardTitle}
           </h2>
-          <span style={{ fontSize: '0.75rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1.5px' }}>{t.admin}</span>
+          <span style={{ fontSize: '0.75rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--foreground)' }}>{t.admin}</span>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ display: 'flex', gap: '0.25rem' }}>
-            {(['dark', 'neon', 'light'] as const).map(th => (
-              <button
-                key={th}
-                onClick={() => {
-                  localStorage.setItem('theme', th);
-                  document.documentElement.setAttribute('data-theme', th);
-                }}
-                style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--surface-border)',
-                  color: 'white',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  fontSize: '0.7rem',
-                  cursor: 'pointer'
-                }}
-              >
-                {th.toUpperCase()}
-              </button>
-            ))}
-          </div>
-
-          <button onClick={handleLogout} style={{
-            background: 'rgba(255, 77, 79, 0.1)',
-            border: '1px solid var(--error)',
-            color: 'var(--error)',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-            fontWeight: 600
-          }}>
-            {t.exit}
-          </button>
-        </div>
+        <button onClick={handleLogout} style={{
+          background: 'rgba(255, 77, 79, 0.1)',
+          border: '1px solid var(--error)',
+          color: 'var(--error)',
+          padding: '8px 16px',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontSize: '0.85rem',
+          fontWeight: 600
+        }}>
+          {t.exit}
+        </button>
       </header>
 
       {/* Notifications toast */}
@@ -303,128 +254,91 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* 4 Cards Grid Metrics */}
+      {/* 3 Metric Cards Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
         gap: '1.5rem',
         marginBottom: '2.5rem'
       }}>
-        <div className="glass-panel" style={{ padding: '1.5rem', position: 'relative' }}>
-          <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.totalVolume}</span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)' }}>{formatCurrency(totalVolume, 'USD')}</h2>
+        <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
+          <span style={{ fontSize: '0.85rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem', color: 'var(--foreground)' }}>{t.totalVolume}</span>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--primary)' }}>{formatCurrency(totalVolume, 'USD')}</h2>
         </div>
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
-          <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.activeEscrow}</span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent)' }}>{formatCurrency(activeEscrow, 'USD')}</h2>
+        <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
+          <span style={{ fontSize: '0.85rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem', color: 'var(--foreground)' }}>{t.totalAgents}</span>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--foreground)' }}>{agents.length}</h2>
         </div>
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
-          <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.totalUsers}</span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 800 }}>{usersList.length}</h2>
-        </div>
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
-          <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.activeOffers}</span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 800 }}>{offersList.filter(o => o.isActive).length}</h2>
+        <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
+          <span style={{ fontSize: '0.85rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem', color: 'var(--foreground)' }}>{t.totalBusinesses}</span>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--foreground)' }}>{restaurants.length}</h2>
         </div>
       </div>
 
-      {/* Main Content Sections */}
+      {/* Main Content: Tables */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
         
-        {/* User Management Section */}
-        <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 700 }}>{t.merchants} & {t.promoters}</h3>
+        {/* TOP 15 AGENTS TABLE */}
+        <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.promoters}</h3>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem' }}>
-                  <th style={{ padding: '10px' }}>User</th>
-                  <th>Role</th>
-                  <th>Reserve / Balance</th>
-                  <th>Escrow Balance</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                  <th style={{ padding: '12px 10px' }}>{t.status}</th>
+                  <th>{t.agent}</th>
+                  <th>{t.role}</th>
+                  <th>{t.volume}</th>
+                  <th>{t.action}</th>
                 </tr>
               </thead>
               <tbody>
-                {usersList.map((usr) => (
-                  <tr key={usr.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', fontSize: '0.9rem' }}>
+                {agents.map((usr) => (
+                  <tr key={usr.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
                     <td style={{ padding: '15px 10px' }}>
+                      <span style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
+                        border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        display: 'inline-block'
+                      }}>
+                        {usr.status === 'verified' ? t.verified : t.unverified}
+                      </span>
+                    </td>
+                    <td>
                       <div style={{ fontWeight: 600 }}>{usr.fullName}</div>
                       <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{usr.email}</div>
                     </td>
                     <td>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
                         {usr.role}
                       </span>
                     </td>
                     <td>
-                      {editingUserId === usr.id ? (
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          <input
-                            type="number"
-                            value={newBalanceValue}
-                            onChange={(e) => setNewBalanceValue(e.target.value)}
-                            style={{ width: '80px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--primary)', color: 'white', padding: '4px', borderRadius: '4px' }}
-                          />
-                          <button onClick={() => handleUpdateBalance(usr.id)} style={{ background: 'var(--primary)', border: 'none', color: 'black', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}>
-                            {t.save}
-                          </button>
-                          <button onClick={() => setEditingUserId(null)} style={{ background: 'transparent', border: '1px solid var(--surface-border)', color: 'white', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
-                            {t.cancel}
-                          </button>
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <strong>{formatCurrency(usr.balance, 'USD')}</strong>
-                          {usr.role !== 'admin' && (
-                            <button
-                              onClick={() => {
-                                setEditingUserId(usr.id);
-                                setNewBalanceValue(usr.balance.toString());
-                              }}
-                              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline' }}
-                            >
-                              {t.topUp}
-                            </button>
-                          )}
-                        </div>
-                      )}
+                      <strong>{formatCurrency(usr.volume, 'USD')}</strong>
                     </td>
                     <td>
-                      <span style={{ color: usr.escrowAmount > 0 ? 'var(--accent)' : 'inherit' }}>
-                        {formatCurrency(usr.escrowAmount, 'USD')}
-                      </span>
-                    </td>
-                    <td>
-                      <span style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        color: usr.status === 'verified' ? 'var(--success)' : 'rgba(255,255,255,0.4)',
-                        border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'rgba(255,255,255,0.2)'}`,
-                        padding: '2px 6px',
-                        borderRadius: '4px'
-                      }}>
-                        {usr.status === 'verified' ? t.verified : t.standard}
-                      </span>
-                    </td>
-                    <td>
-                      {usr.role !== 'admin' && (
-                        <button
-                          onClick={() => handleToggleVerification(usr.id)}
-                          style={{
-                            background: 'rgba(255,255,255,0.02)',
-                            border: '1px solid var(--surface-border)',
-                            color: 'white',
-                            padding: '4px 10px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontSize: '0.75rem'
-                          }}
-                        >
-                          {t.toggleStatus}
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleToggleAgentStatus(usr.id)}
+                        style={{
+                          background: 'var(--surface)',
+                          border: '1px solid var(--surface-border)',
+                          color: 'var(--foreground)',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          fontWeight: 500,
+                          transition: 'opacity 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        {t.toggleStatus}
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -433,50 +347,155 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Platform Escrow Ledger & Transactions */}
-        <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 700 }}>{t.escrowLedger}</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {transactions.slice(0, 10).map((tx) => (
-              <div key={tx.id} style={{
-                padding: '1rem',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid var(--surface-border)',
-                borderRadius: '8px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <div>
-                  <span style={{
-                    fontSize: '0.65rem',
-                    fontWeight: 700,
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    marginRight: '10px',
-                    background: tx.type === 'escrow_hold' ? 'rgba(255, 0, 127, 0.1)' :
-                               tx.type === 'reward' ? 'rgba(82, 196, 26, 0.1)' : 'rgba(255,255,255,0.05)',
-                    color: tx.type === 'escrow_hold' ? 'var(--accent)' :
-                           tx.type === 'reward' ? 'var(--success)' : 'white'
-                  }}>
-                    {tx.type.toUpperCase()}
-                  </span>
-                  <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>ID: {tx.id}</span>
-                  <div style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: '2px' }}>
-                    Created: {new Date(tx.createdAt).toLocaleString()}
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <strong style={{ fontSize: '1.1rem', color: tx.type === 'escrow_hold' ? 'var(--accent)' : 'inherit' }}>
-                    {tx.type === 'escrow_hold' ? '-' : tx.type === 'reward' ? '+' : ''}{formatCurrency(tx.amount, 'USD')}
-                  </strong>
-                  <div style={{ fontSize: '0.65rem', color: 'var(--success)', fontWeight: 600 }}>{tx.status.toUpperCase()}</div>
-                </div>
-              </div>
-            ))}
-            {transactions.length === 0 && (
-              <p style={{ opacity: 0.4, fontSize: '0.85rem', textAlign: 'center' }}>No transactions recorded yet</p>
-            )}
+        {/* TOP 15 RESTAURANTS TABLE */}
+        <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.merchants}</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                  <th style={{ padding: '12px 10px' }}>{t.status}</th>
+                  <th>{t.venue}</th>
+                  <th>{t.role}</th>
+                  <th>{t.volume}</th>
+                  <th>{t.escrow}</th>
+                  <th>{t.action}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {restaurants.map((usr) => (
+                  <tr key={usr.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                    <td style={{ padding: '15px 10px' }}>
+                      <span style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
+                        border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        display: 'inline-block'
+                      }}>
+                        {usr.status === 'verified' ? t.verified : t.unverified}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{usr.fullName}</div>
+                      <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{usr.email}</div>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                        {usr.role}
+                      </span>
+                    </td>
+                    <td>
+                      <strong>{formatCurrency(usr.volume, 'USD')}</strong>
+                    </td>
+                    <td>
+                      <span style={{ color: usr.escrowAmount > 0 ? 'var(--accent)' : 'inherit', fontWeight: 600 }}>
+                        {formatCurrency(usr.escrowAmount, 'USD')}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleToggleRestaurantStatus(usr.id)}
+                        style={{
+                          background: 'var(--surface)',
+                          border: '1px solid var(--surface-border)',
+                          color: 'var(--foreground)',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          fontWeight: 500,
+                          transition: 'opacity 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        {t.toggleStatus}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* UNLIMITED COMPLAINTS / REPORTS TABLE */}
+        <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ width: '10px', height: '10px', background: 'var(--error)', borderRadius: '50%' }}></span>
+            {t.complaints}
+          </h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                  <th style={{ padding: '12px 10px' }}>{t.status}</th>
+                  <th>{t.reportedUser}</th>
+                  <th>{t.role}</th>
+                  <th>{t.reason}</th>
+                  <th>{t.complaintsCount}</th>
+                  <th>{t.action}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {complaints.map((comp) => (
+                  <tr key={comp.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                    <td style={{ padding: '15px 10px' }}>
+                      <span style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        color: comp.status === 'verified' ? 'var(--success)' : 'var(--error)',
+                        border: `1px solid ${comp.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        display: 'inline-block'
+                      }}>
+                        {comp.status === 'verified' ? t.verified : t.unverified}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{comp.fullName}</div>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                        {comp.role}
+                      </span>
+                    </td>
+                    <td>
+                      <span style={{ opacity: 0.85 }}>{comp.reason}</span>
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 700, color: 'var(--error)', background: 'rgba(255, 77, 79, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem' }}>
+                        {comp.count}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleToggleComplaintUserStatus(comp.id)}
+                        style={{
+                          background: 'var(--surface)',
+                          border: '1px solid var(--surface-border)',
+                          color: 'var(--foreground)',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          fontWeight: 500,
+                          transition: 'opacity 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        {t.toggleStatus}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 

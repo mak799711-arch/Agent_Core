@@ -317,7 +317,7 @@ export default function BusinessDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(to bottom, var(--background), #050505)',
+      background: 'var(--background)',
       color: 'var(--foreground)',
       padding: '2rem',
       fontFamily: 'Inter, sans-serif'
@@ -347,7 +347,7 @@ export default function BusinessDashboard() {
           <button onClick={() => router.push('/business/settings')} style={{
             background: 'var(--surface)',
             border: '1px solid var(--surface-border)',
-            color: 'white',
+            color: 'var(--foreground)',
             padding: '6px 12px',
             borderRadius: '6px',
             cursor: 'pointer',
@@ -356,7 +356,7 @@ export default function BusinessDashboard() {
             {t.settings}
           </button>
           <button onClick={handleLogout} style={{
-            background: 'rgba(255,255,255,0.05)',
+            background: 'var(--surface)',
             border: 'none',
             color: 'var(--error)',
             padding: '6px 12px',

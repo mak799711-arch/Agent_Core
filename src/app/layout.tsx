@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import ThemeSelector from '@/app/components/ThemeSelector';
 
 export const metadata: Metadata = {
   title: 'Agent Core | Referral Network',
@@ -18,7 +19,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const theme = localStorage.getItem('theme') || 'neon';
+                const theme = localStorage.getItem('theme') || 'dark';
                 document.documentElement.setAttribute('data-theme', theme);
               } catch (e) {}
             `,
@@ -27,6 +28,7 @@ export default function RootLayout({
       </head>
       <body>
         <main>{children}</main>
+        <ThemeSelector />
       </body>
     </html>
   );
