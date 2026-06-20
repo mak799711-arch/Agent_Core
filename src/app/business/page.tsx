@@ -6,6 +6,7 @@ import { authService, offerRepository, referralRepository, walletRepository } fr
 import { UserProfile } from '@/lib/interfaces/auth';
 import { Offer } from '@/lib/interfaces/offers';
 import { formatCurrency } from '@/lib/utils/currency';
+import VerificationBadge from '@/app/components/VerificationBadge';
 
 const translations = {
   en: {
@@ -338,7 +339,10 @@ export default function BusinessDashboard() {
             style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid var(--accent)' }}
           />
           <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{user?.fullName}</h4>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', display: 'flex', alignItems: 'center' }}>
+              {user?.fullName}
+              {user?.status === 'verified' && <VerificationBadge size={14} />}
+            </h4>
             <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.venue}</span>
           </div>
         </div>

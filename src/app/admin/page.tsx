@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService, offerRepository } from '@/lib/services';
+import { authService } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
 import { formatCurrency } from '@/lib/utils/currency';
+import VerificationBadge from '@/app/components/VerificationBadge';
 
 const translations = {
   en: {
@@ -15,23 +16,29 @@ const translations = {
     totalVolume: 'Platform Turnover',
     totalAgents: 'Agents Count',
     totalBusinesses: 'Businesses Count',
-    merchants: 'Top 15 Restaurants & Beach Clubs',
-    promoters: 'Top 15 Promoters & Agents',
-    complaints: 'User Complaints & Reports (Unlimited)',
-    toggleStatus: 'Toggle Status',
+    tabActive: 'Most Active (Top-10)',
+    tabBanned: 'Ban List',
+    tabRequests: 'Verification Requests',
     status: 'Status',
     role: 'Role',
     agent: 'Agent',
     venue: 'Venue',
-    reportedUser: 'Reported User',
-    reason: 'Reason for Complaint',
-    complaintsCount: 'Reports',
     volume: 'Turnover',
     escrow: 'Active Escrow',
-    action: 'Action',
+    action: 'Actions',
     verified: 'VERIFIED',
     unverified: 'UNVERIFIED',
-    successUpdate: 'Verification status updated successfully!'
+    banned: 'BANNED',
+    banDuration: 'Ban Duration',
+    banOptionsTitle: 'Select Ban Duration',
+    banOption1d: '1 Day',
+    banOption1w: '1 Week',
+    banOption1m: '1 Month',
+    banOption1y: '1 Year',
+    banOptionForever: 'Forever',
+    btnCancel: 'Cancel',
+    unban: 'Unban User',
+    successUpdate: 'Action completed successfully!'
   },
   ru: {
     admin: 'Администратор платформы',
@@ -41,23 +48,29 @@ const translations = {
     totalVolume: 'Оборот платформы',
     totalAgents: 'Всего агентов',
     totalBusinesses: 'Всего бизнесов',
-    merchants: 'ТОП-15 Ресторанов и Заведений',
-    promoters: 'ТОП-15 Агентов и Промоутеров',
-    complaints: 'Жалобы на пользователей (Неограниченно)',
-    toggleStatus: 'Изменить статус',
+    tabActive: 'Самые активные (Топ-10)',
+    tabBanned: 'Бан-лист',
+    tabRequests: 'Заявки на верификацию',
     status: 'Статус',
     role: 'Роль',
     agent: 'Агент',
     venue: 'Заведение',
-    reportedUser: 'Пользователь',
-    reason: 'Причина жалобы',
-    complaintsCount: 'Жалобы',
     volume: 'Оборот',
     escrow: 'В Эскроу',
-    action: 'Действие',
+    action: 'Действия',
     verified: 'ВЕРИФИЦИРОВАН',
     unverified: 'НЕ ВЕРИФИЦИРОВАН',
-    successUpdate: 'Статус верификации обновлен!'
+    banned: 'ЗАБАНЕН',
+    banDuration: 'Срок бана',
+    banOptionsTitle: 'Выберите срок бана',
+    banOption1d: '1 день',
+    banOption1w: '1 неделя',
+    banOption1m: '1 месяц',
+    banOption1y: '1 год',
+    banOptionForever: 'Навсегда',
+    btnCancel: 'Отмена',
+    unban: 'Разбанить',
+    successUpdate: 'Действие успешно выполнено!'
   }
 };
 
@@ -65,52 +78,43 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'active' | 'banned' | 'requests'>('active');
+  const [selectedBanUser, setSelectedBanUser] = useState<{ id: string; name: string; list: 'agents' | 'restaurants' } | null>(null);
   const router = useRouter();
 
-  // Top 15 Agents state
+  // Top 10 Agents state
   const [agents, setAgents] = useState([
-    { id: 'agent-1', fullName: 'Wayan Bali Guide', email: 'wayan@bali.guide', role: 'partner', status: 'verified', volume: 5400 },
-    { id: 'agent-2', fullName: 'Made Indrawan', email: 'made.indra@gmail.com', role: 'partner', status: 'verified', volume: 4800 },
-    { id: 'agent-3', fullName: 'Ketut Sudarsana', email: 'ketut.sud@outlook.com', role: 'partner', status: 'verified', volume: 4200 },
-    { id: 'agent-4', fullName: 'Nyoman Ari', email: 'nyoman.ari@yahoo.com', role: 'partner', status: 'unverified', volume: 3900 },
-    { id: 'agent-5', fullName: 'Gede Pratama', email: 'gede.prat@bali.id', role: 'partner', status: 'verified', volume: 3500 },
-    { id: 'agent-6', fullName: 'John Bali Promoter', email: 'partner@agent.core', role: 'partner', status: 'verified', volume: 3200 },
-    { id: 'agent-7', fullName: 'Sarah Wanderlust', email: 'sarah.explore@gmail.com', role: 'partner', status: 'verified', volume: 2900 },
-    { id: 'agent-8', fullName: 'Alex Nomadic', email: 'alex.nomad@outlook.com', role: 'partner', status: 'verified', volume: 2600 },
-    { id: 'agent-9', fullName: 'Elena Sunset', email: 'elena.sun@gmail.com', role: 'partner', status: 'verified', volume: 2300 },
-    { id: 'agent-10', fullName: 'Dmitry Bali Life', email: 'dmitry.life@mail.ru', role: 'partner', status: 'verified', volume: 2100 },
-    { id: 'agent-11', fullName: 'Putu Sukarta', email: 'putu.suk@gmail.com', role: 'partner', status: 'verified', volume: 1800 },
-    { id: 'agent-12', fullName: 'Kadek Wirawan', email: 'kadek.w@yahoo.com', role: 'partner', status: 'unverified', volume: 1500 },
-    { id: 'agent-13', fullName: 'Komang Budi', email: 'komang.b@gmail.com', role: 'partner', status: 'verified', volume: 1200 },
-    { id: 'agent-14', fullName: 'Michael Explorer', email: 'michael@bali.com', role: 'partner', status: 'verified', volume: 950 },
-    { id: 'agent-15', fullName: 'Anna Island Vibes', email: 'anna.vibes@gmail.com', role: 'partner', status: 'verified', volume: 800 }
+    { id: 'agent-1', fullName: 'Wayan Bali Guide', email: 'wayan@bali.guide', role: 'partner', status: 'verified', volume: 5400, banDuration: '' },
+    { id: 'agent-2', fullName: 'Made Indrawan', email: 'made.indra@gmail.com', role: 'partner', status: 'verified', volume: 4800, banDuration: '' },
+    { id: 'agent-3', fullName: 'Ketut Sudarsana', email: 'ketut.sud@outlook.com', role: 'partner', status: 'verified', volume: 4200, banDuration: '' },
+    { id: 'agent-4', fullName: 'Nyoman Ari', email: 'nyoman.ari@yahoo.com', role: 'partner', status: 'unverified', volume: 3900, banDuration: '' },
+    { id: 'agent-5', fullName: 'Gede Pratama', email: 'gede.prat@bali.id', role: 'partner', status: 'verified', volume: 3500, banDuration: '' },
+    { id: 'agent-6', fullName: 'John Bali Promoter', email: 'partner@agent.core', role: 'partner', status: 'verified', volume: 3200, banDuration: '' },
+    { id: 'agent-7', fullName: 'Sarah Wanderlust', email: 'sarah.explore@gmail.com', role: 'partner', status: 'verified', volume: 2900, banDuration: '' },
+    { id: 'agent-8', fullName: 'Alex Nomadic', email: 'alex.nomad@outlook.com', role: 'partner', status: 'verified', volume: 2600, banDuration: '' },
+    { id: 'agent-9', fullName: 'Elena Sunset', email: 'elena.sun@gmail.com', role: 'partner', status: 'verified', volume: 2300, banDuration: '' },
+    { id: 'agent-10', fullName: 'Dmitry Bali Life', email: 'dmitry.life@mail.ru', role: 'partner', status: 'verified', volume: 2100, banDuration: '' }
   ]);
 
-  // Top 15 Businesses state
+  // Top 10 Businesses state
   const [restaurants, setRestaurants] = useState([
-    { id: 'res-1', fullName: 'La Brisa Bali', email: 'business@agent.core', role: 'business', status: 'verified', volume: 15400, escrowAmount: 1200 },
-    { id: 'res-2', fullName: 'Potato Head Beach Club', email: 'manager@potatohead.co', role: 'business', status: 'verified', volume: 14200, escrowAmount: 900 },
-    { id: 'res-3', fullName: 'Finns VIP Beach Club', email: 'vip@finnsbeachclub.com', role: 'business', status: 'verified', volume: 12800, escrowAmount: 1500 },
-    { id: 'res-4', fullName: 'Naughty Nuri\'s Seminyak', email: 'info@naughtynuris.com', role: 'business', status: 'verified', volume: 9800, escrowAmount: 400 },
-    { id: 'res-5', fullName: 'Mason Canggu', email: 'bookings@masonbali.com', role: 'business', status: 'verified', volume: 8900, escrowAmount: 600 },
-    { id: 'res-6', fullName: 'Milk & Madu', email: 'canggu@milkandmadu.com', role: 'business', status: 'verified', volume: 7600, escrowAmount: 300 },
-    { id: 'res-7', fullName: 'Shady Shack', email: 'hello@shadyshack.com', role: 'business', status: 'verified', volume: 6400, escrowAmount: 200 },
-    { id: 'res-8', fullName: 'Sisterfields Cafe', email: 'manager@sisterfields.com', role: 'business', status: 'verified', volume: 5900, escrowAmount: 150 },
-    { id: 'res-9', fullName: 'Motel Mexicola', email: 'fiesta@motelmexicola.info', role: 'business', status: 'verified', volume: 5200, escrowAmount: 800 },
-    { id: 'res-10', fullName: 'Barbacoa Bali', email: 'info@barbacoabali.com', role: 'business', status: 'verified', volume: 4800, escrowAmount: 500 },
-    { id: 'res-11', fullName: 'Da Maria', email: 'ciao@damariabali.com', role: 'business', status: 'verified', volume: 4100, escrowAmount: 350 },
-    { id: 'res-12', fullName: 'Locavore Ubud', email: 'eat@locavore.co.id', role: 'business', status: 'verified', volume: 3800, escrowAmount: 100 },
-    { id: 'res-13', fullName: 'The Lawn Canggu', email: 'hello@thelawncanggu.com', role: 'business', status: 'verified', volume: 3200, escrowAmount: 250 },
-    { id: 'res-14', fullName: 'Single Fin Uluwatu', email: 'surf@singlefin.com', role: 'business', status: 'verified', volume: 2900, escrowAmount: 150 },
-    { id: 'res-15', fullName: 'Kynd Community', email: 'love@kyndcommunity.com', role: 'business', status: 'verified', volume: 2400, escrowAmount: 100 }
+    { id: 'res-1', fullName: 'La Brisa Bali', email: 'business@agent.core', role: 'business', status: 'verified', volume: 15400, escrowAmount: 1200, banDuration: '' },
+    { id: 'res-2', fullName: 'Potato Head Beach Club', email: 'manager@potatohead.co', role: 'business', status: 'verified', volume: 14200, escrowAmount: 900, banDuration: '' },
+    { id: 'res-3', fullName: 'Finns VIP Beach Club', email: 'vip@finnsbeachclub.com', role: 'business', status: 'verified', volume: 12800, escrowAmount: 1500, banDuration: '' },
+    { id: 'res-4', fullName: 'Naughty Nuri\'s Seminyak', email: 'info@naughtynuris.com', role: 'business', status: 'verified', volume: 9800, escrowAmount: 400, banDuration: '' },
+    { id: 'res-5', fullName: 'Mason Canggu', email: 'bookings@masonbali.com', role: 'business', status: 'verified', volume: 8900, escrowAmount: 600, banDuration: '' },
+    { id: 'res-6', fullName: 'Milk & Madu', email: 'canggu@milkandmadu.com', role: 'business', status: 'verified', volume: 7600, escrowAmount: 300, banDuration: '' },
+    { id: 'res-7', fullName: 'Shady Shack', email: 'hello@shadyshack.com', role: 'business', status: 'verified', volume: 6400, escrowAmount: 200, banDuration: '' },
+    { id: 'res-8', fullName: 'Sisterfields Cafe', email: 'manager@sisterfields.com', role: 'business', status: 'verified', volume: 5900, escrowAmount: 150, banDuration: '' },
+    { id: 'res-9', fullName: 'Motel Mexicola', email: 'fiesta@motelmexicola.info', role: 'business', status: 'verified', volume: 5200, escrowAmount: 800, banDuration: '' },
+    { id: 'res-10', fullName: 'Barbacoa Bali', email: 'info@barbacoabali.com', role: 'business', status: 'verified', volume: 4800, escrowAmount: 500, banDuration: '' }
   ]);
 
-  // Complaints/Reported Users state
-  const [complaints, setComplaints] = useState([
-    { id: 'comp-1', targetId: 'agent-12', fullName: 'Kadek Wirawan', role: 'partner', status: 'unverified', reason: 'High GPS coordinates jump detected', count: 4 },
-    { id: 'comp-2', targetId: 'res-4', fullName: 'Naughty Nuri\'s Seminyak', role: 'business', status: 'verified', reason: 'Promoter reported scan code ignored by cashier', count: 2 },
-    { id: 'comp-3', targetId: 'comp-user-3', fullName: 'Igor Scammer', role: 'partner', status: 'unverified', reason: 'Fake referral email automation patterns', count: 18 }
-  ]);
+  // Combined Ban list state
+  const [bannedUsers, setBannedUsers] = useState<any[]>([]);
+
+  // Verification requests state (loaded from local storage + default mock)
+  const [requests, setRequests] = useState<any[]>([]);
 
   const lang = user?.language === 'ru' ? 'ru' : 'en';
   const t = translations[lang];
@@ -127,6 +131,44 @@ export default function AdminDashboard() {
         setUser(currentUser);
         const activeTheme = localStorage.getItem('theme') || currentUser.theme;
         document.documentElement.setAttribute('data-theme', activeTheme);
+
+        // Load verification requests from mock local storage
+        const defaultRequests = [
+          { id: 'req-1', targetId: 'agent-4', fullName: 'Nyoman Ari', email: 'nyoman.ari@yahoo.com', role: 'partner', dealsCount: 105 },
+          { id: 'req-2', targetId: 'agent-12', fullName: 'Kadek Wirawan', email: 'kadek.w@yahoo.com', role: 'partner', dealsCount: 102 }
+        ];
+
+        // Scan local storage for user created verification requests
+        const keys = Object.keys(localStorage);
+        const dynamicRequests: any[] = [];
+        keys.forEach(key => {
+          if (key.startsWith('verification_requested_')) {
+            const userId = key.replace('verification_requested_', '');
+            // Prevent duplicate
+            if (userId === 'mock-partner-uuid' && !dynamicRequests.some(r => r.targetId === userId)) {
+              dynamicRequests.push({
+                id: `req-dyn-${userId}`,
+                targetId: userId,
+                fullName: 'John Bali Promoter',
+                email: 'partner@agent.core',
+                role: 'partner',
+                dealsCount: 105
+              });
+            } else if (userId === 'mock-business-uuid' && !dynamicRequests.some(r => r.targetId === userId)) {
+              dynamicRequests.push({
+                id: `req-dyn-${userId}`,
+                targetId: userId,
+                fullName: 'La Brisa Bali Manager',
+                email: 'business@agent.core',
+                role: 'business',
+                dealsCount: 105
+              });
+            }
+          }
+        });
+
+        setRequests([...defaultRequests, ...dynamicRequests]);
+
       } catch (err) {
         console.error('Error loading admin panel:', err);
         router.push('/login');
@@ -137,43 +179,108 @@ export default function AdminDashboard() {
     checkAdminAndLoad();
   }, []);
 
-  const handleToggleAgentStatus = (id: string) => {
-    setAgents(prev => prev.map(a => {
-      if (a.id === id) {
-        const nextStatus = a.status === 'verified' ? 'unverified' : 'verified';
-        // Also update matching user in complaints list if present
-        setComplaints(cPrev => cPrev.map(c => c.fullName === a.fullName ? { ...c, status: nextStatus } : c));
-        return { ...a, status: nextStatus };
+  const handleVerifyUser = (id: string, list: 'agents' | 'restaurants') => {
+    if (list === 'agents') {
+      setAgents(prev => prev.map(a => a.id === id ? { ...a, status: 'verified' } : a));
+      // Update requests list if present
+      const userObj = agents.find(a => a.id === id);
+      if (userObj) {
+        setRequests(prev => prev.filter(r => r.fullName !== userObj.fullName));
+        localStorage.removeItem(`verification_requested_${id}`);
+        // If it's a demo account, update status in Mock Service
+        if (userObj.fullName === 'John Bali Promoter') {
+          authService.getCurrentUser().then(curr => {
+            if (curr && curr.id === 'mock-partner-uuid') curr.status = 'verified';
+          });
+        }
       }
-      return a;
-    }));
+    } else {
+      setRestaurants(prev => prev.map(r => r.id === id ? { ...r, status: 'verified' } : r));
+      const userObj = restaurants.find(r => r.id === id);
+      if (userObj) {
+        setRequests(prev => prev.filter(r => r.fullName !== userObj.fullName));
+        localStorage.removeItem(`verification_requested_${id}`);
+        // If it's a demo account, update status in Mock Service
+        if (userObj.fullName === 'La Brisa Bali Manager') {
+          authService.getCurrentUser().then(curr => {
+            if (curr && curr.id === 'mock-business-uuid') curr.status = 'verified';
+          });
+        }
+      }
+    }
     showToast(t.successUpdate);
   };
 
-  const handleToggleRestaurantStatus = (id: string) => {
-    setRestaurants(prev => prev.map(r => {
-      if (r.id === id) {
-        const nextStatus = r.status === 'verified' ? 'unverified' : 'verified';
-        // Also update matching user in complaints list if present
-        setComplaints(cPrev => cPrev.map(c => c.fullName === r.fullName ? { ...c, status: nextStatus } : c));
-        return { ...r, status: nextStatus };
+  const handleVerifyFromRequests = (reqId: string, fullName: string, role: string) => {
+    // Verify in correct main lists
+    if (role === 'partner') {
+      setAgents(prev => prev.map(a => a.fullName === fullName ? { ...a, status: 'verified' } : a));
+    } else {
+      setRestaurants(prev => prev.map(r => r.fullName === fullName ? { ...r, status: 'verified' } : r));
+    }
+    // Remove request
+    setRequests(prev => prev.filter(r => r.id !== reqId));
+    // Clear local storage flag
+    const reqObj = requests.find(r => r.id === reqId);
+    if (reqObj) {
+      localStorage.removeItem(`verification_requested_${reqObj.targetId}`);
+      if (reqObj.targetId === 'mock-partner-uuid' || reqObj.targetId === 'mock-business-uuid') {
+        authService.getCurrentUser().then(curr => {
+          if (curr) curr.status = 'verified';
+        });
       }
-      return r;
-    }));
+    }
     showToast(t.successUpdate);
   };
 
-  const handleToggleComplaintUserStatus = (complaintId: string) => {
-    setComplaints(prev => prev.map(c => {
-      if (c.id === complaintId) {
-        const nextStatus = c.status === 'verified' ? 'unverified' : 'verified';
-        // Synchronize with agents or restaurants list
-        setAgents(aPrev => aPrev.map(a => a.fullName === c.fullName ? { ...a, status: nextStatus } : a));
-        setRestaurants(rPrev => rPrev.map(r => r.fullName === c.fullName ? { ...r, status: nextStatus } : r));
-        return { ...c, status: nextStatus };
+  const handleInitiateBan = (id: string, name: string, list: 'agents' | 'restaurants') => {
+    setSelectedBanUser({ id, name, list });
+  };
+
+  const handleConfirmBan = (duration: string) => {
+    if (!selectedBanUser) return;
+    const { id, name, list } = selectedBanUser;
+    
+    let bannedUserObj: any = null;
+
+    if (list === 'agents') {
+      const userObj = agents.find(a => a.id === id);
+      if (userObj) {
+        bannedUserObj = { ...userObj, status: 'banned', banDuration: duration };
+        setAgents(prev => prev.filter(a => a.id !== id));
       }
-      return c;
-    }));
+    } else {
+      const userObj = restaurants.find(r => r.id === id);
+      if (userObj) {
+        bannedUserObj = { ...userObj, status: 'banned', banDuration: duration };
+        setRestaurants(prev => prev.filter(r => r.id !== id));
+      }
+    }
+
+    if (bannedUserObj) {
+      setBannedUsers(prev => [...prev, bannedUserObj]);
+      // Remove from pending verification requests if any
+      setRequests(prev => prev.filter(r => r.fullName !== name));
+      localStorage.removeItem(`verification_requested_${bannedUserObj.id}`);
+    }
+
+    setSelectedBanUser(null);
+    showToast(t.successUpdate);
+  };
+
+  const handleUnbanUser = (id: string) => {
+    const userObj = bannedUsers.find(u => u.id === id);
+    if (!userObj) return;
+
+    // Restore to their correct list with unverified status
+    const restoredObj = { ...userObj, status: 'unverified', banDuration: '' };
+    if (userObj.role === 'partner') {
+      setAgents(prev => [...prev, restoredObj].sort((a, b) => b.volume - a.volume));
+    } else {
+      setRestaurants(prev => [...prev, restoredObj].sort((a, b) => b.volume - a.volume));
+    }
+
+    setBannedUsers(prev => prev.filter(u => u.id !== id));
     showToast(t.successUpdate);
   };
 
@@ -187,7 +294,7 @@ export default function AdminDashboard() {
     router.push('/login');
   };
 
-  // Calculations for Admin Stats Cards
+  // Stats Card Calculations
   const totalVolume = agents.reduce((sum, a) => sum + a.volume, 0) + restaurants.reduce((sum, r) => sum + r.volume, 0);
 
   if (loading) {
@@ -254,6 +361,83 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* Ban Options Modal */}
+      {selectedBanUser && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100000
+        }}>
+          <div className="glass-panel" style={{
+            padding: '2rem',
+            maxWidth: '400px',
+            width: '100%',
+            border: '1px solid var(--surface-border)',
+            background: 'var(--surface)'
+          }}>
+            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 700, color: 'var(--foreground)' }}>
+              {t.banOptionsTitle} ({selectedBanUser.name})
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
+              {(['1d', '1w', '1m', '1y', 'forever'] as const).map((dur) => (
+                <button
+                  key={dur}
+                  onClick={() => handleConfirmBan(
+                    dur === '1d' ? t.banOption1d :
+                    dur === '1w' ? t.banOption1w :
+                    dur === '1m' ? t.banOption1m :
+                    dur === '1y' ? t.banOption1y : t.banOptionForever
+                  )}
+                  style={{
+                    background: 'rgba(255, 77, 79, 0.08)',
+                    border: '1px solid var(--error)',
+                    color: 'var(--foreground)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    textAlign: 'left',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 77, 79, 0.16)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 77, 79, 0.08)'}
+                >
+                  🚫 {
+                    dur === '1d' ? t.banOption1d :
+                    dur === '1w' ? t.banOption1w :
+                    dur === '1m' ? t.banOption1m :
+                    dur === '1y' ? t.banOption1y : t.banOptionForever
+                  }
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setSelectedBanUser(null)}
+              style={{
+                width: '100%',
+                background: 'var(--surface)',
+                border: '1px solid var(--surface-border)',
+                color: 'var(--foreground)',
+                padding: '10px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              {t.btnCancel}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 3 Metric Cards Grid */}
       <div style={{
         display: 'grid',
@@ -275,229 +459,491 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Main Content: Tables */}
+      {/* Custom Tabs Navigation */}
+      <div style={{
+        display: 'flex',
+        borderBottom: '1px solid var(--surface-border)',
+        marginBottom: '2rem',
+        gap: '24px'
+      }}>
+        <button
+          onClick={() => setActiveTab('active')}
+          style={{
+            background: 'none',
+            border: 'none',
+            borderBottom: activeTab === 'active' ? '2px solid var(--primary)' : '2px solid transparent',
+            color: activeTab === 'active' ? 'var(--primary)' : 'var(--foreground)',
+            padding: '12px 8px',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            fontWeight: 600,
+            transition: 'all 0.2s',
+            opacity: activeTab === 'active' ? 1 : 0.6
+          }}
+        >
+          📈 {t.tabActive}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('banned')}
+          style={{
+            background: 'none',
+            border: 'none',
+            borderBottom: activeTab === 'banned' ? '2px solid var(--error)' : '2px solid transparent',
+            color: activeTab === 'banned' ? 'var(--error)' : 'var(--foreground)',
+            padding: '12px 8px',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            fontWeight: 600,
+            transition: 'all 0.2s',
+            opacity: activeTab === 'banned' ? 1 : 0.6
+          }}
+        >
+          🚫 {t.tabBanned} ({bannedUsers.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('requests')}
+          style={{
+            background: 'none',
+            border: 'none',
+            borderBottom: activeTab === 'requests' ? '2px solid var(--success)' : '2px solid transparent',
+            color: activeTab === 'requests' ? 'var(--success)' : 'var(--foreground)',
+            padding: '12px 8px',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            fontWeight: 600,
+            transition: 'all 0.2s',
+            opacity: activeTab === 'requests' ? 1 : 0.6
+          }}
+        >
+          📥 {t.tabRequests} ({requests.length})
+        </button>
+      </div>
+
+      {/* Tab Panels */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
         
-        {/* TOP 15 AGENTS TABLE */}
-        <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.promoters}</h3>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
-                  <th style={{ padding: '12px 10px' }}>{t.status}</th>
-                  <th>{t.agent}</th>
-                  <th>{t.role}</th>
-                  <th>{t.volume}</th>
-                  <th>{t.action}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {agents.map((usr) => (
-                  <tr key={usr.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
-                    <td style={{ padding: '15px 10px' }}>
-                      <span style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
-                        border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
-                        padding: '3px 8px',
-                        borderRadius: '4px',
-                        display: 'inline-block'
-                      }}>
-                        {usr.status === 'verified' ? t.verified : t.unverified}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{usr.fullName}</div>
-                      <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{usr.email}</div>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-                        {usr.role}
-                      </span>
-                    </td>
-                    <td>
-                      <strong>{formatCurrency(usr.volume, 'USD')}</strong>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleToggleAgentStatus(usr.id)}
-                        style={{
-                          background: 'var(--surface)',
-                          border: '1px solid var(--surface-border)',
-                          color: 'var(--foreground)',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem',
-                          fontWeight: 500,
-                          transition: 'opacity 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                      >
-                        {t.toggleStatus}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* TAB 1: MOST ACTIVE */}
+        {activeTab === 'active' && (
+          <>
+            {/* Top 10 Promoters/Agents */}
+            <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
+              <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.promoters}</h3>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                      <th style={{ padding: '12px 10px' }}>{t.status}</th>
+                      <th>{t.agent}</th>
+                      <th>{t.role}</th>
+                      <th>{t.volume}</th>
+                      <th style={{ textAlign: 'right', paddingRight: '20px' }}>{t.action}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {agents.slice(0, 10).map((usr) => (
+                      <tr key={usr.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                        <td style={{ padding: '15px 10px' }}>
+                          <span style={{
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            color: usr.status === 'verified' ? 'var(--success)' : 'rgba(255,255,255,0.4)',
+                            border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--surface-border)'}`,
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            display: 'inline-block'
+                          }}>
+                            {usr.status === 'verified' ? t.verified : t.unverified}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                            {usr.fullName}
+                            {usr.status === 'verified' && <VerificationBadge size={14} />}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{usr.email}</div>
+                        </td>
+                        <td>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                            {usr.role}
+                          </span>
+                        </td>
+                        <td>
+                          <strong>{formatCurrency(usr.volume, 'USD')}</strong>
+                        </td>
+                        <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                          <div style={{ display: 'inline-flex', gap: '8px' }}>
+                            {/* Verify neon tick button */}
+                            <button
+                              onClick={() => handleVerifyUser(usr.id, 'agents')}
+                              disabled={usr.status === 'verified'}
+                              style={{
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '50%',
+                                background: 'transparent',
+                                border: '1px solid var(--success)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: usr.status === 'verified' ? 'default' : 'pointer',
+                                filter: usr.status === 'verified' ? 'drop-shadow(0 0 4px #52c41a)' : 'none',
+                                opacity: usr.status === 'verified' ? 1 : 0.6,
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => { if (usr.status !== 'verified') e.currentTarget.style.opacity = '1'; }}
+                              onMouseLeave={(e) => { if (usr.status !== 'verified') e.currentTarget.style.opacity = '0.6'; }}
+                              title="Verify User"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            </button>
 
-        {/* TOP 15 RESTAURANTS TABLE */}
-        <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.merchants}</h3>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
-                  <th style={{ padding: '12px 10px' }}>{t.status}</th>
-                  <th>{t.venue}</th>
-                  <th>{t.role}</th>
-                  <th>{t.volume}</th>
-                  <th>{t.escrow}</th>
-                  <th>{t.action}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {restaurants.map((usr) => (
-                  <tr key={usr.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
-                    <td style={{ padding: '15px 10px' }}>
-                      <span style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
-                        border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
-                        padding: '3px 8px',
-                        borderRadius: '4px',
-                        display: 'inline-block'
-                      }}>
-                        {usr.status === 'verified' ? t.verified : t.unverified}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{usr.fullName}</div>
-                      <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{usr.email}</div>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-                        {usr.role}
-                      </span>
-                    </td>
-                    <td>
-                      <strong>{formatCurrency(usr.volume, 'USD')}</strong>
-                    </td>
-                    <td>
-                      <span style={{ color: usr.escrowAmount > 0 ? 'var(--accent)' : 'inherit', fontWeight: 600 }}>
-                        {formatCurrency(usr.escrowAmount, 'USD')}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleToggleRestaurantStatus(usr.id)}
-                        style={{
-                          background: 'var(--surface)',
-                          border: '1px solid var(--surface-border)',
-                          color: 'var(--foreground)',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem',
-                          fontWeight: 500,
-                          transition: 'opacity 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                      >
-                        {t.toggleStatus}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                            {/* Ban neon cross button */}
+                            <button
+                              onClick={() => handleInitiateBan(usr.id, usr.fullName, 'agents')}
+                              style={{
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '50%',
+                                background: 'transparent',
+                                border: '1px solid var(--error)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                opacity: 0.6,
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                              title="Ban User"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-        {/* UNLIMITED COMPLAINTS / REPORTS TABLE */}
-        <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ width: '10px', height: '10px', background: 'var(--error)', borderRadius: '50%' }}></span>
-            {t.complaints}
-          </h3>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
-                  <th style={{ padding: '12px 10px' }}>{t.status}</th>
-                  <th>{t.reportedUser}</th>
-                  <th>{t.role}</th>
-                  <th>{t.reason}</th>
-                  <th>{t.complaintsCount}</th>
-                  <th>{t.action}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {complaints.map((comp) => (
-                  <tr key={comp.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
-                    <td style={{ padding: '15px 10px' }}>
-                      <span style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        color: comp.status === 'verified' ? 'var(--success)' : 'var(--error)',
-                        border: `1px solid ${comp.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
-                        padding: '3px 8px',
-                        borderRadius: '4px',
-                        display: 'inline-block'
-                      }}>
-                        {comp.status === 'verified' ? t.verified : t.unverified}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{comp.fullName}</div>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-                        {comp.role}
-                      </span>
-                    </td>
-                    <td>
-                      <span style={{ opacity: 0.85 }}>{comp.reason}</span>
-                    </td>
-                    <td>
-                      <span style={{ fontWeight: 700, color: 'var(--error)', background: 'rgba(255, 77, 79, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem' }}>
-                        {comp.count}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleToggleComplaintUserStatus(comp.id)}
-                        style={{
-                          background: 'var(--surface)',
-                          border: '1px solid var(--surface-border)',
-                          color: 'var(--foreground)',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem',
-                          fontWeight: 500,
-                          transition: 'opacity 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                      >
-                        {t.toggleStatus}
-                      </button>
-                    </td>
+            {/* Top 10 Restaurants */}
+            <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
+              <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.merchants}</h3>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                      <th style={{ padding: '12px 10px' }}>{t.status}</th>
+                      <th>{t.venue}</th>
+                      <th>{t.role}</th>
+                      <th>{t.volume}</th>
+                      <th>{t.escrow}</th>
+                      <th style={{ textAlign: 'right', paddingRight: '20px' }}>{t.action}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {restaurants.slice(0, 10).map((usr) => (
+                      <tr key={usr.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                        <td style={{ padding: '15px 10px' }}>
+                          <span style={{
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            color: usr.status === 'verified' ? 'var(--success)' : 'rgba(255,255,255,0.4)',
+                            border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--surface-border)'}`,
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            display: 'inline-block'
+                          }}>
+                            {usr.status === 'verified' ? t.verified : t.unverified}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                            {usr.fullName}
+                            {usr.status === 'verified' && <VerificationBadge size={14} />}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{usr.email}</div>
+                        </td>
+                        <td>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                            {usr.role}
+                          </span>
+                        </td>
+                        <td>
+                          <strong>{formatCurrency(usr.volume, 'USD')}</strong>
+                        </td>
+                        <td>
+                          <span style={{ color: usr.escrowAmount > 0 ? 'var(--accent)' : 'inherit', fontWeight: 600 }}>
+                            {formatCurrency(usr.escrowAmount, 'USD')}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                          <div style={{ display: 'inline-flex', gap: '8px' }}>
+                            {/* Verify neon tick button */}
+                            <button
+                              onClick={() => handleVerifyUser(usr.id, 'restaurants')}
+                              disabled={usr.status === 'verified'}
+                              style={{
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '50%',
+                                background: 'transparent',
+                                border: '1px solid var(--success)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: usr.status === 'verified' ? 'default' : 'pointer',
+                                filter: usr.status === 'verified' ? 'drop-shadow(0 0 4px #52c41a)' : 'none',
+                                opacity: usr.status === 'verified' ? 1 : 0.6,
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => { if (usr.status !== 'verified') e.currentTarget.style.opacity = '1'; }}
+                              onMouseLeave={(e) => { if (usr.status !== 'verified') e.currentTarget.style.opacity = '0.6'; }}
+                              title="Verify Business"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            </button>
+
+                            {/* Ban neon cross button */}
+                            <button
+                              onClick={() => handleInitiateBan(usr.id, usr.fullName, 'restaurants')}
+                              style={{
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '50%',
+                                background: 'transparent',
+                                border: '1px solid var(--error)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                opacity: 0.6,
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                              title="Ban Business"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* TAB 2: BANNED USERS LIST */}
+        {activeTab === 'banned' && (
+          <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', marginBottom: '2rem' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--error)' }}>
+              {t.tabBanned}
+            </h3>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                    <th style={{ padding: '12px 10px' }}>{t.status}</th>
+                    <th>User / Venue</th>
+                    <th>{t.role}</th>
+                    <th>{t.banDuration}</th>
+                    <th style={{ textAlign: 'right', paddingRight: '20px' }}>{t.action}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {bannedUsers.map((bUser) => (
+                    <tr key={bUser.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                      <td style={{ padding: '15px 10px' }}>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          color: 'var(--error)',
+                          border: '1px solid var(--error)',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          display: 'inline-block'
+                        }}>
+                          {t.banned}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>{bUser.fullName}</div>
+                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{bUser.email}</div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                          {bUser.role}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ color: 'var(--error)', fontWeight: 600 }}>🚫 {bUser.banDuration}</span>
+                      </td>
+                      <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                        <button
+                          onClick={() => handleUnbanUser(bUser.id)}
+                          style={{
+                            background: 'rgba(82, 196, 26, 0.1)',
+                            border: '1px solid var(--success)',
+                            color: 'var(--success)',
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(82, 196, 26, 0.2)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(82, 196, 26, 0.1)'; }}
+                        >
+                          {t.unban}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {bannedUsers.length === 0 && (
+                    <tr>
+                      <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>
+                        No banned users recorded.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* TAB 3: VERIFICATION REQUESTS */}
+        {activeTab === 'requests' && (
+          <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', marginBottom: '2rem' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--success)' }}>
+              {t.tabRequests}
+            </h3>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                    <th style={{ padding: '12px 10px' }}>{t.status}</th>
+                    <th>User / Venue</th>
+                    <th>{t.role}</th>
+                    <th>Completed Deals</th>
+                    <th style={{ textAlign: 'right', paddingRight: '20px' }}>{t.action}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {requests.map((req) => (
+                    <tr key={req.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                      <td style={{ padding: '15px 10px' }}>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          color: 'var(--warning)',
+                          border: '1px solid var(--warning)',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          display: 'inline-block'
+                        }}>
+                          PENDING
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>{req.fullName}</div>
+                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{req.email}</div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                          {req.role}
+                        </span>
+                      </td>
+                      <td>
+                        <strong style={{ color: 'var(--success)' }}>🔥 {req.dealsCount} сделок</strong>
+                      </td>
+                      <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                        <div style={{ display: 'inline-flex', gap: '8px' }}>
+                          {/* Verify neon tick button */}
+                          <button
+                            onClick={() => handleVerifyFromRequests(req.id, req.fullName, req.role)}
+                            style={{
+                              width: '34px',
+                              height: '34px',
+                              borderRadius: '50%',
+                              background: 'transparent',
+                              border: '1px solid var(--success)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              opacity: 0.7,
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                            title="Approve Request & Verify"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          </button>
+
+                          {/* Reject/Ban cross button */}
+                          <button
+                            onClick={() => handleInitiateBan(req.targetId, req.fullName, req.role === 'partner' ? 'agents' : 'restaurants')}
+                            style={{
+                              width: '34px',
+                              height: '34px',
+                              borderRadius: '50%',
+                              background: 'transparent',
+                              border: '1px solid var(--error)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              opacity: 0.7,
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                            title="Reject & Ban"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {requests.length === 0 && (
+                    <tr>
+                      <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>
+                        No pending verification requests.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

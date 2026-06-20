@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
+import VerificationBadge from '@/app/components/VerificationBadge';
 
 const translations = {
   en: {
@@ -19,7 +20,14 @@ const translations = {
     btnBind: 'Bind New Card',
     btnSave: 'Save Changes',
     success: 'Settings updated successfully!',
-    themes: { dark: 'Dark', light: 'Light', neon: 'Neon' }
+    themes: { dark: 'Dark', light: 'Light', neon: 'Neon' },
+    verificationTitle: 'Verification Status',
+    verificationLock: 'Verification is locked. Complete 100+ deals to apply.',
+    verificationCurrent: 'Completed Deals Progress',
+    btnSimulate: 'Simulate 105 Deals',
+    btnApply: 'Request Verification ✅',
+    statusPending: 'Verification request is pending review.',
+    statusVerified: 'Your profile is officially verified!'
   },
   ru: {
     title: 'Настройки профиля',
@@ -34,7 +42,14 @@ const translations = {
     btnBind: 'Привязать новую карту',
     btnSave: 'Сохранить изменения',
     success: 'Настройки успешно обновлены!',
-    themes: { dark: 'Тёмная', light: 'Светлая', neon: 'Неоновая' }
+    themes: { dark: 'Тёмная', light: 'Светлая', neon: 'Неоновая' },
+    verificationTitle: 'Статус верификации',
+    verificationLock: 'Верификация закрыта. Требуется 100+ завершенных сделок.',
+    verificationCurrent: 'Прогресс завершенных сделок',
+    btnSimulate: 'Симулировать 105 сделок',
+    btnApply: 'Подать заявку на верификацию ✅',
+    statusPending: 'Ваша заявка находится на рассмотрении.',
+    statusVerified: 'Ваш профиль официально верифицирован!'
   },
   id: {
     title: 'Pengaturan Profil',
@@ -43,13 +58,20 @@ const translations = {
     langLabel: 'Bahasa',
     currLabel: 'Mata Uang',
     cardLabel: 'Metode Pembayaran',
-    cardBound: 'Kartu Aktif',
+    cardBound: 'Kartu Pengiriman',
     cardUnbound: 'Tidak ada kartu terikat. Pembayaran ditangguhkan.',
     btnUnbind: 'Lepaskan Kartu',
     btnBind: 'Ikatkan Kartu Baru',
     btnSave: 'Simpan Perubahan',
     success: 'Pengaturan berhasil diperbarui!',
-    themes: { dark: 'Gelap', light: 'Terang', neon: 'Neon' }
+    themes: { dark: 'Gelap', light: 'Terang', neon: 'Neon' },
+    verificationTitle: 'Status Verifikasi',
+    verificationLock: 'Verifikasi terkunci. Selesaikan 100+ transaksi untuk melamar.',
+    verificationCurrent: 'Kemajuan Transaksi Selesai',
+    btnSimulate: 'Simulasikan 105 Transaksi',
+    btnApply: 'Kirim Permohonan Verifikasi ✅',
+    statusPending: 'Permohonan verifikasi Anda sedang ditinjau.',
+    statusVerified: 'Profil Anda telah resmi diverifikasi!'
   }
 };
 
@@ -64,8 +86,12 @@ export default function PartnerSettings() {
   const [newCardNumber, setNewCardNumber] = useState('');
   const [isBinding, setIsBinding] = useState(false);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  
+  // Verification states
+  const [dealsCount, setDealsCount] = useState(85);
+  const [verificationStatus, setVerificationStatus] = useState<'none' | 'pending' | 'verified'>('none');
 
+  const router = useRouter();
   const t = translations[lang];
 
   useEffect(() => {
@@ -80,9 +106,26 @@ export default function PartnerSettings() {
         setCardBound(currentUser.cardBound);
         setCardNumber(currentUser.cardNumber || '');
         
-        // Получаем тему
+        // Get theme
         const activeTheme = localStorage.getItem('theme') as any || currentUser.theme;
         setTheme(activeTheme);
+
+        // Load verification status from mock and localStorage
+        const isVerified = currentUser.status === 'verified';
+        const hasPendingRequest = localStorage.getItem(`verification_requested_${currentUser.id}`) === 'true';
+        const simulatedDeals = localStorage.getItem(`simulated_deals_${currentUser.id}`);
+        
+        if (simulatedDeals) {
+          setDealsCount(parseInt(simulatedDeals));
+        }
+
+        if (isVerified) {
+          setVerificationStatus('verified');
+        } else if (hasPendingRequest) {
+          setVerificationStatus('pending');
+        } else {
+          setVerificationStatus('none');
+        }
       }
       setLoading(false);
     }
@@ -114,6 +157,19 @@ export default function PartnerSettings() {
     setIsBinding(false);
   };
 
+  const handleSimulateDeals = () => {
+    if (!user) return;
+    setDealsCount(105);
+    localStorage.setItem(`simulated_deals_${user.id}`, '105');
+  };
+
+  const handleApplyVerification = () => {
+    if (!user) return;
+    localStorage.setItem(`verification_requested_${user.id}`, 'true');
+    setVerificationStatus('pending');
+    alert(lang === 'ru' ? 'Заявка на верификацию отправлена!' : 'Verification request submitted!');
+  };
+
   const handleSave = async () => {
     try {
       await authService.updateProfile({
@@ -137,8 +193,8 @@ export default function PartnerSettings() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <p style={{ color: 'var(--primary)' }}>Loading Settings...</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
+        <p style={{ color: 'var(--primary)', fontFamily: 'Inter, sans-serif' }}>Loading Settings...</p>
       </div>
     );
   }
@@ -157,11 +213,14 @@ export default function PartnerSettings() {
           {t.back}
         </a>
 
-        <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem' }}>{t.title}</h2>
+        <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem', display: 'flex', alignItems: 'center' }}>
+          {t.title}
+          {verificationStatus === 'verified' && <VerificationBadge size={22} />}
+        </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Theme Switcher */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
             <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 600 }}>{t.themeLabel}</h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {(['dark', 'neon', 'light'] as const).map((th) => (
@@ -187,7 +246,7 @@ export default function PartnerSettings() {
           </div>
 
           {/* Language & Currency */}
-          <div className="glass-panel" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="glass-panel" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t.langLabel}</label>
               <select
@@ -229,8 +288,81 @@ export default function PartnerSettings() {
             </div>
           </div>
 
+          {/* Verification Progress Box */}
+          <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 600 }}>{t.verificationTitle}</h3>
+            
+            {verificationStatus === 'verified' && (
+              <div style={{ color: 'var(--success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <VerificationBadge size={18} /> {t.statusVerified}
+              </div>
+            )}
+
+            {verificationStatus === 'pending' && (
+              <div style={{ color: 'var(--warning)', fontWeight: 600 }}>
+                ⏳ {t.statusPending}
+              </div>
+            )}
+
+            {verificationStatus === 'none' && (
+              <div>
+                <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>
+                  {dealsCount < 100 ? t.verificationLock : 'Congratulations! You qualify for verification.'}
+                </p>
+
+                {/* Progress bar */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px', fontWeight: 600 }}>
+                    <span>{t.verificationCurrent}</span>
+                    <span>{dealsCount}/100</span>
+                  </div>
+                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.min((dealsCount / 100) * 100, 100)}%`, height: '100%', background: dealsCount >= 100 ? 'var(--success)' : 'var(--primary)', transition: 'width 0.3s ease' }}></div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {dealsCount < 100 ? (
+                    <button
+                      onClick={handleSimulateDeals}
+                      style={{
+                        background: 'rgba(0, 210, 255, 0.1)',
+                        border: '1px solid var(--primary)',
+                        color: 'var(--primary)',
+                        padding: '10px 14px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      ⚡ {t.btnSimulate}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleApplyVerification}
+                      style={{
+                        background: 'linear-gradient(135deg, var(--success) 0%, #2b9107 100%)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '10px 20px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                        boxShadow: '0 4px 12px rgba(82, 196, 26, 0.3)'
+                      }}
+                    >
+                      {t.btnApply}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Card Management */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
             <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 600 }}>{t.cardLabel}</h3>
             
             {cardBound ? (
