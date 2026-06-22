@@ -249,10 +249,10 @@ export default function PartnerDashboard() {
   useEffect(() => {
     async function loadData() {
       try {
-        let currentUser = await authService.getCurrentUser();
+        const currentUser = await authService.getCurrentUser();
         if (!currentUser || currentUser.role !== 'partner') {
-          await authService.signIn('partner@agent.core', 'password123');
-          currentUser = await authService.getCurrentUser();
+          router.push('/login');
+          return;
         }
 
         if (currentUser) {

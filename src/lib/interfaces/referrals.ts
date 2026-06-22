@@ -4,9 +4,14 @@ export interface ReferralSession {
   offerId: string;
   businessId: string;
   shortCode: string;
-  status: 'pending' | 'completed' | 'failed' | 'expired';
+  status: 'pending' | 'completed' | 'failed' | 'expired' | 'flagged';
   createdAt: string;
   expiresAt: string;
+  geoLocation?: {
+    lat: number;
+    lng: number;
+    city: string;
+  };
 }
 
 export interface IReferralRepository {
@@ -16,4 +21,6 @@ export interface IReferralRepository {
   getActiveSessionsForPartner(partnerId: string): Promise<ReferralSession[]>;
   completeSession(id: string): Promise<ReferralSession>;
   expireSession(id: string): Promise<ReferralSession>;
+  getAllSessions(): Promise<ReferralSession[]>;
+  flagSession(id: string): Promise<ReferralSession>;
 }

@@ -13,6 +13,8 @@ export interface UserProfile {
   theme: 'dark' | 'neon' | 'light';
   status?: 'verified' | 'unverified' | 'banned' | string;
   email?: string;
+  isBlocked?: boolean;
+  phone?: string;
 }
 
 export interface IAuthService {
@@ -22,4 +24,5 @@ export interface IAuthService {
   signOut(): Promise<void>;
   updateProfile(updates: Partial<UserProfile>): Promise<UserProfile>;
   getAllUsers(): Promise<UserProfile[]>;
+  blockUser(id: string, isBlocked: boolean): Promise<void>;
 }

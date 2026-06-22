@@ -312,10 +312,10 @@ export default function BusinessDashboard() {
   useEffect(() => {
     async function loadData() {
       try {
-        let currentUser = await authService.getCurrentUser();
+        const currentUser = await authService.getCurrentUser();
         if (!currentUser || currentUser.role !== 'business') {
-          await authService.signIn('business@agent.core', 'password123');
-          currentUser = await authService.getCurrentUser();
+          router.push('/login');
+          return;
         }
 
         if (currentUser) {

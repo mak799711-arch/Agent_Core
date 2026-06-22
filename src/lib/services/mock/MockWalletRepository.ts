@@ -18,6 +18,8 @@ export class MockWalletRepository implements IWalletRepository {
       } catch (e) {
         console.error('Error loading mock wallet data:', e);
       }
+    } else {
+      this.seedInitialWalletData();
     }
   }
 

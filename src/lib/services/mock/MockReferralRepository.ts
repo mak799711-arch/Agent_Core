@@ -15,6 +15,8 @@ export class MockReferralRepository implements IReferralRepository {
       } catch (e) {
         console.error('Error loading mock sessions:', e);
       }
+    } else {
+      this.seedInitialSessions();
     }
   }
 
@@ -31,7 +33,8 @@ export class MockReferralRepository implements IReferralRepository {
         shortCode: '222222',
         status: 'completed',
         createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        expiresAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        expiresAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        geoLocation: { lat: -8.6596, lng: 115.1301, city: 'Canggu, Bali' }
       },
       {
         id: 'session-seed-2',
@@ -41,7 +44,8 @@ export class MockReferralRepository implements IReferralRepository {
         shortCode: '333333',
         status: 'completed',
         createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        expiresAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+        expiresAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        geoLocation: { lat: -8.6913, lng: 115.1682, city: 'Seminyak, Bali' }
       },
       {
         id: 'session-seed-3',
@@ -51,7 +55,8 @@ export class MockReferralRepository implements IReferralRepository {
         shortCode: '444444',
         status: 'completed',
         createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString()
+        expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+        geoLocation: { lat: -8.8451, lng: 115.1014, city: 'Uluwatu, Bali' }
       },
       {
         id: 'session-seed-active',
@@ -61,7 +66,8 @@ export class MockReferralRepository implements IReferralRepository {
         shortCode: '111111',
         status: 'pending',
         createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        geoLocation: { lat: -8.6500, lng: 115.1350, city: 'Canggu, Bali' }
       }
     ];
     this.saveSessions();
@@ -79,6 +85,13 @@ export class MockReferralRepository implements IReferralRepository {
 
   async createSession(partnerId: string, offerId: string, businessId: string): Promise<ReferralSession> {
     const shortCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-значный код
+    const cities = [
+      { lat: -8.6596, lng: 115.1301, city: 'Canggu, Bali' },
+      { lat: -8.6913, lng: 115.1682, city: 'Seminyak, Bali' },
+      { lat: -8.8451, lng: 115.1014, city: 'Uluwatu, Bali' }
+    ];
+    const randomCity = cities[Math.floor(Math.random() * cities.length)];
+
     const newSession: ReferralSession = {
       id: `session-${Math.random().toString(36).substr(2, 9)}`,
       partnerId,
@@ -87,7 +100,8 @@ export class MockReferralRepository implements IReferralRepository {
       shortCode,
       status: 'pending',
       createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      geoLocation: randomCity
     };
     this.sessions.push(newSession);
     this.saveSessions();
@@ -118,6 +132,18 @@ export class MockReferralRepository implements IReferralRepository {
     const idx = this.sessions.findIndex(s => s.id === id);
     if (idx === -1) throw new Error('Session not found');
     this.sessions[idx].status = 'expired';
+    this.saveSessions();
+    return this.sessions[idx];
+  }
+
+  async getAllSessions(): Promise<ReferralSession[]> {
+    return this.sessions;
+  }
+
+  async flagSession(id: string): Promise<ReferralSession> {
+    const idx = this.sessions.findIndex(s => s.id === id);
+    if (idx === -1) throw new Error('Session not found');
+    this.sessions[idx].status = 'flagged';
     this.saveSessions();
     return this.sessions[idx];
   }

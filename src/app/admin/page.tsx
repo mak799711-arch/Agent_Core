@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService, walletRepository } from '@/lib/services';
+import { authService, walletRepository, referralRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
+import { ReferralSession } from '@/lib/interfaces/referrals';
 import { formatCurrency } from '@/lib/utils/currency';
 import VerificationBadge from '@/app/components/VerificationBadge';
 
@@ -19,6 +20,7 @@ const translations = {
     tabActive: 'Most Active (Top-10)',
     tabBanned: 'Ban List',
     tabRequests: 'Verification Requests',
+    tabAudit: 'Audit & Fraud',
     status: 'Status',
     role: 'Role',
     agent: 'Agent',
@@ -44,7 +46,16 @@ const translations = {
     emptyActiveAgents: 'No active promoters registered yet.',
     emptyActiveVenues: 'No active businesses registered yet.',
     emptyBanned: 'All users are in good standing. Ban list is empty.',
-    emptyRequests: 'Verification queue is empty.'
+    emptyRequests: 'Verification queue is empty.',
+    emptySessions: 'No sessions match your search criteria.',
+    searchCode: 'Search by Code',
+    searchPromoter: 'Search by Promoter ID',
+    btnFlag: 'Flag Fraud',
+    btnBlock: 'Block Promoter',
+    btnUnblock: 'Unblock',
+    geoLocation: 'Location',
+    sessionCode: 'Session Code',
+    created: 'Created At'
   },
   ru: {
     admin: 'Администратор платформы',
@@ -57,6 +68,7 @@ const translations = {
     tabActive: 'Самые активные (Топ-10)',
     tabBanned: 'Бан-лист',
     tabRequests: 'Заявки на верификацию',
+    tabAudit: 'Аудит и Фрод',
     status: 'Статус',
     role: 'Роль',
     agent: 'Агент',
@@ -82,7 +94,16 @@ const translations = {
     emptyActiveAgents: 'Активные промоутеры на платформе отсутствуют.',
     emptyActiveVenues: 'Активные заведения на платформе отсутствуют.',
     emptyBanned: 'Нарушителей нет. Бан-лист пуст.',
-    emptyRequests: 'Очередь заявок на верификацию пуста.'
+    emptyRequests: 'Очередь заявок на верификацию пуста.',
+    emptySessions: 'Сессии по заданным критериям не найдены.',
+    searchCode: 'Поиск по коду',
+    searchPromoter: 'Поиск по ID промоутера',
+    btnFlag: 'Флаг Фрод',
+    btnBlock: 'Блок Промоутера',
+    btnUnblock: 'Разблочить',
+    geoLocation: 'Геопозиция',
+    sessionCode: 'Код сессии',
+    created: 'Создано'
   }
 };
 
@@ -105,7 +126,7 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'active' | 'banned' | 'requests'>('active');
+  const [activeTab, setActiveTab] = useState<'active' | 'banned' | 'requests' | 'audit'>('active');
   const [selectedBanUser, setSelectedBanUser] = useState<{ id: string; name: string } | null>(null);
   const router = useRouter();
 
@@ -113,6 +134,10 @@ export default function AdminDashboard() {
   const [restaurants, setRestaurants] = useState<EnrichedUser[]>([]);
   const [bannedUsers, setBannedUsers] = useState<EnrichedUser[]>([]);
   const [requests, setRequests] = useState<PendingRequest[]>([]);
+  const [sessions, setSessions] = useState<ReferralSession[]>([]);
+  const [allUsersList, setAllUsersList] = useState<UserProfile[]>([]);
+  const [searchSessionCode, setSearchSessionCode] = useState('');
+  const [searchPromoterId, setSearchPromoterId] = useState('');
 
   const lang = user?.language === 'ru' ? 'ru' : 'en';
   const t = translations[lang];
@@ -175,6 +200,9 @@ export default function AdminDashboard() {
       });
       setRequests(pendingReqs);
 
+      const allSessions = await referralRepository.getAllSessions();
+      setSessions(allSessions);
+      setAllUsersList(allUsers);
     } catch (err) {
       console.error('Error loading platform data:', err);
     }
@@ -228,6 +256,26 @@ export default function AdminDashboard() {
     
     await loadPlatformData();
     showToast(t.successUpdate);
+  };
+
+  const handleFlagSession = async (sessionId: string) => {
+    try {
+      await referralRepository.flagSession(sessionId);
+      await loadPlatformData();
+      showToast(t.successUpdate);
+    } catch (err) {
+      console.error('Error flagging session:', err);
+    }
+  };
+
+  const handleBlockPromoter = async (promoterId: string, block: boolean) => {
+    try {
+      await authService.blockUser(promoterId, block);
+      await loadPlatformData();
+      showToast(t.successUpdate);
+    } catch (err) {
+      console.error('Error blocking promoter:', err);
+    }
   };
 
   const handleInitiateBan = (id: string, name: string) => {
@@ -656,6 +704,30 @@ export default function AdminDashboard() {
         >
           {t.tabRequests}
           <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.12)', padding: '2px 8px', borderRadius: '20px', marginLeft: '4px', fontWeight: 800 }}>{requests.length}</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('audit')}
+          style={{
+            background: activeTab === 'audit' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+            border: 'none',
+            color: activeTab === 'audit' ? 'var(--warning)' : 'var(--foreground)',
+            padding: '12px 24px',
+            borderRadius: '14px',
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            transition: 'all 0.25s ease',
+            opacity: activeTab === 'audit' ? 1 : 0.6,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: activeTab === 'audit' ? '0 4px 12px rgba(0,0,0,0.1)' : 'none',
+            outline: 'none'
+          }}
+        >
+          {t.tabAudit}
+          <span style={{ fontSize: '0.75rem', background: 'rgba(250, 173, 20, 0.12)', padding: '2px 8px', borderRadius: '20px', marginLeft: '4px', fontWeight: 800 }}>{sessions.length}</span>
         </button>
       </div>
 
@@ -1099,6 +1171,205 @@ export default function AdminDashboard() {
                     <tr>
                       <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>
                         {t.emptyRequests}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: AUDIT & FRAUD DASHBOARD */}
+        {activeTab === 'audit' && (
+          <div className="glass-panel" style={{ padding: '2.5rem 2.2rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)', marginBottom: '2rem' }}>
+            <h3 style={{ marginBottom: '1.8rem', fontSize: '1.25rem', fontWeight: 800, color: 'var(--warning)', letterSpacing: '-0.3px' }}>
+              {t.tabAudit}
+            </h3>
+
+            {/* Filters Row */}
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '2rem', flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                placeholder={t.searchCode}
+                value={searchSessionCode}
+                onChange={(e) => setSearchSessionCode(e.target.value)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--surface-border)',
+                  color: 'var(--foreground)',
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  outline: 'none',
+                  fontSize: '0.9rem',
+                  minWidth: '200px',
+                  flex: 1
+                }}
+              />
+              <input
+                type="text"
+                placeholder={t.searchPromoter}
+                value={searchPromoterId}
+                onChange={(e) => setSearchPromoterId(e.target.value)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--surface-border)',
+                  color: 'var(--foreground)',
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  outline: 'none',
+                  fontSize: '0.9rem',
+                  minWidth: '200px',
+                  flex: 1
+                }}
+              />
+            </div>
+
+            {/* Sessions Table */}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.45, fontSize: '0.75rem', color: 'var(--foreground)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    <th style={{ padding: '12px 10px' }}>{t.status}</th>
+                    <th>{t.sessionCode}</th>
+                    <th>Promoter / Agent ID</th>
+                    <th>{t.geoLocation}</th>
+                    <th>{t.created}</th>
+                    <th style={{ textAlign: 'right', paddingRight: '20px' }}>{t.action}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sessions
+                    .filter(s => {
+                      const matchCode = !searchSessionCode || s.shortCode.toLowerCase().includes(searchSessionCode.toLowerCase()) || s.id.toLowerCase().includes(searchSessionCode.toLowerCase());
+                      const matchPromoter = !searchPromoterId || s.partnerId.toLowerCase().includes(searchPromoterId.toLowerCase());
+                      return matchCode && matchPromoter;
+                    })
+                    .map((session) => {
+                      const promoter = allUsersList.find(u => u.id === session.partnerId);
+                      const isPromoterBlocked = promoter?.isBlocked === true;
+
+                      return (
+                        <tr key={session.id} className="table-row-hover" style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                          <td style={{ padding: '16px 10px' }}>
+                            <span style={{
+                              fontSize: '0.65rem',
+                              fontWeight: 800,
+                              color: session.status === 'completed' ? 'var(--success)' :
+                                     session.status === 'flagged' ? 'var(--error)' :
+                                     session.status === 'expired' ? 'var(--foreground)' : 'var(--warning)',
+                              background: session.status === 'completed' ? 'rgba(82, 196, 26, 0.08)' :
+                                          session.status === 'flagged' ? 'rgba(255, 77, 79, 0.08)' :
+                                          session.status === 'expired' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(250, 173, 20, 0.08)',
+                              border: `1px solid ${
+                                session.status === 'completed' ? 'rgba(82, 196, 26, 0.3)' :
+                                session.status === 'flagged' ? 'rgba(255, 77, 79, 0.3)' :
+                                session.status === 'expired' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(250, 173, 20, 0.3)'
+                              }`,
+                              padding: '4px 10px',
+                              borderRadius: '20px',
+                              display: 'inline-block',
+                              letterSpacing: '0.5px',
+                              textTransform: 'uppercase'
+                            }}>
+                              {session.status}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, color: 'var(--primary)' }}>{session.shortCode}</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.45 }}>ID: {session.id}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 600 }}>{promoter?.fullName || 'Unknown Promoter'}</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.45 }}>ID: {session.partnerId}</div>
+                            {isPromoterBlocked && (
+                              <span style={{ fontSize: '0.7rem', color: 'var(--error)', background: 'rgba(255, 77, 79, 0.1)', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', display: 'inline-block', fontWeight: 700 }}>
+                                BLOCKED
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {session.geoLocation ? (
+                              <div>
+                                <div style={{ fontWeight: 600 }}>{session.geoLocation.city}</div>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                  {session.geoLocation.lat.toFixed(4)}, {session.geoLocation.lng.toFixed(4)}
+                                </div>
+                              </div>
+                            ) : (
+                              <span style={{ opacity: 0.4 }}>N/A</span>
+                            )}
+                          </td>
+                          <td>
+                            <div style={{ fontSize: '0.85rem' }}>{new Date(session.createdAt).toLocaleDateString()}</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.45 }}>{new Date(session.createdAt).toLocaleTimeString()}</div>
+                          </td>
+                          <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                            <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center' }}>
+                              <button
+                                onClick={() => handleFlagSession(session.id)}
+                                disabled={session.status === 'flagged'}
+                                style={{
+                                  background: session.status === 'flagged' ? 'rgba(255, 77, 79, 0.05)' : 'rgba(255, 77, 79, 0.1)',
+                                  border: '1px solid rgba(255, 77, 79, 0.3)',
+                                  color: 'var(--error)',
+                                  padding: '8px 14px',
+                                  borderRadius: '8px',
+                                  cursor: session.status === 'flagged' ? 'default' : 'pointer',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 700,
+                                  transition: 'all 0.2s',
+                                  opacity: session.status === 'flagged' ? 0.5 : 1
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (session.status !== 'flagged') {
+                                    e.currentTarget.style.background = 'rgba(255, 77, 79, 0.2)';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (session.status !== 'flagged') {
+                                    e.currentTarget.style.background = 'rgba(255, 77, 79, 0.1)';
+                                  }
+                                }}
+                              >
+                                {t.btnFlag}
+                              </button>
+
+                              <button
+                                onClick={() => handleBlockPromoter(session.partnerId, !isPromoterBlocked)}
+                                style={{
+                                  background: isPromoterBlocked ? 'rgba(82, 196, 26, 0.1)' : 'rgba(255, 77, 79, 0.1)',
+                                  border: `1px solid ${isPromoterBlocked ? 'rgba(82, 196, 26, 0.3)' : 'rgba(255, 77, 79, 0.3)'}`,
+                                  color: isPromoterBlocked ? 'var(--success)' : 'var(--error)',
+                                  padding: '8px 14px',
+                                  borderRadius: '8px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 700,
+                                  transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = isPromoterBlocked ? 'rgba(82, 196, 26, 0.2)' : 'rgba(255, 77, 79, 0.2)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = isPromoterBlocked ? 'rgba(82, 196, 26, 0.1)' : 'rgba(255, 77, 79, 0.1)';
+                                }}
+                              >
+                                {isPromoterBlocked ? t.btnUnblock : t.btnBlock}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  {sessions.filter(s => {
+                    const matchCode = !searchSessionCode || s.shortCode.toLowerCase().includes(searchSessionCode.toLowerCase()) || s.id.toLowerCase().includes(searchSessionCode.toLowerCase());
+                    const matchPromoter = !searchPromoterId || s.partnerId.toLowerCase().includes(searchPromoterId.toLowerCase());
+                    return matchCode && matchPromoter;
+                  }).length === 0 && (
+                    <tr>
+                      <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>
+                        {t.emptySessions}
                       </td>
                     </tr>
                   )}

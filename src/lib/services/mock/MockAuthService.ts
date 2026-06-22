@@ -210,4 +210,20 @@ export class MockAuthService implements IAuthService {
       return user;
     });
   }
+
+  async blockUser(id: string, isBlocked: boolean): Promise<void> {
+    for (const [email, user] of this.users.entries()) {
+      if (user.id === id) {
+        user.isBlocked = isBlocked;
+        this.users.set(email, user);
+        break;
+      }
+    }
+    this.saveUsersToStorage();
+    if (this.currentUser && this.currentUser.id === id) {
+      this.currentUser.isBlocked = isBlocked;
+    }
+  }
 }
+
+
