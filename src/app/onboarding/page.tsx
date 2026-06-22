@@ -62,8 +62,8 @@ const translations = {
 export default function OnboardingPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [step, setStep] = useState(1);
-  const [lang, setLang] = useState<'ru' | 'en' | 'id'>('en');
-  const [currency, setCurrency] = useState<'USD' | 'IDR' | 'EUR'>('USD');
+  const [lang, setLang] = useState<'ru' | 'en' | 'id' | 'zh' | 'es' | 'de' | 'fr'>('en');
+  const [currency, setCurrency] = useState<'USD' | 'IDR' | 'EUR' | 'RUB' | 'CNY' | 'AUD' | 'SGD' | 'GBP' | 'JPY'>('USD');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
@@ -71,7 +71,7 @@ export default function OnboardingPage() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const router = useRouter();
 
-  const t = translations[lang];
+  const t = (translations as any)[lang] || translations.en;
 
   useEffect(() => {
     async function checkUser() {
@@ -150,8 +150,12 @@ export default function OnboardingPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <p style={{ color: 'var(--primary)' }}>Loading Onboarding...</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ border: '3px solid rgba(34, 211, 238, 0.1)', borderTop: '3px solid var(--primary)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' }} />
+          <p style={{ color: 'var(--foreground)', fontWeight: 600 }}>Loading Onboarding...</p>
+          <style dangerouslySetInnerHTML={{__html: `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}} />
+        </div>
       </div>
     );
   }
@@ -162,181 +166,179 @@ export default function OnboardingPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.08) 0%, #0a0a0a 100%)',
-      padding: '1.5rem'
+      background: 'radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.06) 0%, #090a0f 100%)',
+      padding: '1.5rem',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
+      {/* Ambient background light */}
+      <div style={{
+        position: 'absolute',
+        width: '350px',
+        height: '350px',
+        background: 'rgba(34, 211, 238, 0.05)',
+        filter: 'blur(90px)',
+        borderRadius: '50%',
+        top: '25%',
+        left: '15%',
+        pointerEvents: 'none'
+      }} />
+
       <div className="glass-panel" style={{
         width: '100%',
-        maxWidth: '460px',
-        padding: '2.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.4)'
+        maxWidth: '480px',
+        padding: '3rem 2.5rem',
+        boxShadow: 'var(--card-shadow)',
+        borderRadius: '24px',
+        border: '1px solid var(--glass-border)',
+        zIndex: 1
       }}>
         {/* Progress Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '0.8rem', opacity: 0.8 }}>
-          <span style={{ color: step === 1 ? 'var(--primary)' : 'white', fontWeight: step === 1 ? 600 : 400 }}>{t.step1}</span>
-          <span style={{ color: step === 2 ? 'var(--primary)' : 'white', fontWeight: step === 2 ? 600 : 400 }}>{t.step2}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>
+          <span style={{ color: step === 1 ? 'var(--primary)' : 'var(--foreground)', transition: 'color 0.2s' }}>{t.step1.toUpperCase()}</span>
+          <span style={{ color: step === 2 ? 'var(--primary)' : 'var(--foreground)', transition: 'color 0.2s' }}>{t.step2.toUpperCase()}</span>
         </div>
-        <div style={{ width: '100%', height: '4px', background: 'var(--surface-border)', borderRadius: '2px', marginBottom: '2rem', overflow: 'hidden' }}>
-          <div style={{ width: step === 1 ? '50%' : '100%', height: '100%', background: 'linear-gradient(95deg, var(--primary), var(--accent))', transition: 'width 0.3s ease' }}></div>
+        <div style={{ width: '100%', height: '4px', background: 'var(--surface-border)', borderRadius: '10px', marginBottom: '2.5rem', overflow: 'hidden' }}>
+          <div style={{ width: step === 1 ? '50%' : '100%', height: '100%', background: 'linear-gradient(90deg, var(--primary), var(--accent))', transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
         </div>
 
-        <h2 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '0.5rem', textAlign: 'center' }}>{t.title}</h2>
-        <p style={{ fontSize: '0.9rem', opacity: 0.6, marginBottom: '2rem', textAlign: 'center' }}>{t.subtitle}</p>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.4rem', textAlign: 'center', letterSpacing: '-0.5px' }}>{t.title}</h2>
+        <p style={{ fontSize: '0.9rem', opacity: 0.6, marginBottom: '2.5rem', textAlign: 'center', fontWeight: 500 }}>{t.subtitle}</p>
 
         {step === 1 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
             {/* Language Selector */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>{t.langLabel}</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {(['en', 'ru', 'id'] as const).map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => setLang(l)}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '1px solid',
-                      borderColor: lang === l ? 'var(--primary)' : 'var(--surface-border)',
-                      background: lang === l ? 'rgba(0, 210, 255, 0.1)' : 'rgba(255,255,255,0.02)',
-                      color: 'white',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      textTransform: 'uppercase'
-                    }}
-                  >
-                    {l === 'en' ? 'English' : l === 'ru' ? 'Русский' : 'Bahasa'}
-                  </button>
-                ))}
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', opacity: 0.7 }}>{t.langLabel}</label>
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value as any)}
+                style={{
+                  width: '100%'
+                }}
+              >
+                <option value="en" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>English</option>
+                <option value="ru" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>Русский</option>
+                <option value="id" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>Bahasa Indonesia</option>
+                <option value="zh" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>中文 (Chinese)</option>
+                <option value="es" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>Español (Spanish)</option>
+                <option value="de" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>Deutsch (German)</option>
+                <option value="fr" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>Français (French)</option>
+              </select>
             </div>
 
             {/* Currency Selector */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>{t.currLabel}</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {(['USD', 'IDR', 'EUR'] as const).map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setCurrency(c)}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '1px solid',
-                      borderColor: currency === c ? 'var(--primary)' : 'var(--surface-border)',
-                      background: currency === c ? 'rgba(0, 210, 255, 0.1)' : 'rgba(255,255,255,0.02)',
-                      color: 'white',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', opacity: 0.7 }}>{t.currLabel}</label>
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as any)}
+                style={{
+                  width: '100%'
+                }}
+              >
+                <option value="USD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>USD ($)</option>
+                <option value="IDR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>IDR (Rp)</option>
+                <option value="EUR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>EUR (€)</option>
+                <option value="RUB" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>RUB (₽)</option>
+                <option value="CNY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>CNY (¥)</option>
+                <option value="AUD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>AUD (A$)</option>
+                <option value="SGD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>SGD (S$)</option>
+                <option value="GBP" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>GBP (£)</option>
+                <option value="JPY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>JPY (¥)</option>
+              </select>
             </div>
 
-            <button onClick={handleNextStep} className="btn-primary" style={{ marginTop: '1rem' }}>
+            <button onClick={handleNextStep} className="btn-primary" style={{ marginTop: '1rem', borderRadius: '12px', padding: '14px' }}>
               {t.btnNext}
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
             {/* Card Details */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>{t.cardLabel}</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', opacity: 0.7 }}>{t.cardLabel}</label>
               
               {/* Virtual Mock Card Visual */}
               <div className="glass-panel" style={{
-                background: 'linear-gradient(135deg, rgba(255, 0, 127, 0.15) 0%, rgba(0, 210, 255, 0.15) 100%)',
-                padding: '1.5rem',
-                borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.1) 0%, rgba(34, 211, 238, 0.1) 100%)',
+                padding: '1.8rem',
+                borderRadius: '20px',
                 marginBottom: '1rem',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                height: '160px',
-                border: '1px solid rgba(255,255,255,0.1)'
+                height: '180px',
+                border: '1px solid var(--glass-border)',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 8px 30px rgba(0,0,0,0.2)'
               }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '1px' }}>AGENT CARD</span>
-                <span style={{ fontSize: '1.4rem', fontWeight: 600, letterSpacing: '2px', margin: '1.5rem 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '1.5px', opacity: 0.9 }}>AGENT CARD</span>
+                  <div style={{ width: '36px', height: '24px', background: 'rgba(255,255,255,0.1)', borderRadius: '6px' }}></div>
+                </div>
+                <span style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '2.5px', margin: '1rem 0', fontFamily: 'monospace' }}>
                   {cardNumber || '•••• •••• •••• ••••'}
                 </span>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', opacity: 0.8 }}>
-                  <span>{user?.fullName || 'CARD HOLDER'}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.5px', opacity: 0.8 }}>
+                  <span style={{ textTransform: 'uppercase' }}>{user?.fullName || 'CARD HOLDER'}</span>
                   <span>{expiry || 'MM/YY'}</span>
                 </div>
               </div>
 
               {/* Card Form Fields */}
-              <input
-                type="text"
-                value={cardNumber}
-                onChange={handleCardNumberChange}
-                placeholder="0000 0000 0000 0000"
-                required
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid var(--surface-border)',
-                  borderRadius: '8px',
-                  padding: '12px 14px',
-                  color: 'white',
-                  fontSize: '1.1rem',
-                  letterSpacing: '1px',
-                  outline: 'none'
-                }}
-              />
-
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <input
                   type="text"
-                  value={expiry}
-                  onChange={handleExpiryChange}
-                  placeholder={t.cardExpiry}
+                  value={cardNumber}
+                  onChange={handleCardNumberChange}
+                  placeholder="0000 0000 0000 0000"
                   required
                   style={{
-                    flex: 1,
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid var(--surface-border)',
-                    borderRadius: '8px',
-                    padding: '12px 14px',
-                    color: 'white',
-                    outline: 'none',
+                    fontSize: '1.1rem',
+                    letterSpacing: '1px',
                     textAlign: 'center'
                   }}
                 />
-                <input
-                  type="password"
-                  value={cvc}
-                  onChange={handleCvcChange}
-                  placeholder={t.cardCvc}
-                  required
-                  style={{
-                    flex: 1,
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid var(--surface-border)',
-                    borderRadius: '8px',
-                    padding: '12px 14px',
-                    color: 'white',
-                    outline: 'none',
-                    textAlign: 'center'
-                  }}
-                />
+
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <input
+                    type="text"
+                    value={expiry}
+                    onChange={handleExpiryChange}
+                    placeholder={t.cardExpiry}
+                    required
+                    style={{
+                      flex: 1,
+                      textAlign: 'center'
+                    }}
+                  />
+                  <input
+                    type="password"
+                    value={cvc}
+                    onChange={handleCvcChange}
+                    placeholder={t.cardCvc}
+                    required
+                    style={{
+                      flex: 1,
+                      textAlign: 'center'
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button type="button" onClick={() => setStep(1)} className="btn-primary" style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button type="button" onClick={() => setStep(1)} className="btn-primary" style={{ flex: 1, background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)', boxShadow: 'none' }}>
                 Back
               </button>
-              <button type="submit" disabled={submitLoading} className="btn-primary" style={{ flex: 2, background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)' }}>
+              <button type="submit" disabled={submitLoading} className="btn-primary" style={{ flex: 2, background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)', boxShadow: '0 4px 14px rgba(244, 63, 94, 0.2)' }}>
                 {submitLoading ? 'Saving...' : t.btnSubmit}
               </button>
             </div>
 
-            <span style={{ fontSize: '0.7rem', opacity: 0.4, textAlign: 'center', marginTop: '0.5rem' }}>
+            <span style={{ fontSize: '0.75rem', opacity: 0.5, textAlign: 'center', marginTop: '0.5rem', display: 'block', fontWeight: 600 }}>
               🔒 {t.secured}
             </span>
           </form>

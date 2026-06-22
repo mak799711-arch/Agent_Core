@@ -3,21 +3,23 @@
 import { useState, useEffect, useRef } from 'react';
 
 const themeOptions = [
-  // { id: 'neon', name: 'Neon', label: '🌴 Neon', gradient: 'linear-gradient(135deg, #00d2ff 0%, #ff007f 100%)', color: '#00d2ff' },
-  { id: 'dark', name: 'Dark', label: '🌙 Dark', gradient: 'linear-gradient(135deg, #333 0%, #111 100%)', color: '#90caf9' },
-  { id: 'light', name: 'Light', label: '☀️ Light', gradient: 'linear-gradient(135deg, #fff 0%, #e2e8f0 100%)', color: '#0070f3' }
+  { id: 'dark', name: 'Dark', label: '🌙 Dark', gradient: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', color: '#3b82f6' },
+  { id: 'light', name: 'Light', label: '☀️ Light', gradient: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)', color: '#0284c7' },
+  { id: 'neon', name: 'Neon', label: '🌴 Neon', gradient: 'linear-gradient(135deg, #00d2ff 0%, #ff007f 100%)', color: '#00d2ff' }
 ] as const;
 
 export default function ThemeSelector() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTheme, setActiveTheme] = useState<'neon' | 'dark' | 'light'>('dark');
+  const [activeTheme, setActiveTheme] = useState<'neon' | 'dark' | 'light'>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'neon' || savedTheme === 'dark' || savedTheme === 'light') {
+        return savedTheme;
+      }
+    }
+    return 'dark';
+  });
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Read theme from localStorage or document attribute
-    const savedTheme = (localStorage.getItem('theme') as any) || 'dark';
-    setActiveTheme(savedTheme);
-  }, []);
 
   useEffect(() => {
     // Handle click outside to collapse

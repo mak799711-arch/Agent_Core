@@ -8,8 +8,8 @@ export interface UserProfile {
   // Новые поля для Phase 1.1 Onboarding & Settings
   cardBound: boolean;
   cardNumber: string | null;
-  currency: 'USD' | 'IDR' | 'EUR';
-  language: 'ru' | 'en' | 'id';
+  currency: 'USD' | 'IDR' | 'EUR' | 'RUB' | 'CNY' | 'AUD' | 'SGD' | 'GBP' | 'JPY';
+  language: 'ru' | 'en' | 'id' | 'zh' | 'es' | 'de' | 'fr';
   theme: 'dark' | 'neon' | 'light';
   status?: 'verified' | 'unverified' | 'banned' | string;
   email?: string;

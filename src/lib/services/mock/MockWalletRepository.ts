@@ -5,9 +5,7 @@ export class MockWalletRepository implements IWalletRepository {
   private transactions: Transaction[] = [];
 
   constructor() {
-    // Тестовые балансы
-    this.balances.set('mock-partner-uuid', 25.00);
-    this.balances.set('mock-business-uuid', 500.00); // Резерв заведения
+    // No starting balances
   }
 
   async getBalance(userId: string): Promise<number> {

@@ -36,7 +36,8 @@ const translations = {
       nightlife: 'Party 🍸',
       villa: 'Stay 🏡',
       activity: 'Surf 🏄'
-    }
+    },
+    searchPlaceholder: 'Search venue or reward...'
   },
   ru: {
     promoter: 'Локальный промоутер',
@@ -64,7 +65,8 @@ const translations = {
       nightlife: 'Клубы 🍸',
       villa: 'Виллы 🏡',
       activity: 'Сёрфинг 🏄'
-    }
+    },
+    searchPlaceholder: 'Поиск заведений и наград...'
   },
   id: {
     promoter: 'Promotor Lokal',
@@ -92,7 +94,124 @@ const translations = {
       nightlife: 'Pesta 🍸',
       villa: 'Tinggal 🏡',
       activity: 'Selancar 🏄'
-    }
+    },
+    searchPlaceholder: 'Cari tempat atau hadiah...'
+  },
+  zh: {
+    promoter: '本地推广员',
+    exit: '退出',
+    settings: '设置 ⚙️',
+    totalEarnedLabel: '总收益 (累计)',
+    getStartedBtn: '开始寻找 🚀',
+    locRequesting: '正在获取定位...',
+    locError: '无法获取定位，使用默认巴厘岛中心。',
+    activeCodes: '活跃推荐码',
+    waiting: '等待扫描',
+    offersTitle: '巴厘岛活跃优惠',
+    mapHint: '📍 巴厘岛实时地图',
+    mapPending: '等待配置 Mapbox Token',
+    rewardLabel: '奖励',
+    generateBtn: '生成推荐码',
+    modalTitle: '推荐已激活',
+    modalHint: '向商户经理展示此条码或二维码以确认。',
+    shortCodeLabel: '短码',
+    done: '完成',
+    loading: '正在加载推广员门户...',
+    categories: {
+      all: '全部 🌍',
+      restaurant: '美食 🍕',
+      nightlife: '派对 🍸',
+      villa: '住宿 🏡',
+      activity: '冲浪 🏄'
+    },
+    searchPlaceholder: '搜索商户或奖励...'
+  },
+  es: {
+    promoter: 'Promotor Local',
+    exit: 'Salir',
+    settings: 'Ajustes ⚙️',
+    totalEarnedLabel: 'Ganancias Totales',
+    getStartedBtn: 'Comenzar 🚀',
+    locRequesting: 'Buscando ubicación...',
+    locError: 'Acceso a ubicación denegado. Usando Bali por defecto.',
+    activeCodes: 'Códigos de Referidos Activos',
+    waiting: 'Esperando escaneo',
+    offersTitle: 'Ofertas Activas en Bali',
+    mapHint: '📍 Mapa de Bali en Vivo',
+    mapPending: 'Integración Mapbox Pendiente',
+    rewardLabel: 'Recompensa',
+    generateBtn: 'Generar Código',
+    modalTitle: 'Referido Activo',
+    modalHint: 'Muestre este código al gerente del lugar para confirmar.',
+    shortCodeLabel: 'CÓDIGO CORTO',
+    done: 'Hecho',
+    loading: 'Cargando Portal de Socios...',
+    categories: {
+      all: 'Todo 🌍',
+      restaurant: 'Comida 🍕',
+      nightlife: 'Fiesta 🍸',
+      villa: 'Villas 🏡',
+      activity: 'Surf 🏄'
+    },
+    searchPlaceholder: 'Buscar lugar o recompensa...'
+  },
+  de: {
+    promoter: 'Lokaler Promoter',
+    exit: 'Beenden',
+    settings: 'Einstellungen ⚙️',
+    totalEarnedLabel: 'Gesamtverdienst',
+    getStartedBtn: 'Starten 🚀',
+    locRequesting: 'Standort wird abgefragt...',
+    locError: 'Standortzugriff verweigert. Nutze Bali Standard.',
+    activeCodes: 'Aktive Empfehlungscodes',
+    waiting: 'Warten auf Scan',
+    offersTitle: 'Aktive Angebote in Bali',
+    mapHint: '📍 Live-Karte Bali',
+    mapPending: 'Mapbox-Token ausstehend',
+    rewardLabel: 'Belohnung',
+    generateBtn: 'Empfehlungscode generieren',
+    modalTitle: 'Empfehlung Aktiv',
+    modalHint: 'Zeigen Sie dem Manager diesen Code, um zu bestätigen.',
+    shortCodeLabel: 'KURZCODE',
+    done: 'Fertig',
+    loading: 'Partnerportal wird geladen...',
+    categories: {
+      all: 'Alle 🌍',
+      restaurant: 'Essen 🍕',
+      nightlife: 'Party 🍸',
+      villa: 'Villen 🏡',
+      activity: 'Surfen 🏄'
+    },
+    searchPlaceholder: 'Suche Ort oder Belohnung...'
+  },
+  fr: {
+    promoter: 'Promoteur Local',
+    exit: 'Quitter',
+    settings: 'Paramètres ⚙️',
+    totalEarnedLabel: 'Gains Totaux',
+    getStartedBtn: 'Commencer 🚀',
+    locRequesting: 'Recherche de localisation...',
+    locError: 'Accès localisation refusé. Bali par défaut.',
+    activeCodes: 'Codes de Parrainage Actifs',
+    waiting: 'En attente de scan',
+    offersTitle: 'Offres Actives à Bali',
+    mapHint: '📍 Carte de Bali en Direct',
+    mapPending: 'Intégration Mapbox en Attente',
+    rewardLabel: 'Récompense',
+    generateBtn: 'Générer un Code',
+    modalTitle: 'Parrainage Actif',
+    modalHint: 'Présentez ce code au responsable pour valider.',
+    shortCodeLabel: 'CODE COURT',
+    done: 'Terminé',
+    loading: 'Chargement du Portail Partenaire...',
+    categories: {
+      all: 'Tout 🌍',
+      restaurant: 'Manger 🍕',
+      nightlife: 'Fête 🍸',
+      villa: 'Villas 🏡',
+      activity: 'Surf 🏄'
+    },
+    searchPlaceholder: 'Rechercher un lieu ou récompense...'
   }
 };
 
@@ -117,6 +236,7 @@ export default function PartnerDashboard() {
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   
   const [generatedSession, setGeneratedSession] = useState<ReferralSession | null>(null);
   const [loading, setLoading] = useState(true);
@@ -151,8 +271,8 @@ export default function PartnerDashboard() {
             .filter(tx => tx.type === 'reward' && tx.status === 'completed')
             .reduce((sum, tx) => sum + tx.amount, 0);
           
-          // Для дефолтного аккаунта добавим стартовый заработок $25.00, если транзакций еще нет
-          setTotalEarnings(earned || 25.00);
+          // Для нового аккаунта баланс начинается с 0
+          setTotalEarnings(earned);
 
           const activeOffers = await offerRepository.getOffers({ onlyActive: true });
           setOffers(activeOffers);
@@ -167,6 +287,7 @@ export default function PartnerDashboard() {
       }
     }
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleGetStarted = () => {
@@ -223,7 +344,7 @@ export default function PartnerDashboard() {
       
       const sessions = await referralRepository.getActiveSessionsForPartner(user.id);
       setActiveSessions(sessions);
-    } catch (err) {
+    } catch {
       alert('Failed to generate referral session');
     }
   };
@@ -233,15 +354,28 @@ export default function PartnerDashboard() {
     router.push('/login');
   };
 
-  // Фильтрация офферов по категории
-  const filteredOffers = offers.filter(offer => 
-    selectedCategory === 'all' || offer.category === selectedCategory
-  );
+  // Фильтрация офферов по категории и поисковому запросу
+  const filteredOffers = offers.filter(offer => {
+    const matchesCategory = selectedCategory === 'all' || offer.category === selectedCategory;
+    const bizLocation = MOCK_BUSINESS_LOCATIONS.find(loc => loc.id === offer.id);
+    const bizName = bizLocation ? bizLocation.name : '';
+    
+    const matchesQuery = 
+      offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (offer.conditions || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      bizName.toLowerCase().includes(searchQuery.toLowerCase());
+      
+    return matchesCategory && matchesQuery;
+  });
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <p style={{ color: 'var(--primary)' }}>{t?.loading || 'Loading...'}</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ border: '3px solid rgba(59, 130, 246, 0.1)', borderTop: '3px solid var(--primary)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' }} />
+          <p style={{ color: 'var(--foreground)', fontWeight: 600 }}>{t?.loading || 'Loading...'}</p>
+          <style dangerouslySetInnerHTML={{__html: `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}} />
+        </div>
       </div>
     );
   }
@@ -249,57 +383,155 @@ export default function PartnerDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'var(--background)',
+      background: 'var(--bg-gradient)',
       color: 'var(--foreground)',
-      padding: '1.5rem',
-      paddingBottom: '5rem',
-      fontFamily: 'Inter, sans-serif'
+      padding: '2rem 1.5rem',
+      paddingBottom: '6rem',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
+      {/* Ambient background light */}
+      <div style={{
+        position: 'absolute',
+        width: '300px',
+        height: '300px',
+        background: 'var(--ambient-glow)',
+        filter: 'blur(100px)',
+        borderRadius: '50%',
+        top: '0%',
+        right: '10%',
+        pointerEvents: 'none'
+      }} />
+
       {/* Header */}
-      <header style={{
+      <header className="glass-header" style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '2rem',
-        paddingBottom: '1rem',
-        borderBottom: '1px solid var(--surface-border)'
+        marginBottom: '2.5rem',
+        padding: '1rem 1.5rem',
+        marginLeft: '-1.5rem',
+        marginRight: '-1.5rem',
+        marginTop: '-2rem',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={user?.avatarUrl || ''}
             alt="Avatar"
-            style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid var(--primary)' }}
+            style={{ width: '46px', height: '46px', borderRadius: '50%', border: '2.5px solid var(--primary)', objectFit: 'cover' }}
           />
           <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', display: 'flex', alignItems: 'center' }}>
+            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
               {user?.fullName}
               {user?.status === 'verified' && <VerificationBadge size={14} />}
             </h4>
-            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.promoter}</span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'var(--primary)' }}>{t.promoter}</span>
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* Language Selector */}
+          <select 
+            value={lang} 
+            onChange={async (e) => {
+              const newLang = e.target.value as any;
+              try {
+                const updated = await authService.updateProfile({ language: newLang });
+                setUser(updated);
+              } catch (err) {
+                console.error("Failed to update language:", err);
+              }
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid var(--surface-border)',
+              color: 'var(--foreground)',
+              padding: '8px 12px',
+              borderRadius: '10px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value="en" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇬🇧 EN</option>
+            <option value="ru" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇷🇺 RU</option>
+            <option value="id" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇮🇩 ID</option>
+            <option value="zh" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇨🇳 ZH</option>
+            <option value="es" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇪🇸 ES</option>
+            <option value="de" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇩🇪 DE</option>
+            <option value="fr" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇫🇷 FR</option>
+          </select>
+
+          {/* Currency Selector */}
+          <select 
+            value={user?.currency || 'USD'} 
+            onChange={async (e) => {
+              const newCurr = e.target.value as any;
+              try {
+                const updated = await authService.updateProfile({ currency: newCurr });
+                setUser(updated);
+              } catch (err) {
+                console.error("Failed to update currency:", err);
+              }
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid var(--surface-border)',
+              color: 'var(--foreground)',
+              padding: '8px 12px',
+              borderRadius: '10px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value="USD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>$ USD</option>
+            <option value="IDR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>Rp IDR</option>
+            <option value="EUR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>€ EUR</option>
+            <option value="RUB" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>₽ RUB</option>
+            <option value="CNY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>¥ CNY</option>
+            <option value="AUD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>A$ AUD</option>
+            <option value="SGD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>S$ SGD</option>
+            <option value="GBP" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>£ GBP</option>
+            <option value="JPY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>¥ JPY</option>
+          </select>
+
           <button onClick={() => router.push('/partner/settings')} style={{
-            background: 'var(--surface)',
+            background: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid var(--surface-border)',
             color: 'var(--foreground)',
-            padding: '6px 12px',
-            borderRadius: '6px',
+            padding: '8px 16px',
+            borderRadius: '10px',
             cursor: 'pointer',
-            fontSize: '0.8rem'
-          }}>
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)'}
+          >
             {t.settings}
           </button>
           <button onClick={handleLogout} style={{
-            background: 'var(--surface)',
-            border: 'none',
+            background: 'rgba(244, 63, 94, 0.06)',
+            border: '1px solid rgba(244, 63, 94, 0.15)',
             color: 'var(--error)',
-            padding: '6px 12px',
-            borderRadius: '6px',
+            padding: '8px 16px',
+            borderRadius: '10px',
             cursor: 'pointer',
-            fontSize: '0.8rem'
-          }}>
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.06)'}
+          >
             {t.exit}
           </button>
         </div>
@@ -307,14 +539,17 @@ export default function PartnerDashboard() {
 
       {/* Total Earnings Widget */}
       <div className="glass-panel" style={{
-        padding: '1.5rem',
-        marginBottom: '2rem',
-        background: 'linear-gradient(135deg, rgba(0, 210, 255, 0.1) 0%, rgba(255, 0, 127, 0.05) 100%)',
+        padding: '2rem 1.8rem',
+        marginBottom: '2.5rem',
+        background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(244, 63, 94, 0.03) 100%)',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        borderRadius: '20px',
+        border: '1px solid rgba(34, 211, 238, 0.15)',
+        zIndex: 2
       }}>
-        <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.totalEarnedLabel}</span>
-        <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', margin: 0 }}>
+        <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>{t.totalEarnedLabel}</span>
+        <h2 style={{ fontSize: '2.8rem', fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: '-1px' }}>
           {user && formatCurrency(totalEarnings, user.currency)}
         </h2>
       </div>
@@ -330,7 +565,7 @@ export default function PartnerDashboard() {
             {activeSessions.map(session => {
               const offer = offers.find(o => o.id === session.offerId);
               return (
-                <div key={session.id} className="glass-panel" style={{
+                <div key={session.id} className="card-interactive" style={{
                   padding: '1rem',
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -385,6 +620,49 @@ export default function PartnerDashboard() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
+          {/* Search Engine Input */}
+          <div style={{ position: 'relative', width: '100%' }}>
+            <input
+              type="text"
+              placeholder={t.searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                paddingLeft: '44px',
+                background: 'var(--surface)',
+                border: '1px solid var(--surface-border)',
+                borderRadius: '14px',
+                color: 'var(--foreground)',
+                fontSize: '0.95rem',
+                outline: 'none',
+                transition: 'all 0.2s ease'
+              }}
+            />
+            <svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="var(--foreground)" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              style={{
+                position: 'absolute',
+                left: '16px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                opacity: 0.4,
+                pointerEvents: 'none'
+              }}
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+
           {/* Category Filter - Rounded Beautiful Badges */}
           <div style={{
             display: 'flex',
@@ -453,8 +731,8 @@ export default function PartnerDashboard() {
 
             {/* Render Category Pins */}
             {MOCK_BUSINESS_LOCATIONS
-              .filter(loc => selectedCategory === 'all' || loc.category === selectedCategory)
-              .map((loc, idx) => {
+              .filter(loc => filteredOffers.some(o => o.id === loc.id))
+              .map((loc) => {
                 // Вычисляем смещение от центра (50%) для визуального отображения вокруг "Тебя"
                 const topOffset = 50 + (loc.lat - (-8.6534)) * 3000;
                 const leftOffset = 50 + (loc.lng - (115.1305)) * 3000;

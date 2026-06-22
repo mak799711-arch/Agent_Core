@@ -10,54 +10,79 @@ export class MockAuthService implements IAuthService {
   private users: Map<string, MockUser> = new Map();
 
   constructor() {
-    // Дефолтные тестовые аккаунты (уже завершили onboarding для удобства тестов)
-    const partnerId = 'mock-partner-uuid';
-    const businessId = 'mock-business-uuid';
+    const isClient = typeof window !== 'undefined';
+    
+    // 1. Load users list from localStorage or initialize with defaults
+    let loadedUsers: [string, MockUser][] | null = null;
+    if (isClient) {
+      try {
+        const stored = localStorage.getItem('mock_users');
+        if (stored) {
+          loadedUsers = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error('Error loading mock users:', e);
+      }
+    }
 
-    this.users.set('partner@agent.core', {
-      id: partnerId,
-      role: 'partner',
-      fullName: 'John Bali Promoter',
-      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-      createdAt: new Date().toISOString(),
-      email: 'partner@agent.core',
-      password: 'password123',
-      cardBound: true,
-      cardNumber: '4242 4242 4242 4242',
-      currency: 'USD',
-      language: 'en',
-      theme: 'neon'
-    });
+    if (loadedUsers && loadedUsers.length > 0) {
+      this.users = new Map(loadedUsers);
+    } else {
+      // Admin Account
+      this.users.set('mak799711@gmail.com', {
+        id: 'mock-admin-uuid',
+        role: 'admin',
+        fullName: 'Mak Admin',
+        avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=Mak',
+        createdAt: new Date().toISOString(),
+        email: 'mak799711@gmail.com',
+        password: 'MAKADMIN1551',
+        cardBound: true,
+        cardNumber: '7777 7777 7777 7777',
+        currency: 'USD',
+        language: 'ru',
+        theme: 'dark'
+      });
 
-    this.users.set('business@agent.core', {
-      id: businessId,
-      role: 'business',
-      fullName: 'La Brisa Bali Manager',
-      avatarUrl: 'https://api.dicebear.com/7.x/identicon/svg?seed=LaBrisa',
-      createdAt: new Date().toISOString(),
-      email: 'business@agent.core',
-      password: 'password123',
-      cardBound: true,
-      cardNumber: '5555 5555 5555 5555',
-      currency: 'USD',
-      language: 'en',
-      theme: 'neon'
-    });
+      this.saveUsersToStorage();
+    }
 
-    this.users.set('mak799711@gmail.com', {
-      id: 'mock-admin-uuid',
-      role: 'admin',
-      fullName: 'Mak Admin',
-      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=Mak',
-      createdAt: new Date().toISOString(),
-      email: 'mak799711@gmail.com',
-      password: 'MAKADMIN1551',
-      cardBound: true,
-      cardNumber: '7777 7777 7777 7777',
-      currency: 'USD',
-      language: 'ru',
-      theme: 'neon'
-    });
+    // 2. Load active session from localStorage
+    if (isClient) {
+      try {
+        const storedEmail = localStorage.getItem('current_user_email');
+        if (storedEmail) {
+          const user = this.users.get(storedEmail);
+          if (user) {
+            this.currentUser = user;
+          }
+        }
+      } catch (e) {
+        console.error('Error loading active user session:', e);
+      }
+    }
+  }
+
+  private saveUsersToStorage() {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('mock_users', JSON.stringify(Array.from(this.users.entries())));
+      } catch (e) {
+        console.error('Failed to save mock users to storage:', e);
+      }
+    }
+  }
+
+  private saveSession(email: string) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('current_user_email', email);
+    }
+  }
+
+  private clearSession() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('current_user_email');
+    }
   }
 
   async getCurrentUser(): Promise<UserProfile | null> {
@@ -75,14 +100,16 @@ export class MockAuthService implements IAuthService {
       createdAt: new Date().toISOString(),
       email: cleanEmail,
       password,
-      cardBound: false, // Новый пользователь должен пройти Onboarding!
+      cardBound: false,
       cardNumber: null,
       currency: 'USD',
       language: 'en',
-      theme: 'neon'
+      theme: 'dark'
     };
     this.users.set(cleanEmail, user);
+    this.saveUsersToStorage();
     this.currentUser = user;
+    this.saveSession(cleanEmail);
     return user;
   }
 
@@ -96,11 +123,13 @@ export class MockAuthService implements IAuthService {
       throw new Error('Incorrect password');
     }
     this.currentUser = user;
+    this.saveSession(cleanEmail);
     return user;
   }
 
   async signOut(): Promise<void> {
     this.currentUser = null;
+    this.clearSession();
   }
 
   async updateProfile(updates: Partial<UserProfile>): Promise<UserProfile> {
@@ -123,6 +152,7 @@ export class MockAuthService implements IAuthService {
 
     if (userEmail) {
       this.users.set(userEmail, { ...this.users.get(userEmail)!, ...updates });
+      this.saveUsersToStorage();
     }
 
     this.currentUser = updatedUser;
@@ -130,6 +160,9 @@ export class MockAuthService implements IAuthService {
   }
 
   async getAllUsers(): Promise<UserProfile[]> {
-    return Array.from(this.users.values()).map(({ password, ...user }) => user);
+    return Array.from(this.users.values()).map((u) => {
+      const { password: _password, ...user } = u;
+      return user;
+    });
   }
 }

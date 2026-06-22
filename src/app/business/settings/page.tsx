@@ -77,8 +77,8 @@ const translations = {
 
 export default function BusinessSettings() {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [lang, setLang] = useState<'ru' | 'en' | 'id'>('en');
-  const [currency, setCurrency] = useState<'USD' | 'IDR' | 'EUR'>('USD');
+  const [lang, setLang] = useState<'ru' | 'en' | 'id' | 'zh' | 'es' | 'de' | 'fr'>('en');
+  const [currency, setCurrency] = useState<'USD' | 'IDR' | 'EUR' | 'RUB' | 'CNY' | 'AUD' | 'SGD' | 'GBP' | 'JPY'>('USD');
   const [theme, setTheme] = useState<'dark' | 'neon' | 'light'>('neon');
   const [cardBound, setCardBound] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
@@ -92,7 +92,7 @@ export default function BusinessSettings() {
   const [verificationStatus, setVerificationStatus] = useState<'none' | 'pending' | 'verified'>('none');
 
   const router = useRouter();
-  const t = translations[lang];
+  const t = (translations as any)[lang] || translations.en;
 
   useEffect(() => {
     async function loadUser() {
@@ -106,7 +106,7 @@ export default function BusinessSettings() {
         setCardBound(currentUser.cardBound);
         setCardNumber(currentUser.cardNumber || '');
         
-        const activeTheme = localStorage.getItem('theme') as any || currentUser.theme;
+        const activeTheme = (localStorage.getItem('theme') as 'dark' | 'neon' | 'light' | null) || currentUser.theme;
         setTheme(activeTheme);
 
         // Load verification status from mock and localStorage
@@ -129,6 +129,7 @@ export default function BusinessSettings() {
       setLoading(false);
     }
     loadUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleThemeChange = (newTheme: 'dark' | 'neon' | 'light') => {
@@ -192,7 +193,11 @@ export default function BusinessSettings() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
-        <p style={{ color: 'var(--primary)', fontFamily: 'Inter, sans-serif' }}>Loading Settings...</p>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ border: '3px solid rgba(34, 211, 238, 0.1)', borderTop: '3px solid var(--primary)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' }} />
+          <p style={{ color: 'var(--foreground)', fontWeight: 600 }}>Loading Settings...</p>
+          <style dangerouslySetInnerHTML={{__html: `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}} />
+        </div>
       </div>
     );
   }
@@ -200,26 +205,40 @@ export default function BusinessSettings() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'var(--background)',
+      background: 'var(--bg-gradient)',
       color: 'var(--foreground)',
-      padding: '2rem',
-      fontFamily: 'Inter, sans-serif'
+      padding: '3rem 2rem',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
-      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+      {/* Ambient background light */}
+      <div style={{
+        position: 'absolute',
+        width: '350px',
+        height: '350px',
+        background: 'var(--ambient-glow)',
+        filter: 'blur(100px)',
+        borderRadius: '50%',
+        top: '10%',
+        left: '15%',
+        pointerEvents: 'none'
+      }} />
+
+      <div style={{ maxWidth: '600px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {/* Back Link */}
-        <a href="/business" style={{ color: 'var(--accent)', textDecoration: 'none', display: 'inline-block', marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: 600 }}>
+        <a href="/business" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '2rem', fontSize: '0.9rem', fontWeight: 700 }}>
           {t.back}
         </a>
 
-        <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem', display: 'flex', alignItems: 'center' }}>
+        <h2 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.8px' }}>
           {t.title}
           {verificationStatus === 'verified' && <VerificationBadge size={22} />}
         </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Theme Switcher */}
-          <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 600 }}>{t.themeLabel}</h3>
+          <div className="glass-panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: '1rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.themeLabel}</h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {(['dark', 'neon', 'light'] as const).map((th) => (
                 <button
@@ -228,13 +247,15 @@ export default function BusinessSettings() {
                   style={{
                     flex: 1,
                     padding: '12px',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     border: '1px solid',
-                    borderColor: theme === th ? 'var(--accent)' : 'var(--surface-border)',
-                    background: theme === th ? 'var(--surface)' : 'rgba(255,255,255,0.02)',
+                    borderColor: theme === th ? 'var(--primary)' : 'var(--surface-border)',
+                    background: theme === th ? 'var(--primary-glow)' : 'rgba(255,255,255,0.01)',
                     color: 'var(--foreground)',
-                    fontWeight: 600,
-                    cursor: 'pointer'
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    transition: 'all 0.2s'
                   }}
                 >
                   {t.themes[th]}
@@ -244,78 +265,78 @@ export default function BusinessSettings() {
           </div>
 
           {/* Language & Currency */}
-          <div className="glass-panel" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t.langLabel}</label>
+          <div className="glass-panel" style={{ padding: '1.8rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.langLabel}</label>
               <select
                 value={lang}
                 onChange={(e) => setLang(e.target.value as any)}
                 style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--surface-border)',
-                  color: 'var(--foreground)',
-                  padding: '10px',
-                  borderRadius: '6px',
-                  outline: 'none'
+                  width: '100%'
                 }}
               >
-                <option value="en" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>English</option>
-                <option value="ru" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>Русский</option>
-                <option value="id" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>Bahasa Indonesia</option>
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="zh">中文 (Chinese)</option>
+                <option value="es">Español (Spanish)</option>
+                <option value="de">Deutsch (German)</option>
+                <option value="fr">Français (French)</option>
               </select>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t.currLabel}</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.currLabel}</label>
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value as any)}
                 style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--surface-border)',
-                  color: 'var(--foreground)',
-                  padding: '10px',
-                  borderRadius: '6px',
-                  outline: 'none'
+                  width: '100%'
                 }}
               >
-                <option value="USD" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>USD ($)</option>
-                <option value="IDR" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>IDR (Rp)</option>
-                <option value="EUR" style={{ background: 'var(--surface)', color: 'var(--foreground)' }}>EUR (€)</option>
+                <option value="USD">USD ($)</option>
+                <option value="IDR">IDR (Rp)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="RUB">RUB (₽)</option>
+                <option value="CNY">CNY (¥)</option>
+                <option value="AUD">AUD (A$)</option>
+                <option value="SGD">SGD (S$)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="JPY">JPY (¥)</option>
               </select>
             </div>
           </div>
 
           {/* Verification Progress Box */}
-          <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 600 }}>{t.verificationTitle}</h3>
+          <div className="glass-panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: '1.2rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.verificationTitle}</h3>
             
             {verificationStatus === 'verified' && (
-              <div style={{ color: 'var(--success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <VerificationBadge size={18} /> {t.statusVerified}
+              <div style={{ color: 'var(--success)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem' }}>
+                <VerificationBadge size={20} /> {t.statusVerified}
               </div>
             )}
 
             {verificationStatus === 'pending' && (
-              <div style={{ color: 'var(--warning)', fontWeight: 600 }}>
+              <div style={{ color: 'var(--warning)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem' }}>
                 ⏳ {t.statusPending}
               </div>
             )}
 
             {verificationStatus === 'none' && (
               <div>
-                <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>
+                <p style={{ fontSize: '0.9rem', opacity: 0.7, marginBottom: '1.2rem', fontWeight: 500, lineHeight: 1.5 }}>
                   {dealsCount < 100 ? t.verificationLock : 'Congratulations! You qualify for verification.'}
                 </p>
 
                 {/* Progress bar */}
-                <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px', fontWeight: 600 }}>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '6px', fontWeight: 700 }}>
                     <span>{t.verificationCurrent}</span>
-                    <span>{dealsCount}/100</span>
+                    <span style={{ color: 'var(--primary)' }}>{dealsCount}/100</span>
                   </div>
-                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ width: `${Math.min((dealsCount / 100) * 100, 100)}%`, height: '100%', background: dealsCount >= 100 ? 'var(--success)' : 'var(--accent)', transition: 'width 0.3s ease' }}></div>
+                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.min((dealsCount / 100) * 100, 100)}%`, height: '100%', background: dealsCount >= 100 ? 'var(--success)' : 'var(--primary)', transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
                   </div>
                 </div>
 
@@ -323,15 +344,13 @@ export default function BusinessSettings() {
                   {dealsCount < 100 ? (
                     <button
                       onClick={handleSimulateDeals}
+                      className="btn-primary"
                       style={{
-                        background: 'rgba(255, 0, 127, 0.1)',
-                        border: '1px solid var(--accent)',
-                        color: 'var(--accent)',
-                        padding: '10px 14px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '0.8rem',
-                        fontWeight: 600
+                        padding: '10px 18px',
+                        fontSize: '0.85rem',
+                        background: 'rgba(34, 211, 238, 0.08)',
+                        border: '1px solid var(--primary)',
+                        boxShadow: 'none'
                       }}
                     >
                       ⚡ {t.btnSimulate}
@@ -339,16 +358,10 @@ export default function BusinessSettings() {
                   ) : (
                     <button
                       onClick={handleApplyVerification}
+                      className="btn-primary"
                       style={{
-                        background: 'linear-gradient(135deg, var(--success) 0%, #2b9107 100%)',
-                        border: 'none',
-                        color: 'white',
-                        padding: '10px 20px',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '0.9rem',
-                        boxShadow: '0 4px 12px rgba(82, 196, 26, 0.3)'
+                        background: 'linear-gradient(135deg, var(--success) 0%, #10b981 100%)',
+                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.2)'
                       }}
                     >
                       {t.btnApply}
@@ -360,26 +373,35 @@ export default function BusinessSettings() {
           </div>
 
           {/* Card Management */}
-          <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 600 }}>{t.cardLabel}</h3>
+          <div className="glass-panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: '1.2rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.cardLabel}</h3>
             
             {cardBound ? (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)', padding: '1.2rem 1.5rem', borderRadius: '16px', border: '1px solid var(--surface-border)' }}>
                 <div>
-                  <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block' }}>{t.cardBound}</span>
-                  <span style={{ fontSize: '1.2rem', fontWeight: 600, letterSpacing: '1px' }}>{cardNumber}</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '4px', fontWeight: 700 }}>{t.cardBound.toUpperCase()}</span>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 700, letterSpacing: '1.5px', fontFamily: 'monospace' }}>{cardNumber}</span>
                 </div>
                 <button
                   onClick={handleUnbindCard}
                   style={{
                     background: 'none',
-                    border: '1px solid var(--error)',
+                    border: '1px solid rgba(244, 63, 94, 0.3)',
                     color: 'var(--error)',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
+                    padding: '8px 18px',
+                    borderRadius: '10px',
                     cursor: 'pointer',
                     fontSize: '0.85rem',
-                    fontWeight: 600
+                    fontWeight: 700,
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(244, 63, 94, 0.08)';
+                    e.currentTarget.style.borderColor = 'var(--error)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'none';
+                    e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.3)';
                   }}
                 >
                   {t.btnUnbind}
@@ -387,7 +409,7 @@ export default function BusinessSettings() {
               </div>
             ) : (
               <div>
-                <p style={{ fontSize: '0.9rem', opacity: 0.5, marginBottom: '1rem' }}>{t.cardUnbound}</p>
+                <p style={{ fontSize: '0.9rem', opacity: 0.5, marginBottom: '1.2rem', fontWeight: 500 }}>{t.cardUnbound}</p>
                 
                 {isBinding ? (
                   <form onSubmit={handleBindCard} style={{ display: 'flex', gap: '0.5rem' }}>
@@ -402,24 +424,18 @@ export default function BusinessSettings() {
                       placeholder="0000 0000 0000 0000"
                       required
                       style={{
-                        flex: 1,
-                        background: 'var(--surface)',
-                        border: '1px solid var(--surface-border)',
-                        borderRadius: '8px',
-                        padding: '10px 14px',
-                        color: 'var(--foreground)',
-                        outline: 'none'
+                        flex: 1
                       }}
                     />
                     <button type="submit" className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
                       Add
                     </button>
-                    <button type="button" onClick={() => setIsBinding(false)} className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)' }}>
+                    <button type="button" onClick={() => setIsBinding(false)} className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)', boxShadow: 'none' }}>
                       Cancel
                     </button>
                   </form>
                 ) : (
-                  <button onClick={() => setIsBinding(true)} className="btn-primary" style={{ width: '100%', padding: '10px' }}>
+                  <button onClick={() => setIsBinding(true)} className="btn-primary" style={{ width: '100%', padding: '12px' }}>
                     {t.btnBind}
                   </button>
                 )}
@@ -427,7 +443,7 @@ export default function BusinessSettings() {
             )}
           </div>
 
-          <button onClick={handleSave} className="btn-primary" style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)' }}>
+          <button onClick={handleSave} className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)', boxShadow: '0 4px 14px rgba(34, 211, 238, 0.15)' }}>
             {t.btnSave}
           </button>
         </div>

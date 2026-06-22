@@ -1,22 +1,38 @@
-const RATES = {
+const RATES: Record<string, number> = {
   USD: 1.0,
   IDR: 16300,
-  EUR: 0.93
+  EUR: 0.93,
+  RUB: 90.0,
+  CNY: 7.25,
+  AUD: 1.50,
+  SGD: 1.35,
+  GBP: 0.79,
+  JPY: 160.0
 };
 
-const SYMBOLS = {
+const SYMBOLS: Record<string, string> = {
   USD: '$',
   IDR: 'Rp ',
-  EUR: '€'
+  EUR: '€',
+  RUB: '₽',
+  CNY: '¥',
+  AUD: 'A$',
+  SGD: 'S$',
+  GBP: '£',
+  JPY: '¥'
 };
 
-export function formatCurrency(amountInUSD: number, currency: 'USD' | 'IDR' | 'EUR'): string {
-  const converted = amountInUSD * RATES[currency];
+export function formatCurrency(amountInUSD: number, currency: string): string {
+  const currencyUpper = (currency || 'USD').toUpperCase();
+  const rate = RATES[currencyUpper] || 1.0;
+  const symbol = SYMBOLS[currencyUpper] || `${currencyUpper} `;
+  const converted = amountInUSD * rate;
   
-  if (currency === 'IDR') {
-    // Форматируем рупии красиво без копеек
-    return `${SYMBOLS.IDR}${Math.round(converted).toLocaleString()}`;
+  if (currencyUpper === 'IDR' || currencyUpper === 'JPY') {
+    // Round to whole numbers for currencies like Rupiah and Yen
+    return `${symbol}${Math.round(converted).toLocaleString()}`;
   }
   
-  return `${SYMBOLS[currency]}${converted.toFixed(2)}`;
+  // Format with 2 decimal places for cents-based currencies
+  return `${symbol}${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }

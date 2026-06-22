@@ -35,8 +35,9 @@ export default function LoginPage() {
           router.push(`/${user.role}`);
         }
       }
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -49,8 +50,9 @@ export default function LoginPage() {
       const email = type === 'partner' ? 'partner@agent.core' : 'business@agent.core';
       await authService.signIn(email, 'password123');
       router.push(`/${type}`);
-    } catch (err: any) {
-      setError(err.message || 'Demo login failed');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Demo login failed');
     } finally {
       setLoading(false);
     }
@@ -62,23 +64,53 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.1) 0%, rgba(255, 0, 127, 0.05) 90%), #0a0a0a',
-      padding: '1rem'
+      background: 'var(--bg-gradient)',
+      padding: '1.5rem',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
+      {/* Background ambient lights */}
+      <div style={{
+        position: 'absolute',
+        width: '300px',
+        height: '300px',
+        background: 'var(--ambient-glow)',
+        filter: 'blur(80px)',
+        borderRadius: '50%',
+        top: '20%',
+        left: '10%',
+        pointerEvents: 'none'
+      }} />
+      <div style={{
+        position: 'absolute',
+        width: '300px',
+        height: '300px',
+        background: 'var(--ambient-glow)',
+        filter: 'blur(80px)',
+        borderRadius: '50%',
+        bottom: '20%',
+        right: '10%',
+        pointerEvents: 'none'
+      }} />
+
       <div className="glass-panel" style={{
         width: '100%',
-        maxWidth: '420px',
-        padding: '2.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        maxWidth: '440px',
+        padding: '3rem 2.5rem',
+        boxShadow: 'var(--card-shadow)',
+        borderRadius: '24px',
+        zIndex: 1,
+        border: '1px solid var(--glass-border)'
       }}>
         <h2 style={{
-          fontSize: '2rem',
-          fontWeight: 700,
-          background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
+          fontSize: '2.2rem',
+          fontWeight: 800,
+          background: 'linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.7) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          marginBottom: '0.5rem',
-          textAlign: 'center'
+          marginBottom: '0.4rem',
+          textAlign: 'center',
+          letterSpacing: '-1px'
         }}>
           Agent Core
         </h2>
@@ -87,98 +119,82 @@ export default function LoginPage() {
           opacity: 0.6,
           fontSize: '0.9rem',
           textAlign: 'center',
-          marginBottom: '2rem'
+          marginBottom: '2rem',
+          fontWeight: 500
         }}>
           {isSignUp ? 'Create your digital employee account' : 'Sign in to your dashboard'}
         </p>
 
         {error && (
           <div style={{
-            background: 'rgba(255, 77, 79, 0.1)',
-            border: '1px solid var(--error)',
+            background: 'rgba(244, 63, 94, 0.08)',
+            border: '1px solid rgba(244, 63, 94, 0.2)',
             color: 'var(--error)',
-            padding: '0.75rem',
-            borderRadius: '8px',
+            padding: '10px 14px',
+            borderRadius: '10px',
             fontSize: '0.85rem',
-            marginBottom: '1.5rem'
+            marginBottom: '1.5rem',
+            fontWeight: 500
           }}>
-            {error}
+            ⚠️ {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
           {isSignUp && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Full Name / Business Name</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Full Name / Business Name</label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid var(--surface-border)',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  color: 'white',
-                  outline: 'none'
-                }}
+                placeholder="e.g. John Doe"
               />
             </div>
           )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Email Address</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid var(--surface-border)',
-                borderRadius: '8px',
-                padding: '10px 14px',
-                color: 'white',
-                outline: 'none'
-              }}
+              placeholder="name@domain.com"
             />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Password</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid var(--surface-border)',
-                borderRadius: '8px',
-                padding: '10px 14px',
-                color: 'white',
-                outline: 'none'
-              }}
+              placeholder="••••••••"
             />
           </div>
 
           {isSignUp && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Account Type</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Account Type</label>
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.2rem' }}>
                 <button
                   type="button"
                   onClick={() => setRole('partner')}
                   style={{
                     flex: 1,
-                    padding: '8px',
-                    borderRadius: '6px',
+                    padding: '12px',
+                    borderRadius: '10px',
                     border: '1px solid',
                     borderColor: role === 'partner' ? 'var(--primary)' : 'var(--surface-border)',
-                    background: role === 'partner' ? 'rgba(0, 210, 255, 0.1)' : 'transparent',
+                    background: role === 'partner' ? 'rgba(34, 211, 238, 0.08)' : 'rgba(255, 255, 255, 0.01)',
                     color: 'white',
-                    cursor: 'pointer'
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
                   }}
                 >
                   Partner (Promoter)
@@ -188,13 +204,16 @@ export default function LoginPage() {
                   onClick={() => setRole('business')}
                   style={{
                     flex: 1,
-                    padding: '8px',
-                    borderRadius: '6px',
+                    padding: '12px',
+                    borderRadius: '10px',
                     border: '1px solid',
                     borderColor: role === 'business' ? 'var(--primary)' : 'var(--surface-border)',
-                    background: role === 'business' ? 'rgba(0, 210, 255, 0.1)' : 'transparent',
+                    background: role === 'business' ? 'rgba(34, 211, 238, 0.08)' : 'rgba(255, 255, 255, 0.01)',
                     color: 'white',
-                    cursor: 'pointer'
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
                   }}
                 >
                   Business (Venue)
@@ -207,13 +226,13 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             className="btn-primary"
-            style={{ width: '100%', marginTop: '0.5rem' }}
+            style={{ width: '100%', marginTop: '0.5rem', borderRadius: '12px', padding: '14px' }}
           >
             {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem' }}>
+        <div style={{ textAlign: 'center', marginTop: '1.8rem', fontSize: '0.85rem' }}>
           <span style={{ opacity: 0.6 }}>
             {isSignUp ? 'Already have an account?' : 'New to Agent Core?'}
           </span>{' '}
@@ -224,39 +243,48 @@ export default function LoginPage() {
               border: 'none',
               color: 'var(--primary)',
               cursor: 'pointer',
-              fontWeight: 600
+              fontWeight: 700
             }}
           >
             {isSignUp ? 'Sign In' : 'Sign Up'}
           </button>
         </div>
 
-        <div style={{ margin: '2rem 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ margin: '2rem 0 1.2rem 0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
-          <span style={{ fontSize: '0.75rem', opacity: 0.4 }}>DEMO LOGINS</span>
+          <span style={{ fontSize: '0.7rem', opacity: 0.4, fontWeight: 700, letterSpacing: '1px' }}>DEMO LOGINS</span>
           <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button
             onClick={() => handleDemoLogin('partner')}
             disabled={loading}
             style={{
               flex: 1,
-              padding: '10px',
-              borderRadius: '8px',
-              background: 'rgba(255,255,255,0.02)',
+              padding: '12px',
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.01)',
               border: '1px solid var(--surface-border)',
               color: 'white',
               cursor: 'pointer',
-              fontSize: '0.8rem',
+              fontSize: '0.85rem',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '2px'
+              gap: '4px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+              e.currentTarget.style.borderColor = 'var(--primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.01)';
+              e.currentTarget.style.borderColor = 'var(--surface-border)';
             }}
           >
-            <span style={{ fontWeight: 600 }}>Demo Partner</span>
+            <span style={{ fontWeight: 700 }}>Demo Partner</span>
             <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>Bali Promoter</span>
           </button>
           <button
@@ -264,20 +292,29 @@ export default function LoginPage() {
             disabled={loading}
             style={{
               flex: 1,
-              padding: '10px',
-              borderRadius: '8px',
-              background: 'rgba(255,255,255,0.02)',
+              padding: '12px',
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.01)',
               border: '1px solid var(--surface-border)',
               color: 'white',
               cursor: 'pointer',
-              fontSize: '0.8rem',
+              fontSize: '0.85rem',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '2px'
+              gap: '4px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+              e.currentTarget.style.borderColor = 'var(--primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.01)';
+              e.currentTarget.style.borderColor = 'var(--surface-border)';
             }}
           >
-            <span style={{ fontWeight: 600 }}>Demo Business</span>
+            <span style={{ fontWeight: 700 }}>Demo Business</span>
             <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>Venue Manager</span>
           </button>
         </div>

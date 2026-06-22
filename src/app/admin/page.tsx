@@ -10,8 +10,8 @@ import VerificationBadge from '@/app/components/VerificationBadge';
 const translations = {
   en: {
     admin: 'Platform Administrator',
-    exit: 'Exit',
-    dashboardTitle: 'Platform Command Center 🔑',
+    exit: 'Sign Out',
+    dashboardTitle: 'Platform Command Center',
     loading: 'Loading Admin Console...',
     totalVolume: 'Platform Turnover',
     totalAgents: 'Agents Count',
@@ -40,12 +40,16 @@ const translations = {
     unban: 'Unban User',
     successUpdate: 'Action completed successfully!',
     promoters: 'Active Promoters & Agents',
-    merchants: 'Active Restaurants & Beach Clubs'
+    merchants: 'Active Restaurants & Beach Clubs',
+    emptyActiveAgents: 'No active promoters registered yet.',
+    emptyActiveVenues: 'No active businesses registered yet.',
+    emptyBanned: 'All users are in good standing. Ban list is empty.',
+    emptyRequests: 'Verification queue is empty.'
   },
   ru: {
     admin: 'Администратор платформы',
     exit: 'Выйти',
-    dashboardTitle: 'Центр управления платформой 🔑',
+    dashboardTitle: 'Центр управления платформой',
     loading: 'Загрузка панели администратора...',
     totalVolume: 'Оборот платформы',
     totalAgents: 'Всего агентов',
@@ -74,9 +78,28 @@ const translations = {
     unban: 'Разбанить',
     successUpdate: 'Действие успешно выполнено!',
     promoters: 'Активные Агенты и Промоутеры',
-    merchants: 'Активные Рестораны и Заведений'
+    merchants: 'Активные Рестораны и Заведения',
+    emptyActiveAgents: 'Активные промоутеры на платформе отсутствуют.',
+    emptyActiveVenues: 'Активные заведения на платформе отсутствуют.',
+    emptyBanned: 'Нарушителей нет. Бан-лист пуст.',
+    emptyRequests: 'Очередь заявок на верификацию пуста.'
   }
 };
+
+interface EnrichedUser extends UserProfile {
+  volume: number;
+  escrowAmount: number;
+  banDuration: string;
+}
+
+interface PendingRequest {
+  id: string;
+  targetId: string;
+  fullName: string;
+  email: string;
+  role: 'partner' | 'business';
+  dealsCount: number;
+}
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -86,11 +109,10 @@ export default function AdminDashboard() {
   const [selectedBanUser, setSelectedBanUser] = useState<{ id: string; name: string } | null>(null);
   const router = useRouter();
 
-  // Dynamic state populated from real authService database
-  const [agents, setAgents] = useState<any[]>([]);
-  const [restaurants, setRestaurants] = useState<any[]>([]);
-  const [bannedUsers, setBannedUsers] = useState<any[]>([]);
-  const [requests, setRequests] = useState<any[]>([]);
+  const [agents, setAgents] = useState<EnrichedUser[]>([]);
+  const [restaurants, setRestaurants] = useState<EnrichedUser[]>([]);
+  const [bannedUsers, setBannedUsers] = useState<EnrichedUser[]>([]);
+  const [requests, setRequests] = useState<PendingRequest[]>([]);
 
   const lang = user?.language === 'ru' ? 'ru' : 'en';
   const t = translations[lang];
@@ -100,11 +122,9 @@ export default function AdminDashboard() {
       const allUsers = await authService.getAllUsers();
       
       const enrichedUsers = await Promise.all(allUsers.map(async (u) => {
-        // Fetch balance
         const balance = await walletRepository.getBalance(u.id);
-        
-        // Fetch transactions to compute turnover volume and escrow
         const txs = await walletRepository.getTransactions(u.id);
+        
         const volume = txs
           .filter(t => t.status === 'completed')
           .reduce((sum, t) => sum + t.amount, 0);
@@ -116,7 +136,6 @@ export default function AdminDashboard() {
           .filter(t => t.type === 'escrow_release' && t.status === 'completed')
           .reduce((sum, t) => sum + t.amount, 0);
 
-        // Persistent status & ban duration overrides in localStorage
         const storedStatus = localStorage.getItem(`user_status_${u.id}`);
         const status = storedStatus || u.status || 'unverified';
         const banDuration = localStorage.getItem(`user_ban_dur_${u.id}`) || '';
@@ -124,14 +143,13 @@ export default function AdminDashboard() {
         return {
           ...u,
           status,
-          volume: volume || (u.role === 'partner' ? 3200 : 15400), // Default mock values if no transactions yet
+          volume,
           escrowAmount: Math.max(escrow, 0),
           banDuration
         };
       }));
 
-      // Filter out admin themselves and segment by role and status
-      const nonAdminUsers = enrichedUsers.filter(u => u.role !== 'admin');
+      const nonAdminUsers = enrichedUsers.filter(u => u.role !== 'admin') as EnrichedUser[];
       
       const activeAgents = nonAdminUsers.filter(u => u.role === 'partner' && u.status !== 'banned');
       const activeRestaurants = nonAdminUsers.filter(u => u.role === 'business' && u.status !== 'banned');
@@ -141,8 +159,7 @@ export default function AdminDashboard() {
       setRestaurants(activeRestaurants.sort((a, b) => b.volume - a.volume));
       setBannedUsers(banned);
 
-      // Load verification requests
-      const pendingReqs: any[] = [];
+      const pendingReqs: PendingRequest[] = [];
       nonAdminUsers.forEach(u => {
         const hasPendingRequest = localStorage.getItem(`verification_requested_${u.id}`) === 'true';
         if (hasPendingRequest && u.status !== 'verified' && u.status !== 'banned') {
@@ -151,8 +168,8 @@ export default function AdminDashboard() {
             targetId: u.id,
             fullName: u.fullName || 'Unnamed',
             email: u.email || '',
-            role: u.role,
-            dealsCount: parseInt(localStorage.getItem(`simulated_deals_${u.id}`) || '105')
+            role: u.role as 'partner' | 'business',
+            dealsCount: parseInt(localStorage.getItem(`simulated_deals_${u.id}`) || '0')
           });
         }
       });
@@ -191,7 +208,6 @@ export default function AdminDashboard() {
     localStorage.setItem(`user_status_${id}`, 'verified');
     localStorage.removeItem(`verification_requested_${id}`);
     
-    // Update local Mock service if it matches currently logged in session
     const currentUser = await authService.getCurrentUser();
     if (currentUser && currentUser.id === id) {
       currentUser.status = 'verified';
@@ -264,7 +280,13 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
-        <p style={{ color: 'var(--primary)', fontFamily: 'Inter, sans-serif' }}>{t?.loading || 'Loading Admin Console...'}</p>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ border: '3px solid rgba(0, 210, 255, 0.1)', borderTop: '3px solid var(--primary)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' }} />
+          <p style={{ color: 'var(--foreground)', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.95rem', letterSpacing: '0.5px' }}>{t?.loading || 'Loading Admin Console...'}</p>
+        </div>
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        `}} />
       </div>
     );
   }
@@ -272,37 +294,65 @@ export default function AdminDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'var(--background)',
+      background: 'var(--bg-gradient)',
       color: 'var(--foreground)',
-      padding: '2.5rem',
-      fontFamily: 'Inter, sans-serif'
+      padding: '3rem 2.5rem',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
+      {/* Background ambient light */}
+      <div style={{
+        position: 'absolute',
+        width: '400px',
+        height: '400px',
+        background: 'var(--ambient-glow)',
+        filter: 'blur(120px)',
+        borderRadius: '50%',
+        top: '0%',
+        left: '25%',
+        pointerEvents: 'none'
+      }} />
+
       {/* Header */}
       <header style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '2.5rem',
-        paddingBottom: '1rem',
-        borderBottom: '1px solid var(--surface-border)'
+        marginBottom: '3rem',
+        paddingBottom: '1.5rem',
+        borderBottom: '1px solid var(--surface-border)',
+        position: 'relative',
+        zIndex: 2
       }}>
         <div>
-          <h2 style={{ fontSize: '1.8rem', fontWeight: 800, background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 800, background: 'linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.7) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0, letterSpacing: '-0.8px' }}>
             {t.dashboardTitle}
           </h2>
-          <span style={{ fontSize: '0.75rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--foreground)' }}>{t.admin}</span>
+          <span style={{ fontSize: '0.75rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700, color: 'var(--primary)', marginTop: '6px', display: 'block' }}>{t.admin}</span>
         </div>
         
         <button onClick={handleLogout} style={{
-          background: 'rgba(255, 77, 79, 0.1)',
-          border: '1px solid var(--error)',
+          background: 'rgba(244, 63, 94, 0.06)',
+          border: '1px solid rgba(244, 63, 94, 0.25)',
           color: 'var(--error)',
-          padding: '8px 16px',
-          borderRadius: '6px',
+          padding: '10px 22px',
+          borderRadius: '12px',
           cursor: 'pointer',
           fontSize: '0.85rem',
-          fontWeight: 600
-        }}>
+          fontWeight: 700,
+          transition: 'all 0.2s ease',
+          outline: 'none',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)';
+          e.currentTarget.style.borderColor = 'var(--error)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(244, 63, 94, 0.06)';
+          e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.25)';
+        }}
+        >
           {t.exit}
         </button>
       </header>
@@ -311,16 +361,24 @@ export default function AdminDashboard() {
       {statusMsg && (
         <div style={{
           position: 'fixed',
-          top: '20px',
-          right: '20px',
+          bottom: '24px',
+          left: '24px',
           background: 'var(--success)',
-          color: 'black',
-          padding: '10px 20px',
-          borderRadius: '8px',
-          fontWeight: 600,
-          boxShadow: '0 4px 12px rgba(82, 196, 26, 0.3)',
-          zIndex: 10000
+          color: '#ffffff',
+          padding: '14px 28px',
+          borderRadius: '14px',
+          fontWeight: 700,
+          boxShadow: '0 8px 30px rgba(16, 185, 129, 0.3)',
+          zIndex: 10000,
+          fontSize: '0.9rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          animation: 'fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           {statusMsg}
         </div>
       )}
@@ -330,25 +388,33 @@ export default function AdminDashboard() {
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.7)',
-          backdropFilter: 'blur(8px)',
+          background: 'rgba(5, 5, 8, 0.5)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100000
+          zIndex: 100000,
+          animation: 'fadeIn 0.2s ease'
         }}>
           <div className="glass-panel" style={{
-            padding: '2rem',
-            maxWidth: '400px',
+            padding: '3rem 2.5rem',
+            maxWidth: '440px',
             width: '100%',
-            border: '1px solid var(--surface-border)',
-            background: 'var(--surface)'
+            border: '1px solid var(--glass-border)',
+            background: 'var(--glass-bg)',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.5)',
+            borderRadius: '24px',
+            animation: 'scaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
-            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 700, color: 'var(--foreground)' }}>
-              {t.banOptionsTitle} ({selectedBanUser.name})
+            <h3 style={{ marginBottom: '0.5rem', fontSize: '1.4rem', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.3px' }}>
+              {t.banOptionsTitle}
             </h3>
+            <p style={{ fontSize: '0.9rem', opacity: 0.6, marginBottom: '2rem', fontWeight: 500 }}>
+              Restricting access for user: <strong style={{ color: 'var(--foreground)' }}>{selectedBanUser.name}</strong>
+            </p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '2rem' }}>
               {(['1d', '1w', '1m', '1y', 'forever'] as const).map((dur) => (
                 <button
                   key={dur}
@@ -359,26 +425,41 @@ export default function AdminDashboard() {
                     dur === '1y' ? t.banOption1y : t.banOptionForever
                   )}
                   style={{
-                    background: 'rgba(255, 77, 79, 0.08)',
-                    border: '1px solid var(--error)',
+                    background: 'rgba(244, 63, 94, 0.03)',
+                    border: '1px solid rgba(244, 63, 94, 0.15)',
                     color: 'var(--foreground)',
-                    padding: '12px',
-                    borderRadius: '8px',
+                    padding: '14px 20px',
+                    borderRadius: '12px',
                     cursor: 'pointer',
                     fontWeight: 600,
                     fontSize: '0.9rem',
                     textAlign: 'left',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    outline: 'none'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 77, 79, 0.16)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 77, 79, 0.08)'}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(244, 63, 94, 0.1)';
+                    e.currentTarget.style.borderColor = 'var(--error)';
+                    e.currentTarget.style.transform = 'translateX(4px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(244, 63, 94, 0.03)';
+                    e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.15)';
+                    e.currentTarget.style.transform = 'translateX(0)';
+                  }}
                 >
-                  🚫 {
-                    dur === '1d' ? t.banOption1d :
-                    dur === '1w' ? t.banOption1w :
-                    dur === '1m' ? t.banOption1m :
-                    dur === '1y' ? t.banOption1y : t.banOptionForever
-                  }
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {
+                      dur === '1d' ? t.banOption1d :
+                      dur === '1w' ? t.banOption1w :
+                      dur === '1m' ? t.banOption1m :
+                      dur === '1y' ? t.banOption1y : t.banOptionForever
+                    }
+                  </span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.4 }}>→</span>
                 </button>
               ))}
             </div>
@@ -387,14 +468,19 @@ export default function AdminDashboard() {
               onClick={() => setSelectedBanUser(null)}
               style={{
                 width: '100%',
-                background: 'var(--surface)',
+                background: 'transparent',
                 border: '1px solid var(--surface-border)',
                 color: 'var(--foreground)',
-                padding: '10px',
-                borderRadius: '8px',
+                padding: '14px',
+                borderRadius: '12px',
                 cursor: 'pointer',
-                fontWeight: 600
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                transition: 'background 0.2s',
+                outline: 'none'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
               {t.btnCancel}
             </button>
@@ -406,98 +492,186 @@ export default function AdminDashboard() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '1.5rem',
-        marginBottom: '2.5rem'
+        gap: '24px',
+        marginBottom: '3rem',
+        position: 'relative',
+        zIndex: 2
       }}>
-        <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-          <span style={{ fontSize: '0.85rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem', color: 'var(--foreground)' }}>{t.totalVolume}</span>
-          <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--primary)' }}>{formatCurrency(totalVolume, 'USD')}</h2>
+        {/* Card 1: Platform Volume */}
+        <div className="glass-panel" style={{
+          padding: '2.2rem 2rem',
+          border: '1px solid var(--glass-border)',
+          background: 'var(--glass-bg)',
+          boxShadow: 'var(--card-shadow)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: '20px'
+        }}>
+          <div>
+            <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>{t.totalVolume}</span>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{formatCurrency(totalVolume, 'USD')}</h2>
+          </div>
+          <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(34, 211, 238, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(34, 211, 238, 0.15)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
         </div>
-        <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-          <span style={{ fontSize: '0.85rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem', color: 'var(--foreground)' }}>{t.totalAgents}</span>
-          <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--foreground)' }}>{agents.length}</h2>
+
+        {/* Card 2: Agents Count */}
+        <div className="glass-panel" style={{
+          padding: '2.2rem 2rem',
+          border: '1px solid var(--glass-border)',
+          background: 'var(--glass-bg)',
+          boxShadow: 'var(--card-shadow)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: '20px'
+        }}>
+          <div>
+            <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.totalAgents}</span>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{agents.length}</h2>
+          </div>
+          <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface-border)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.75 }}>
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
         </div>
-        <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-          <span style={{ fontSize: '0.85rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem', color: 'var(--foreground)' }}>{t.totalBusinesses}</span>
-          <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--foreground)' }}>{restaurants.length}</h2>
+
+        {/* Card 3: Businesses Count */}
+        <div className="glass-panel" style={{
+          padding: '2.2rem 2rem',
+          border: '1px solid var(--glass-border)',
+          background: 'var(--glass-bg)',
+          boxShadow: 'var(--card-shadow)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: '20px'
+        }}>
+          <div>
+            <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.totalBusinesses}</span>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{restaurants.length}</h2>
+          </div>
+          <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface-border)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.75 }}>
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </div>
         </div>
       </div>
 
-      {/* Custom Tabs Navigation */}
+      {/* Tabs Navigation (Segmented Pill Design) */}
       <div style={{
-        display: 'flex',
-        borderBottom: '1px solid var(--surface-border)',
-        marginBottom: '2rem',
-        gap: '24px'
+        display: 'inline-flex',
+        background: 'rgba(255, 255, 255, 0.02)',
+        border: '1px solid var(--surface-border)',
+        borderRadius: '20px',
+        padding: '6px',
+        marginBottom: '3rem',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+        position: 'relative',
+        zIndex: 2
       }}>
         <button
           onClick={() => setActiveTab('active')}
           style={{
-            background: 'none',
+            background: activeTab === 'active' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'active' ? '2px solid var(--primary)' : '2px solid transparent',
             color: activeTab === 'active' ? 'var(--primary)' : 'var(--foreground)',
-            padding: '12px 8px',
+            padding: '12px 24px',
+            borderRadius: '14px',
             cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: 600,
-            transition: 'all 0.2s',
-            opacity: activeTab === 'active' ? 1 : 0.6
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            transition: 'all 0.25s ease',
+            opacity: activeTab === 'active' ? 1 : 0.6,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: activeTab === 'active' ? '0 4px 12px rgba(0,0,0,0.1)' : 'none',
+            outline: 'none'
           }}
         >
-          📈 {t.tabActive}
+          {t.tabActive}
         </button>
 
         <button
           onClick={() => setActiveTab('banned')}
           style={{
-            background: 'none',
+            background: activeTab === 'banned' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'banned' ? '2px solid var(--error)' : '2px solid transparent',
             color: activeTab === 'banned' ? 'var(--error)' : 'var(--foreground)',
-            padding: '12px 8px',
+            padding: '12px 24px',
+            borderRadius: '14px',
             cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: 600,
-            transition: 'all 0.2s',
-            opacity: activeTab === 'banned' ? 1 : 0.6
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            transition: 'all 0.25s ease',
+            opacity: activeTab === 'banned' ? 1 : 0.6,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: activeTab === 'banned' ? '0 4px 12px rgba(0,0,0,0.1)' : 'none',
+            outline: 'none'
           }}
         >
-          🚫 {t.tabBanned} ({bannedUsers.length})
+          {t.tabBanned} 
+          <span style={{ fontSize: '0.75rem', background: 'rgba(244, 63, 94, 0.12)', padding: '2px 8px', borderRadius: '20px', marginLeft: '4px', fontWeight: 800 }}>{bannedUsers.length}</span>
         </button>
 
         <button
           onClick={() => setActiveTab('requests')}
           style={{
-            background: 'none',
+            background: activeTab === 'requests' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'requests' ? '2px solid var(--success)' : '2px solid transparent',
             color: activeTab === 'requests' ? 'var(--success)' : 'var(--foreground)',
-            padding: '12px 8px',
+            padding: '12px 24px',
+            borderRadius: '14px',
             cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: 600,
-            transition: 'all 0.2s',
-            opacity: activeTab === 'requests' ? 1 : 0.6
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            transition: 'all 0.25s ease',
+            opacity: activeTab === 'requests' ? 1 : 0.6,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: activeTab === 'requests' ? '0 4px 12px rgba(0,0,0,0.1)' : 'none',
+            outline: 'none'
           }}
         >
-          📥 {t.tabRequests} ({requests.length})
+          {t.tabRequests}
+          <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.12)', padding: '2px 8px', borderRadius: '20px', marginLeft: '4px', fontWeight: 800 }}>{requests.length}</span>
         </button>
       </div>
 
       {/* Tab Panels */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', position: 'relative', zIndex: 2 }}>
         
         {/* TAB 1: MOST ACTIVE */}
         {activeTab === 'active' && (
           <>
             {/* Top Promoters/Agents */}
-            <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-              <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.promoters}</h3>
+            <div className="glass-panel" style={{ padding: '2rem 2.2rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)' }}>
+              <h3 style={{ marginBottom: '1.8rem', fontSize: '1.25rem', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.3px' }}>{t.promoters}</h3>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                    <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.45, fontSize: '0.75rem', color: 'var(--foreground)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
                       <th style={{ padding: '12px 10px' }}>{t.status}</th>
                       <th>{t.agent}</th>
                       <th>{t.role}</th>
@@ -507,57 +681,58 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody>
                     {agents.slice(0, 10).map((usr) => (
-                      <tr key={usr.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
-                        <td style={{ padding: '15px 10px' }}>
+                      <tr key={usr.id} className="table-row-hover" style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                        <td style={{ padding: '16px 10px' }}>
                           <span style={{
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
+                            fontSize: '0.65rem',
+                            fontWeight: 800,
                             color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
-                            border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            display: 'inline-block'
+                            background: usr.status === 'verified' ? 'rgba(82, 196, 26, 0.08)' : 'rgba(255, 77, 79, 0.08)',
+                            border: `1px solid ${usr.status === 'verified' ? 'rgba(82, 196, 26, 0.3)' : 'rgba(255, 77, 79, 0.3)'}`,
+                            padding: '4px 10px',
+                            borderRadius: '20px',
+                            display: 'inline-block',
+                            letterSpacing: '0.5px'
                           }}>
                             {usr.status === 'verified' ? t.verified : t.unverified}
                           </span>
                         </td>
                         <td>
-                          <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                          <div style={{ fontWeight: 650, display: 'flex', alignItems: 'center' }}>
                             {usr.fullName}
                             {usr.status === 'verified' && <VerificationBadge size={14} />}
                           </div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{usr.email}</div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.45, marginTop: '2px' }}>{usr.email}</div>
                         </td>
                         <td>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                          <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '4px 10px', borderRadius: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                             {usr.role}
                           </span>
                         </td>
                         <td>
-                          <strong>{formatCurrency(usr.volume, 'USD')}</strong>
+                          <strong style={{ fontSize: '0.95rem' }}>{formatCurrency(usr.volume, 'USD')}</strong>
                         </td>
                         <td style={{ textAlign: 'right', paddingRight: '20px' }}>
-                          <div style={{ display: 'inline-flex', gap: '8px' }}>
-                            {/* Verify neon tick button */}
+                          <div style={{ display: 'inline-flex', gap: '10px' }}>
                             <button
                               onClick={() => handleVerifyUser(usr.id)}
                               disabled={usr.status === 'verified'}
                               style={{
-                                width: '34px',
-                                height: '34px',
+                                width: '36px',
+                                height: '36px',
                                 borderRadius: '50%',
                                 background: 'transparent',
-                                border: '1px solid var(--success)',
+                                border: '1px solid rgba(82, 196, 26, 0.35)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: usr.status === 'verified' ? 'default' : 'pointer',
-                                filter: usr.status === 'verified' ? 'drop-shadow(0 0 4px #52c41a)' : 'none',
-                                opacity: usr.status === 'verified' ? 1 : 0.6,
-                                transition: 'all 0.2s'
+                                filter: usr.status === 'verified' ? 'drop-shadow(0 0 6px #52c41a)' : 'none',
+                                opacity: usr.status === 'verified' ? 1 : 0.5,
+                                transition: 'all 0.25s ease',
+                                outline: 'none'
                               }}
-                              onMouseEnter={(e) => { if (usr.status !== 'verified') e.currentTarget.style.opacity = '1'; }}
-                              onMouseLeave={(e) => { if (usr.status !== 'verified') e.currentTarget.style.opacity = '0.6'; }}
+                              className="verify-btn"
                               title="Verify User"
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -565,24 +740,23 @@ export default function AdminDashboard() {
                               </svg>
                             </button>
 
-                            {/* Ban neon cross button */}
                             <button
-                              onClick={() => handleInitiateBan(usr.id, usr.fullName)}
+                              onClick={() => handleInitiateBan(usr.id, usr.fullName || 'Unnamed')}
                               style={{
-                                width: '34px',
-                                height: '34px',
+                                width: '36px',
+                                height: '36px',
                                 borderRadius: '50%',
                                 background: 'transparent',
-                                border: '1px solid var(--error)',
+                                border: '1px solid rgba(255, 77, 79, 0.35)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: 'pointer',
-                                opacity: 0.6,
-                                transition: 'all 0.2s'
+                                opacity: 0.5,
+                                transition: 'all 0.25s ease',
+                                outline: 'none'
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                              className="ban-btn"
                               title="Ban User"
                             >
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -596,8 +770,8 @@ export default function AdminDashboard() {
                     ))}
                     {agents.length === 0 && (
                       <tr>
-                        <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>
-                          No active promoters registered yet.
+                        <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>
+                          {t.emptyActiveAgents}
                         </td>
                       </tr>
                     )}
@@ -607,12 +781,12 @@ export default function AdminDashboard() {
             </div>
 
             {/* Top Restaurants */}
-            <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)' }}>
-              <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)' }}>{t.merchants}</h3>
+            <div className="glass-panel" style={{ padding: '2rem 2.2rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)' }}>
+              <h3 style={{ marginBottom: '1.8rem', fontSize: '1.25rem', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.3px' }}>{t.merchants}</h3>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                    <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.45, fontSize: '0.75rem', color: 'var(--foreground)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
                       <th style={{ padding: '12px 10px' }}>{t.status}</th>
                       <th>{t.venue}</th>
                       <th>{t.role}</th>
@@ -623,62 +797,63 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody>
                     {restaurants.slice(0, 10).map((usr) => (
-                      <tr key={usr.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
-                        <td style={{ padding: '15px 10px' }}>
+                      <tr key={usr.id} className="table-row-hover" style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                        <td style={{ padding: '16px 10px' }}>
                           <span style={{
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
+                            fontSize: '0.65rem',
+                            fontWeight: 800,
                             color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
-                            border: `1px solid ${usr.status === 'verified' ? 'var(--success)' : 'var(--error)'}`,
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            display: 'inline-block'
+                            background: usr.status === 'verified' ? 'rgba(82, 196, 26, 0.08)' : 'rgba(255, 77, 79, 0.08)',
+                            border: `1px solid ${usr.status === 'verified' ? 'rgba(82, 196, 26, 0.3)' : 'rgba(255, 77, 79, 0.3)'}`,
+                            padding: '4px 10px',
+                            borderRadius: '20px',
+                            display: 'inline-block',
+                            letterSpacing: '0.5px'
                           }}>
                             {usr.status === 'verified' ? t.verified : t.unverified}
                           </span>
                         </td>
                         <td>
-                          <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                          <div style={{ fontWeight: 650, display: 'flex', alignItems: 'center' }}>
                             {usr.fullName}
                             {usr.status === 'verified' && <VerificationBadge size={14} />}
                           </div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{usr.email}</div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.45, marginTop: '2px' }}>{usr.email}</div>
                         </td>
                         <td>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                          <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '4px 10px', borderRadius: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                             {usr.role}
                           </span>
                         </td>
                         <td>
-                          <strong>{formatCurrency(usr.volume, 'USD')}</strong>
+                          <strong style={{ fontSize: '0.95rem' }}>{formatCurrency(usr.volume, 'USD')}</strong>
                         </td>
                         <td>
-                          <span style={{ color: usr.escrowAmount > 0 ? 'var(--accent)' : 'inherit', fontWeight: 600 }}>
+                          <span style={{ color: usr.escrowAmount > 0 ? 'var(--accent)' : 'inherit', fontWeight: 650 }}>
                             {formatCurrency(usr.escrowAmount, 'USD')}
                           </span>
                         </td>
                         <td style={{ textAlign: 'right', paddingRight: '20px' }}>
-                          <div style={{ display: 'inline-flex', gap: '8px' }}>
-                            {/* Verify neon tick button */}
+                          <div style={{ display: 'inline-flex', gap: '10px' }}>
                             <button
                               onClick={() => handleVerifyUser(usr.id)}
                               disabled={usr.status === 'verified'}
                               style={{
-                                width: '34px',
-                                height: '34px',
+                                width: '36px',
+                                height: '36px',
                                 borderRadius: '50%',
                                 background: 'transparent',
-                                border: '1px solid var(--success)',
+                                border: '1px solid rgba(82, 196, 26, 0.35)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: usr.status === 'verified' ? 'default' : 'pointer',
-                                filter: usr.status === 'verified' ? 'drop-shadow(0 0 4px #52c41a)' : 'none',
-                                opacity: usr.status === 'verified' ? 1 : 0.6,
-                                transition: 'all 0.2s'
+                                filter: usr.status === 'verified' ? 'drop-shadow(0 0 6px #52c41a)' : 'none',
+                                opacity: usr.status === 'verified' ? 1 : 0.5,
+                                transition: 'all 0.25s ease',
+                                outline: 'none'
                               }}
-                              onMouseEnter={(e) => { if (usr.status !== 'verified') e.currentTarget.style.opacity = '1'; }}
-                              onMouseLeave={(e) => { if (usr.status !== 'verified') e.currentTarget.style.opacity = '0.6'; }}
+                              className="verify-btn"
                               title="Verify Business"
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -686,24 +861,23 @@ export default function AdminDashboard() {
                               </svg>
                             </button>
 
-                            {/* Ban neon cross button */}
                             <button
-                              onClick={() => handleInitiateBan(usr.id, usr.fullName)}
+                              onClick={() => handleInitiateBan(usr.id, usr.fullName || 'Unnamed')}
                               style={{
-                                width: '34px',
-                                height: '34px',
+                                width: '36px',
+                                height: '36px',
                                 borderRadius: '50%',
                                 background: 'transparent',
-                                border: '1px solid var(--error)',
+                                border: '1px solid rgba(255, 77, 79, 0.35)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: 'pointer',
-                                opacity: 0.6,
-                                transition: 'all 0.2s'
+                                opacity: 0.5,
+                                transition: 'all 0.25s ease',
+                                outline: 'none'
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                              className="ban-btn"
                               title="Ban Business"
                             >
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -717,8 +891,8 @@ export default function AdminDashboard() {
                     ))}
                     {restaurants.length === 0 && (
                       <tr>
-                        <td colSpan={6} style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>
-                          No active businesses registered yet.
+                        <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>
+                          {t.emptyActiveVenues}
                         </td>
                       </tr>
                     )}
@@ -731,14 +905,14 @@ export default function AdminDashboard() {
 
         {/* TAB 2: BANNED USERS LIST */}
         {activeTab === 'banned' && (
-          <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', marginBottom: '2rem' }}>
-            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--error)' }}>
+          <div className="glass-panel" style={{ padding: '2.5rem 2.2rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)', marginBottom: '2rem' }}>
+            <h3 style={{ marginBottom: '1.8rem', fontSize: '1.25rem', fontWeight: 800, color: 'var(--error)', letterSpacing: '-0.3px' }}>
               {t.tabBanned}
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                  <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.45, fontSize: '0.75rem', color: 'var(--foreground)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
                     <th style={{ padding: '12px 10px' }}>{t.status}</th>
                     <th>User / Venue</th>
                     <th>{t.role}</th>
@@ -748,48 +922,57 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {bannedUsers.map((bUser) => (
-                    <tr key={bUser.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
-                      <td style={{ padding: '15px 10px' }}>
+                    <tr key={bUser.id} className="table-row-hover" style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                      <td style={{ padding: '16px 10px' }}>
                         <span style={{
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
+                          fontSize: '0.65rem',
+                          fontWeight: 800,
                           color: 'var(--error)',
-                          border: '1px solid var(--error)',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          display: 'inline-block'
+                          background: 'rgba(255, 77, 79, 0.08)',
+                          border: '1px solid rgba(255, 77, 79, 0.3)',
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          display: 'inline-block',
+                          letterSpacing: '0.5px'
                         }}>
                           {t.banned}
                         </span>
                       </td>
                       <td>
-                        <div style={{ fontWeight: 600 }}>{bUser.fullName}</div>
-                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{bUser.email}</div>
+                        <div style={{ fontWeight: 650 }}>{bUser.fullName}</div>
+                        <div style={{ fontSize: '0.75rem', opacity: 0.45, marginTop: '2px' }}>{bUser.email}</div>
                       </td>
                       <td>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '4px 10px', borderRadius: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                           {bUser.role}
                         </span>
                       </td>
                       <td>
-                        <span style={{ color: 'var(--error)', fontWeight: 600 }}>🚫 {bUser.banDuration}</span>
+                        <span style={{ color: 'var(--error)', fontWeight: 600 }}>{bUser.banDuration}</span>
                       </td>
                       <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                         <button
                           onClick={() => handleUnbanUser(bUser.id)}
                           style={{
-                            background: 'rgba(82, 196, 26, 0.1)',
-                            border: '1px solid var(--success)',
+                            background: 'rgba(82, 196, 26, 0.06)',
+                            border: '1px solid rgba(82, 196, 26, 0.25)',
                             color: 'var(--success)',
-                            padding: '6px 12px',
-                            borderRadius: '6px',
+                            padding: '8px 16px',
+                            borderRadius: '10px',
                             cursor: 'pointer',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            transition: 'all 0.2s'
+                            fontSize: '0.8rem',
+                            fontWeight: 700,
+                            transition: 'all 0.2s ease',
+                            outline: 'none'
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(82, 196, 26, 0.2)'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(82, 196, 26, 0.1)'; }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(82, 196, 26, 0.12)';
+                            e.currentTarget.style.borderColor = 'var(--success)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(82, 196, 26, 0.06)';
+                            e.currentTarget.style.borderColor = 'rgba(82, 196, 26, 0.25)';
+                          }}
                         >
                           {t.unban}
                         </button>
@@ -798,8 +981,8 @@ export default function AdminDashboard() {
                   ))}
                   {bannedUsers.length === 0 && (
                     <tr>
-                      <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>
-                        No banned users recorded.
+                      <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>
+                        {t.emptyBanned}
                       </td>
                     </tr>
                   )}
@@ -811,14 +994,14 @@ export default function AdminDashboard() {
 
         {/* TAB 3: VERIFICATION REQUESTS */}
         {activeTab === 'requests' && (
-          <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', marginBottom: '2rem' }}>
-            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--success)' }}>
+          <div className="glass-panel" style={{ padding: '2.5rem 2.2rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)', marginBottom: '2rem' }}>
+            <h3 style={{ marginBottom: '1.8rem', fontSize: '1.25rem', fontWeight: 800, color: 'var(--success)', letterSpacing: '-0.3px' }}>
               {t.tabRequests}
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.6, fontSize: '0.8rem', color: 'var(--foreground)' }}>
+                  <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.45, fontSize: '0.75rem', color: 'var(--foreground)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
                     <th style={{ padding: '12px 10px' }}>{t.status}</th>
                     <th>User / Venue</th>
                     <th>{t.role}</th>
@@ -828,52 +1011,55 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {requests.map((req) => (
-                    <tr key={req.id} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
-                      <td style={{ padding: '15px 10px' }}>
+                    <tr key={req.id} className="table-row-hover" style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.9rem', color: 'var(--foreground)' }}>
+                      <td style={{ padding: '16px 10px' }}>
                         <span style={{
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
+                          fontSize: '0.65rem',
+                          fontWeight: 800,
                           color: 'var(--warning)',
-                          border: '1px solid var(--warning)',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          display: 'inline-block'
+                          background: 'rgba(250, 173, 20, 0.08)',
+                          border: '1px solid rgba(250, 173, 20, 0.3)',
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          display: 'inline-block',
+                          letterSpacing: '0.5px'
                         }}>
                           PENDING
                         </span>
                       </td>
                       <td>
-                        <div style={{ fontWeight: 600 }}>{req.fullName}</div>
-                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{req.email}</div>
+                        <div style={{ fontWeight: 650 }}>{req.fullName}</div>
+                        <div style={{ fontSize: '0.75rem', opacity: 0.45, marginTop: '2px' }}>{req.email}</div>
                       </td>
                       <td>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '4px 10px', borderRadius: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                           {req.role}
                         </span>
                       </td>
                       <td>
-                        <strong style={{ color: 'var(--success)' }}>🔥 {req.dealsCount} сделок</strong>
+                        <span style={{ color: 'var(--success)', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.95rem' }}>
+                          {req.dealsCount} deals
+                        </span>
                       </td>
                       <td style={{ textAlign: 'right', paddingRight: '20px' }}>
-                        <div style={{ display: 'inline-flex', gap: '8px' }}>
-                          {/* Verify neon tick button */}
+                        <div style={{ display: 'inline-flex', gap: '10px' }}>
                           <button
                             onClick={() => handleVerifyFromRequests(req.id, req.targetId)}
                             style={{
-                              width: '34px',
-                              height: '34px',
+                              width: '36px',
+                              height: '36px',
                               borderRadius: '50%',
                               background: 'transparent',
-                              border: '1px solid var(--success)',
+                              border: '1px solid rgba(82, 196, 26, 0.4)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               cursor: 'pointer',
                               opacity: 0.7,
-                              transition: 'all 0.2s'
+                              transition: 'all 0.25s ease',
+                              outline: 'none'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                            className="verify-btn"
                             title="Approve Request & Verify"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -881,24 +1067,23 @@ export default function AdminDashboard() {
                             </svg>
                           </button>
 
-                          {/* Reject/Ban cross button */}
                           <button
                             onClick={() => handleInitiateBan(req.targetId, req.fullName)}
                             style={{
-                              width: '34px',
-                              height: '34px',
+                              width: '36px',
+                              height: '36px',
                               borderRadius: '50%',
                               background: 'transparent',
-                              border: '1px solid var(--error)',
+                              border: '1px solid rgba(255, 77, 79, 0.4)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               cursor: 'pointer',
                               opacity: 0.7,
-                              transition: 'all 0.2s'
+                              transition: 'all 0.25s ease',
+                              outline: 'none'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                            className="ban-btn"
                             title="Reject & Ban"
                           >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -912,8 +1097,8 @@ export default function AdminDashboard() {
                   ))}
                   {requests.length === 0 && (
                     <tr>
-                      <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>
-                        No pending verification requests.
+                      <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>
+                        {t.emptyRequests}
                       </td>
                     </tr>
                   )}
@@ -924,6 +1109,41 @@ export default function AdminDashboard() {
         )}
 
       </div>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        .table-row-hover {
+          transition: background-color 0.2s ease;
+        }
+        .table-row-hover:hover {
+          background-color: rgba(255, 255, 255, 0.015) !important;
+        }
+        .verify-btn:hover {
+          background: rgba(82, 196, 26, 0.08) !important;
+          border-color: var(--success) !important;
+          opacity: 1 !important;
+          box-shadow: 0 0 10px rgba(82, 196, 26, 0.4);
+          transform: scale(1.05);
+        }
+        .ban-btn:hover {
+          background: rgba(255, 77, 79, 0.08) !important;
+          border-color: var(--error) !important;
+          opacity: 1 !important;
+          box-shadow: 0 0 10px rgba(255, 77, 79, 0.4);
+          transform: scale(1.05);
+        }
+        @keyframes scaleUp {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+          from { transform: translateY(10px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+      `}} />
     </div>
   );
 }

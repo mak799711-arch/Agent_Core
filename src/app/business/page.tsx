@@ -116,6 +116,150 @@ const translations = {
     successPrefix: 'Rujukan dikonfirmasi!',
     depositSuccess: 'berhasil ditambahkan ke saldo cadangan Anda.',
     loading: 'Memuat Panel Bisnis...'
+  },
+  zh: {
+    venue: '商户经理',
+    exit: '退出',
+    settings: '设置 ⚙️',
+    balanceLabel: '活跃准备金余额',
+    depositBtn: '充值 $100',
+    reserveNote: '🔒 准备金保护已激活：如果奖励金额超过当前准备金余额，优惠将自动停用。',
+    attributeTitle: '验证推荐码',
+    verifyBtn: '核销并支付',
+    offersTitle: '您的活跃优惠',
+    rewardLabel: '奖励',
+    statusActive: '活跃',
+    statusPaused: '已暂停 (余额不足)',
+    noOffers: '暂无优惠活动',
+    createTitle: '创建新优惠',
+    offerTitleLabel: '优惠标题',
+    offerTitlePlaceholder: '例如：特别促销',
+    categoryLabel: '类别',
+    rewardTypeLabel: '奖励类型',
+    fixedReward: '固定金额',
+    percentageReward: '账单百分比',
+    rewardAmountLabel: '推广员奖励金额 (USD)',
+    avgBillLabel: '平均账单金额 (USD)',
+    percentLabel: '奖励百分比 (%)',
+    conditionsLabel: '条款与描述',
+    conditionsPlaceholder: '描述核销条件 (例如：必须点主菜)',
+    createBtn: '创建优惠',
+    cancelBtn: '取消',
+    codeError: '未找到活跃推荐码或已过期',
+    offerError: '优惠未找到',
+    balanceError: '准备金余额不足，无法支付奖励',
+    balanceErrorCreate: '准备金余额不足，无法创建优惠。请先充值。',
+    successPrefix: '推荐核销成功！',
+    depositSuccess: '已成功存入您的准备金余额。',
+    loading: '正在加载商户门户...'
+  },
+  es: {
+    venue: 'Gerente del Lugar',
+    exit: 'Salir',
+    settings: 'Ajustes ⚙️',
+    balanceLabel: 'Saldo de Reserva Activo',
+    depositBtn: 'Depositar $100',
+    reserveNote: '🔒 Protección de Reserva Activa: Las ofertas se desactivarán automáticamente si la recompensa excede el saldo de reserva.',
+    attributeTitle: 'Atribuir Código de Referido',
+    verifyBtn: 'Verificar y Pagar',
+    offersTitle: 'Sus Ofertas Activas',
+    rewardLabel: 'Recompensa',
+    statusActive: 'ACTIVO',
+    statusPaused: 'PAUSADO (Saldo Bajo)',
+    noOffers: 'Aún no hay ofertas creadas',
+    createTitle: 'Crear Nueva Oferta',
+    offerTitleLabel: 'Título de la Oferta',
+    offerTitlePlaceholder: 'ej. Promoción Especial',
+    categoryLabel: 'Categoría',
+    rewardTypeLabel: 'Tipo de Recompensa',
+    fixedReward: 'Monto Fijo',
+    percentageReward: 'Porcentaje de la Cuenta',
+    rewardAmountLabel: 'Monto de Recompensa al Promotor (en USD)',
+    avgBillLabel: 'Cuenta Promedio (en USD)',
+    percentLabel: 'Porcentaje de Recompensa (%)',
+    conditionsLabel: 'Condiciones / Descripción',
+    conditionsPlaceholder: 'Describa los términos (ej. se requiere plato principal)',
+    createBtn: 'Crear Oferta',
+    cancelBtn: 'Cancelar',
+    codeError: 'Código de referido no encontrado o expirado',
+    offerError: 'Oferta no encontrada',
+    balanceError: 'Saldo de reserva insuficiente para pagar la recompensa',
+    balanceErrorCreate: 'Saldo de reserva insuficiente para crear la oferta. Deposite fondos primero.',
+    successPrefix: '¡Referido confirmado!',
+    depositSuccess: 'añadido con éxito a su saldo de reserva.',
+    loading: 'Cargando Portal de Negocios...'
+  },
+  de: {
+    venue: 'Veranstaltungsort-Manager',
+    exit: 'Beenden',
+    settings: 'Einstellungen ⚙️',
+    balanceLabel: 'Aktives Reserveguthaben',
+    depositBtn: '100 $ einzahlen',
+    reserveNote: '🔒 Reserveschutz aktiv: Angebote werden automatisch deaktiviert, wenn die Belohnung Ihr Guthaben übersteigt.',
+    attributeTitle: 'Empfehlungscode zuordnen',
+    verifyBtn: 'Verifizieren & Bezahlen',
+    offersTitle: 'Ihre aktiven Angebote',
+    rewardLabel: 'Belohnung',
+    statusActive: 'AKTIV',
+    statusPaused: 'PAUSIERT (Wenig Guthaben)',
+    noOffers: 'Noch keine Angebote erstellt',
+    createTitle: 'Neues Angebot erstellen',
+    offerTitleLabel: 'Angebotstitel',
+    offerTitlePlaceholder: 'z. B. Sonderaktion',
+    categoryLabel: 'Kategorie',
+    rewardTypeLabel: 'Belohnungstyp',
+    fixedReward: 'Fester Betrag',
+    percentageReward: 'Prozent der Rechnung',
+    rewardAmountLabel: 'Promoter-Belohnungsbetrag (in USD)',
+    avgBillLabel: 'Durchschnittliche Rechnung (in USD)',
+    percentLabel: 'Belohnungsprozentsatz (%)',
+    conditionsLabel: 'Bedingungen / Beschreibung',
+    conditionsPlaceholder: 'Bedingungen beschreiben (z. B. Hauptgericht erforderlich)',
+    createBtn: 'Angebot erstellen',
+    cancelBtn: 'Abbrechen',
+    codeError: 'Aktiver Empfehlungscode nicht gefunden oder abgelaufen',
+    offerError: 'Angebot nicht gefunden',
+    balanceError: 'Ungenügendes Reserveguthaben für die Belohnung',
+    balanceErrorCreate: 'Ungenügendes Reserveguthaben für dieses Angebot. Bitte zuerst einzahlen.',
+    successPrefix: 'Empfehlung bestätigt!',
+    depositSuccess: 'erfolgreich Ihrem Reserveguthaben gutgeschrieben.',
+    loading: 'Business-Portal wird geladen...'
+  },
+  fr: {
+    venue: 'Gérant de l\'Établissement',
+    exit: 'Quitter',
+    settings: 'Paramètres ⚙️',
+    balanceLabel: 'Solde de Réserve Actif',
+    depositBtn: 'Déposer 100 $',
+    reserveNote: '🔒 Protection de Réserve Active : Les offres seront désactivées si la récompense dépasse le solde.',
+    attributeTitle: 'Attribuer Code de Parrainage',
+    verifyBtn: 'Vérifier & Payer',
+    offersTitle: 'Vos Offres Actives',
+    rewardLabel: 'Récompense',
+    statusActive: 'ACTIF',
+    statusPaused: 'PAUSÉ (Solde Bas)',
+    noOffers: 'Aucune offre créée',
+    createTitle: 'Créer une Offre',
+    offerTitleLabel: 'Titre de l\'Offre',
+    offerTitlePlaceholder: 'ex. Promotion Spéciale',
+    categoryLabel: 'Catégorie',
+    rewardTypeLabel: 'Type de Récompense',
+    fixedReward: 'Montant Fixe',
+    percentageReward: 'Pourcentage de l\'Addition',
+    rewardAmountLabel: 'Montant de Récompense (en USD)',
+    avgBillLabel: 'Addition Moyenne (en USD)',
+    percentLabel: 'Pourcentage de Récompensa (%)',
+    conditionsLabel: 'Conditions / Description',
+    conditionsPlaceholder: 'Décrivez les termes (ex. plat principal requis)',
+    createBtn: 'Créer l\'Offre',
+    cancelBtn: 'Annuler',
+    codeError: 'Code de parrainage non trouvé ou expiré',
+    offerError: 'Offre non trouvée',
+    balanceError: 'Solde de réserve insuffisant pour payer la récompense',
+    balanceErrorCreate: 'Solde de réserve insuffisant pour créer l\'offre. Veuillez déposer des fonds.',
+    successPrefix: 'Parrainage confirmé !',
+    depositSuccess: 'ajouté avec succès à votre solde de réserve.',
+    loading: 'Chargement du Portail Entreprise...'
   }
 };
 
@@ -141,6 +285,24 @@ export default function BusinessDashboard() {
 
   const lang = user?.language || 'en';
   const t = translations[lang];
+
+  const refreshData = async (userId: string) => {
+    const bal = await walletRepository.getBalance(userId);
+    setBalance(bal);
+
+    const businessOffers = await offerRepository.getOffers({ businessId: userId });
+    
+    // Reserve Protection Layer Logic:
+    const updatedOffers = await Promise.all(businessOffers.map(async (offer) => {
+      const isBalanceSufficient = bal >= offer.rewardAmount;
+      if (offer.isActive !== isBalanceSufficient) {
+        return await offerRepository.updateOffer(offer.id, { isActive: isBalanceSufficient });
+      }
+      return offer;
+    }));
+
+    setOffers(updatedOffers);
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -171,25 +333,8 @@ export default function BusinessDashboard() {
       }
     }
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const refreshData = async (userId: string) => {
-    const bal = await walletRepository.getBalance(userId);
-    setBalance(bal);
-
-    const businessOffers = await offerRepository.getOffers({ businessId: userId });
-    
-    // Reserve Protection Layer Logic:
-    const updatedOffers = await Promise.all(businessOffers.map(async (offer) => {
-      const isBalanceSufficient = bal >= offer.rewardAmount;
-      if (offer.isActive !== isBalanceSufficient) {
-        return await offerRepository.updateOffer(offer.id, { isActive: isBalanceSufficient });
-      }
-      return offer;
-    }));
-
-    setOffers(updatedOffers);
-  };
 
   const handleConfirmReferral = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,8 +368,9 @@ export default function BusinessDashboard() {
       setStatusMessage({ text: `${t.successPrefix} ${formatCurrency(offer.rewardAmount, user.currency)} paid to promoter.`, type: 'success' });
       setShortCode('');
       await refreshData(user.id);
-    } catch (err: any) {
-      setStatusMessage({ text: err.message || 'Error confirming referral', type: 'error' });
+    } catch (err) {
+      const error = err as Error;
+      setStatusMessage({ text: error.message || 'Error confirming referral', type: 'error' });
     }
   };
 
@@ -309,8 +455,12 @@ export default function BusinessDashboard() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <p style={{ color: 'var(--primary)' }}>{t?.loading || 'Loading...'}</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ border: '3px solid rgba(34, 211, 238, 0.1)', borderTop: '3px solid var(--primary)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' }} />
+          <p style={{ color: 'var(--foreground)', fontWeight: 600 }}>{t?.loading || 'Loading...'}</p>
+          <style dangerouslySetInnerHTML={{__html: `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}} />
+        </div>
       </div>
     );
   }
@@ -318,111 +468,214 @@ export default function BusinessDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'var(--background)',
+      background: 'radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.04) 0%, #090a0f 100%)',
       color: 'var(--foreground)',
-      padding: '2rem',
-      fontFamily: 'Inter, sans-serif'
+      padding: '2rem 1.5rem',
+      paddingBottom: '6rem',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
+      {/* Ambient background light */}
+      <div style={{
+        position: 'absolute',
+        width: '350px',
+        height: '350px',
+        background: 'rgba(34, 211, 238, 0.03)',
+        filter: 'blur(100px)',
+        borderRadius: '50%',
+        top: '0%',
+        right: '15%',
+        pointerEvents: 'none'
+      }} />
+
       {/* Header */}
       <header style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '2rem',
-        paddingBottom: '1rem',
-        borderBottom: '1px solid var(--surface-border)'
+        marginBottom: '2.5rem',
+        paddingBottom: '1.2rem',
+        borderBottom: '1px solid var(--surface-border)',
+        position: 'relative',
+        zIndex: 2
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <img
             src={user?.avatarUrl || ''}
             alt="Avatar"
-            style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid var(--accent)' }}
+            style={{ width: '46px', height: '46px', borderRadius: '50%', border: '2.5px solid var(--primary)', objectFit: 'cover' }}
           />
           <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', display: 'flex', alignItems: 'center' }}>
+            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
               {user?.fullName}
               {user?.status === 'verified' && <VerificationBadge size={14} />}
             </h4>
-            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.venue}</span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'var(--primary)' }}>{t.venue}</span>
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* Language Selector */}
+          <select 
+            value={lang} 
+            onChange={async (e) => {
+              const newLang = e.target.value as any;
+              try {
+                const updated = await authService.updateProfile({ language: newLang });
+                setUser(updated);
+              } catch (err) {
+                console.error("Failed to update language:", err);
+              }
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid var(--surface-border)',
+              color: 'var(--foreground)',
+              padding: '8px 12px',
+              borderRadius: '10px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value="en" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇬🇧 EN</option>
+            <option value="ru" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇷🇺 RU</option>
+            <option value="id" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇮🇩 ID</option>
+            <option value="zh" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇨🇳 ZH</option>
+            <option value="es" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇪🇸 ES</option>
+            <option value="de" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇩🇪 DE</option>
+            <option value="fr" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇫🇷 FR</option>
+          </select>
+
+          {/* Currency Selector */}
+          <select 
+            value={user?.currency || 'USD'} 
+            onChange={async (e) => {
+              const newCurr = e.target.value as any;
+              try {
+                const updated = await authService.updateProfile({ currency: newCurr });
+                setUser(updated);
+              } catch (err) {
+                console.error("Failed to update currency:", err);
+              }
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid var(--surface-border)',
+              color: 'var(--foreground)',
+              padding: '8px 12px',
+              borderRadius: '10px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value="USD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>$ USD</option>
+            <option value="IDR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>Rp IDR</option>
+            <option value="EUR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>€ EUR</option>
+            <option value="RUB" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>₽ RUB</option>
+            <option value="CNY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>¥ CNY</option>
+            <option value="AUD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>A$ AUD</option>
+            <option value="SGD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>S$ SGD</option>
+            <option value="GBP" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>£ GBP</option>
+            <option value="JPY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>¥ JPY</option>
+          </select>
+
           <button onClick={() => router.push('/business/settings')} style={{
-            background: 'var(--surface)',
+            background: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid var(--surface-border)',
             color: 'var(--foreground)',
-            padding: '6px 12px',
-            borderRadius: '6px',
+            padding: '8px 16px',
+            borderRadius: '10px',
             cursor: 'pointer',
-            fontSize: '0.8rem'
-          }}>
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)'}
+          >
             {t.settings}
           </button>
           <button onClick={handleLogout} style={{
-            background: 'var(--surface)',
-            border: 'none',
+            background: 'rgba(244, 63, 94, 0.06)',
+            border: '1px solid rgba(244, 63, 94, 0.15)',
             color: 'var(--error)',
-            padding: '6px 12px',
-            borderRadius: '6px',
+            padding: '8px 16px',
+            borderRadius: '10px',
             cursor: 'pointer',
-            fontSize: '0.8rem'
-          }}>
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.06)'}
+          >
             {t.exit}
           </button>
         </div>
       </header>
 
       {/* Centered Single Column Layout */}
-      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem', position: 'relative', zIndex: 2 }}>
         
         {/* Reserve Protection Widget */}
         <div className="glass-panel" style={{
-          padding: '1.5rem',
-          background: 'linear-gradient(135deg, rgba(255, 0, 127, 0.1) 0%, rgba(0, 210, 255, 0.05) 100%)'
+          padding: '2rem 1.8rem',
+          background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(244, 63, 94, 0.03) 100%)',
+          borderRadius: '20px',
+          border: '1px solid rgba(34, 211, 238, 0.15)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.2rem' }}>
             <div>
-              <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '0.25rem' }}>{t.balanceLabel}</span>
-              <h2 style={{ fontSize: '2.5rem', fontWeight: 800 }}>
+              <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>{t.balanceLabel}</span>
+              <h2 style={{ fontSize: '2.8rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-1px' }}>
                 {user && formatCurrency(balance, user.currency)}
               </h2>
             </div>
-            <button className="btn-primary" onClick={handleDepositReserve} style={{ background: 'var(--accent)' }}>
+            <button className="btn-primary" onClick={handleDepositReserve} style={{ 
+              background: 'linear-gradient(135deg, var(--accent) 0%, #b91c1c 100%)',
+              boxShadow: '0 4px 14px rgba(244, 63, 94, 0.2)'
+            }}>
               {user && t.depositBtn.replace('$100', formatCurrency(100.00, user.currency))}
             </button>
           </div>
           <div style={{
-            background: 'rgba(0,0,0,0.2)',
-            padding: '0.75rem',
-            borderRadius: '8px',
+            background: 'rgba(5, 5, 8, 0.25)',
+            padding: '10px 14px',
+            borderRadius: '10px',
             border: '1px solid var(--surface-border)',
             fontSize: '0.8rem',
-            opacity: 0.8
+            opacity: 0.8,
+            fontWeight: 500,
+            lineHeight: 1.5
           }}>
             {t.reserveNote}
           </div>
         </div>
 
         {/* Confirm Referral Code Form */}
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>{t.attributeTitle}</h3>
+        <div className="glass-panel" style={{ padding: '2rem 1.8rem', borderRadius: '20px' }}>
+          <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.2px' }}>{t.attributeTitle}</h3>
           
           {statusMessage && (
             <div style={{
-              background: statusMessage.type === 'success' ? 'rgba(82, 196, 26, 0.1)' : 'rgba(255, 77, 79, 0.1)',
+              background: statusMessage.type === 'success' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(244, 63, 94, 0.08)',
               border: `1px solid ${statusMessage.type === 'success' ? 'var(--success)' : 'var(--error)'}`,
               color: statusMessage.type === 'success' ? 'var(--success)' : 'var(--error)',
-              padding: '0.75rem',
-              borderRadius: '8px',
+              padding: '10px 14px',
+              borderRadius: '10px',
               fontSize: '0.85rem',
-              marginBottom: '1.2rem'
+              marginBottom: '1.2rem',
+              fontWeight: 600
             }}>
               {statusMessage.text}
             </div>
           )}
 
-          <form onSubmit={handleConfirmReferral} style={{ display: 'flex', gap: '0.5rem' }}>
+          <form onSubmit={handleConfirmReferral} style={{ display: 'flex', gap: '0.75rem' }}>
             <input
               type="text"
               value={shortCode}
@@ -432,22 +685,18 @@ export default function BusinessDashboard() {
               maxLength={6}
               style={{
                 flex: 1,
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid var(--surface-border)',
-                borderRadius: '8px',
-                padding: '12px 14px',
-                color: 'white',
-                fontSize: '1.1rem',
-                letterSpacing: '2px',
+                fontSize: '1.2rem',
+                letterSpacing: '4px',
                 textAlign: 'center',
-                outline: 'none'
+                fontWeight: 700
               }}
             />
-            <button type="submit" className="btn-primary" style={{ padding: '12px 24px' }}>
+            <button type="submit" className="btn-primary" style={{ padding: '12px 28px', borderRadius: '10px' }}>
               {t.verifyBtn}
             </button>
           </form>
         </div>
+
 
         {/* Offers List */}
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
@@ -577,7 +826,7 @@ export default function BusinessDashboard() {
                 <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.categoryLabel}</label>
                 <select
                   value={newOfferCategory}
-                  onChange={(e) => setNewOfferCategory(e.target.value as any)}
+                  onChange={(e) => setNewOfferCategory(e.target.value as 'restaurant' | 'nightlife' | 'villa' | 'activity')}
                   style={{
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid var(--surface-border)',
