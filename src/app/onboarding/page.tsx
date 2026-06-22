@@ -27,7 +27,8 @@ const translations = {
     phoneLabel: 'Phone Number',
     emailPlaceholder: 'you@example.com',
     phonePlaceholder: '+1 (555) 000-0000',
-    contactTitle: 'Contact Information'
+    contactTitle: 'Contact Information',
+    btnSignOut: 'Sign Out / Switch Account'
   },
   ru: {
     title: 'Добро пожаловать в Agent Core',
@@ -50,7 +51,8 @@ const translations = {
     phoneLabel: 'Номер телефона',
     emailPlaceholder: 'you@example.com',
     phonePlaceholder: '+7 (999) 000-00-00',
-    contactTitle: 'Контактная информация'
+    contactTitle: 'Контактная информация',
+    btnSignOut: 'Выйти / Сменить аккаунт'
   },
   id: {
     title: 'Selamat datang di Agent Core',
@@ -73,7 +75,8 @@ const translations = {
     phoneLabel: 'Nomor Telepon',
     emailPlaceholder: 'you@example.com',
     phonePlaceholder: '+62 812-3456-7890',
-    contactTitle: 'Informasi Kontak'
+    contactTitle: 'Informasi Kontak',
+    btnSignOut: 'Keluar / Ganti Akun'
   }
 };
 
@@ -113,6 +116,11 @@ export default function OnboardingPage() {
     }
     checkUser();
   }, []);
+
+  const handleSignOut = async () => {
+    await authService.signOut();
+    router.push('/login');
+  };
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
@@ -423,6 +431,28 @@ export default function OnboardingPage() {
             </span>
           </form>
         )}
+        
+        {/* Sign Out / Switch Account */}
+        <div style={{ textAlign: 'center', marginTop: '1.8rem', borderTop: '1px solid var(--surface-border)', paddingTop: '1.2rem' }}>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--foreground)',
+              opacity: 0.5,
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              transition: 'opacity 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.85'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
+          >
+            {t.btnSignOut}
+          </button>
+        </div>
       </div>
     </div>
   );
