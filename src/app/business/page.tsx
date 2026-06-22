@@ -7,6 +7,7 @@ import { UserProfile } from '@/lib/interfaces/auth';
 import { Offer } from '@/lib/interfaces/offers';
 import { formatCurrency } from '@/lib/utils/currency';
 import VerificationBadge from '@/app/components/VerificationBadge';
+import { Transaction } from '@/lib/interfaces/wallet';
 
 const translations = {
   en: {
@@ -268,6 +269,7 @@ export default function BusinessDashboard() {
   const [balance, setBalance] = useState(0);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [shortCode, setShortCode] = useState('');
+  const [history, setHistory] = useState<Transaction[]>([]);
   
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -302,6 +304,9 @@ export default function BusinessDashboard() {
     }));
 
     setOffers(updatedOffers);
+
+    const txs = await walletRepository.getTransactions(userId);
+    setHistory(txs.slice().reverse());
   };
 
   useEffect(() => {
@@ -361,6 +366,15 @@ export default function BusinessDashboard() {
         userId: session.partnerId,
         amount: offer.rewardAmount,
         type: 'reward',
+        sessionId: session.id,
+        status: 'completed'
+      });
+
+      // Deduct reward from business reserve balance:
+      await walletRepository.createTransaction({
+        userId: session.businessId,
+        amount: offer.rewardAmount,
+        type: 'fee',
         sessionId: session.id,
         status: 'completed'
       });
@@ -771,6 +785,56 @@ export default function BusinessDashboard() {
             ))}
             {offers.length === 0 && (
               <p style={{ opacity: 0.4, fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>{t.noOffers}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Transaction History */}
+        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700 }}>Recent Transactions</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {history.slice(0, 10).map((tx) => (
+              <div key={tx.id} style={{
+                padding: '0.75rem 1rem',
+                background: 'rgba(255,255,255,0.01)',
+                border: '1px solid var(--surface-border)',
+                borderRadius: '10px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '0.85rem'
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600 }}>
+                    {tx.type === 'deposit' ? '💳 Reserve Deposit' :
+                     tx.type === 'fee' ? '💸 Commission Deducted' :
+                     tx.type === 'reward' ? '🎁 Promoter Reward' : '🔄 Wallet Transaction'}
+                  </div>
+                  <span style={{ fontSize: '0.7rem', opacity: 0.4, display: 'block', marginTop: '2px' }}>
+                    {new Date(tx.createdAt).toLocaleString()}
+                  </span>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{ 
+                    fontWeight: 700, 
+                    color: tx.type === 'deposit' ? '#52c41a' : '#ff4d4f' 
+                  }}>
+                    {tx.type === 'deposit' ? '+' : '-'}{user && formatCurrency(tx.amount, user.currency)}
+                  </span>
+                  <span style={{ 
+                    display: 'block', 
+                    fontSize: '0.65rem', 
+                    opacity: 0.5, 
+                    textTransform: 'uppercase',
+                    marginTop: '2px'
+                  }}>
+                    {tx.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {history.length === 0 && (
+              <p style={{ opacity: 0.4, fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>No transactions recorded yet</p>
             )}
           </div>
         </div>

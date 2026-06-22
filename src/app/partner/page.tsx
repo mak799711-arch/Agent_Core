@@ -239,6 +239,7 @@ export default function PartnerDashboard() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   
   const [generatedSession, setGeneratedSession] = useState<ReferralSession | null>(null);
+  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -914,10 +915,24 @@ export default function PartnerDashboard() {
             <button
               className="btn-primary"
               onClick={() => {
+                const checkoutLink = window.location.origin + '/checkout?code=' + generatedSession.shortCode;
+                navigator.clipboard.writeText(checkoutLink);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              style={{ width: '100%', marginBottom: '0.75rem', background: '#22d3ee', color: '#000', border: 'none' }}
+            >
+              {copied ? 'Link Copied! ✓' : '🔗 Copy Checkout Link'}
+            </button>
+
+            <button
+              className="btn-primary"
+              onClick={() => {
                 setGeneratedSession(null);
                 setSelectedOffer(null);
+                setCopied(false);
               }}
-              style={{ width: '100%' }}
+              style={{ width: '100%', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--foreground)' }}
             >
               {t.done}
             </button>

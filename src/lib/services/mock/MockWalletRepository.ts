@@ -5,7 +5,31 @@ export class MockWalletRepository implements IWalletRepository {
   private transactions: Transaction[] = [];
 
   constructor() {
-    // No starting balances
+    if (typeof window !== 'undefined') {
+      try {
+        const storedBalances = localStorage.getItem('mock_balances');
+        if (storedBalances) {
+          this.balances = new Map(JSON.parse(storedBalances));
+        }
+        const storedTx = localStorage.getItem('mock_transactions');
+        if (storedTx) {
+          this.transactions = JSON.parse(storedTx);
+        }
+      } catch (e) {
+        console.error('Error loading mock wallet data:', e);
+      }
+    }
+  }
+
+  private saveWalletData() {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('mock_balances', JSON.stringify(Array.from(this.balances.entries())));
+        localStorage.setItem('mock_transactions', JSON.stringify(this.transactions));
+      } catch (e) {
+        console.error('Error saving mock wallet data:', e);
+      }
+    }
   }
 
   async getBalance(userId: string): Promise<number> {
@@ -34,6 +58,7 @@ export class MockWalletRepository implements IWalletRepository {
       }
     }
 
+    this.saveWalletData();
     return newTx;
   }
 
@@ -52,6 +77,7 @@ export class MockWalletRepository implements IWalletRepository {
     }
     
     tx.status = status;
+    this.saveWalletData();
     return tx;
   }
 }
