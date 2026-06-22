@@ -22,17 +22,17 @@ export default function LoginPage() {
     try {
       if (isSignUp) {
         await authService.signUp(email, password, role, fullName);
+        // New users always go through 3-step onboarding
+        router.push('/onboarding');
       } else {
         await authService.signIn(email, password);
-      }
-      
-      // Направляем на onboarding, если карта не привязана, иначе в дашборд
-      const user = await authService.getCurrentUser();
-      if (user) {
-        if (!user.cardBound) {
-          router.push('/onboarding');
-        } else {
-          router.push(`/${user.role}`);
+        const user = await authService.getCurrentUser();
+        if (user) {
+          if (!user.cardBound) {
+            router.push('/onboarding');
+          } else {
+            router.push(`/${user.role}`);
+          }
         }
       }
     } catch (err) {
@@ -71,70 +71,41 @@ export default function LoginPage() {
     }}>
       {/* Background ambient lights */}
       <div style={{
-        position: 'absolute',
-        width: '300px',
-        height: '300px',
-        background: 'var(--ambient-glow)',
-        filter: 'blur(80px)',
-        borderRadius: '50%',
-        top: '20%',
-        left: '10%',
-        pointerEvents: 'none'
+        position: 'absolute', width: '300px', height: '300px',
+        background: 'var(--ambient-glow)', filter: 'blur(80px)',
+        borderRadius: '50%', top: '20%', left: '10%', pointerEvents: 'none'
       }} />
       <div style={{
-        position: 'absolute',
-        width: '300px',
-        height: '300px',
-        background: 'var(--ambient-glow)',
-        filter: 'blur(80px)',
-        borderRadius: '50%',
-        bottom: '20%',
-        right: '10%',
-        pointerEvents: 'none'
+        position: 'absolute', width: '300px', height: '300px',
+        background: 'var(--ambient-glow)', filter: 'blur(80px)',
+        borderRadius: '50%', bottom: '20%', right: '10%', pointerEvents: 'none'
       }} />
 
       <div className="glass-panel" style={{
-        width: '100%',
-        maxWidth: '440px',
-        padding: '3rem 2.5rem',
-        boxShadow: 'var(--card-shadow)',
-        borderRadius: '24px',
-        zIndex: 1,
-        border: '1px solid var(--glass-border)'
+        width: '100%', maxWidth: '440px', padding: '3rem 2.5rem',
+        boxShadow: 'var(--card-shadow)', borderRadius: '24px',
+        zIndex: 1, border: '1px solid var(--glass-border)'
       }}>
         <h2 style={{
-          fontSize: '2.2rem',
-          fontWeight: 800,
+          fontSize: '2.2rem', fontWeight: 800,
           background: 'linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.7) 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '0.4rem',
-          textAlign: 'center',
-          letterSpacing: '-1px'
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          marginBottom: '0.4rem', textAlign: 'center', letterSpacing: '-1px'
         }}>
           Agent Core
         </h2>
         <p style={{
-          color: 'var(--foreground)',
-          opacity: 0.6,
-          fontSize: '0.9rem',
-          textAlign: 'center',
-          marginBottom: '2rem',
-          fontWeight: 500
+          color: 'var(--foreground)', opacity: 0.6, fontSize: '0.9rem',
+          textAlign: 'center', marginBottom: '2rem', fontWeight: 500
         }}>
-          {isSignUp ? 'Create your digital employee account' : 'Sign in to your dashboard'}
+          {isSignUp ? 'Create your account — 3-step setup' : 'Sign in to your dashboard'}
         </p>
 
         {error && (
           <div style={{
-            background: 'rgba(244, 63, 94, 0.08)',
-            border: '1px solid rgba(244, 63, 94, 0.2)',
-            color: 'var(--error)',
-            padding: '10px 14px',
-            borderRadius: '10px',
-            fontSize: '0.85rem',
-            marginBottom: '1.5rem',
-            fontWeight: 500
+            background: 'rgba(244, 63, 94, 0.08)', border: '1px solid rgba(244, 63, 94, 0.2)',
+            color: 'var(--error)', padding: '10px 14px', borderRadius: '10px',
+            fontSize: '0.85rem', marginBottom: '1.5rem', fontWeight: 500
           }}>
             ⚠️ {error}
           </div>
@@ -145,11 +116,9 @@ export default function LoginPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Full Name / Business Name</label>
               <input
-                type="text"
-                value={fullName}
+                type="text" value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                required
-                placeholder="e.g. John Doe"
+                required placeholder="e.g. John Doe"
               />
             </div>
           )}
@@ -157,22 +126,18 @@ export default function LoginPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Email Address</label>
             <input
-              type="email"
-              value={email}
+              type="email" value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="name@domain.com"
+              required placeholder="name@domain.com"
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Password</label>
             <input
-              type="password"
-              value={password}
+              type="password" value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
+              required placeholder="••••••••"
             />
           </div>
 
@@ -180,42 +145,20 @@ export default function LoginPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Account Type</label>
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.2rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setRole('partner')}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    borderRadius: '10px',
-                    border: '1px solid',
-                    borderColor: role === 'partner' ? 'var(--primary)' : 'var(--surface-border)',
-                    background: role === 'partner' ? 'rgba(34, 211, 238, 0.08)' : 'rgba(255, 255, 255, 0.01)',
-                    color: 'white',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
+                <button type="button" onClick={() => setRole('partner')} style={{
+                  flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid',
+                  borderColor: role === 'partner' ? 'var(--primary)' : 'var(--surface-border)',
+                  background: role === 'partner' ? 'rgba(34, 211, 238, 0.08)' : 'rgba(255,255,255,0.01)',
+                  color: 'white', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s ease'
+                }}>
                   Partner (Promoter)
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('business')}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    borderRadius: '10px',
-                    border: '1px solid',
-                    borderColor: role === 'business' ? 'var(--primary)' : 'var(--surface-border)',
-                    background: role === 'business' ? 'rgba(34, 211, 238, 0.08)' : 'rgba(255, 255, 255, 0.01)',
-                    color: 'white',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
+                <button type="button" onClick={() => setRole('business')} style={{
+                  flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid',
+                  borderColor: role === 'business' ? 'var(--primary)' : 'var(--surface-border)',
+                  background: role === 'business' ? 'rgba(34, 211, 238, 0.08)' : 'rgba(255,255,255,0.01)',
+                  color: 'white', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s ease'
+                }}>
                   Business (Venue)
                 </button>
               </div>
@@ -223,12 +166,10 @@ export default function LoginPage() {
           )}
 
           <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary"
+            type="submit" disabled={loading} className="btn-primary"
             style={{ width: '100%', marginTop: '0.5rem', borderRadius: '12px', padding: '14px' }}
           >
-            {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
+            {loading ? 'Processing...' : isSignUp ? 'Create Account →' : 'Sign In'}
           </button>
         </form>
 
@@ -238,18 +179,13 @@ export default function LoginPage() {
           </span>{' '}
           <button
             onClick={() => setIsSignUp(!isSignUp)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--primary)',
-              cursor: 'pointer',
-              fontWeight: 700
-            }}
+            style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 700 }}
           >
             {isSignUp ? 'Sign In' : 'Sign Up'}
           </button>
         </div>
 
+        {/* Demo accounts — skip onboarding, go straight to dashboard */}
         <div style={{ margin: '2rem 0 1.2rem 0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
           <span style={{ fontSize: '0.7rem', opacity: 0.4, fontWeight: 700, letterSpacing: '1px' }}>DEMO LOGINS</span>
@@ -261,28 +197,13 @@ export default function LoginPage() {
             onClick={() => handleDemoLogin('partner')}
             disabled={loading}
             style={{
-              flex: 1,
-              padding: '12px',
-              borderRadius: '12px',
-              background: 'rgba(255,255,255,0.01)',
-              border: '1px solid var(--surface-border)',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              transition: 'all 0.2s ease'
+              flex: 1, padding: '12px', borderRadius: '12px',
+              background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)',
+              color: 'white', cursor: 'pointer', fontSize: '0.85rem',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-              e.currentTarget.style.borderColor = 'var(--primary)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.01)';
-              e.currentTarget.style.borderColor = 'var(--surface-border)';
-            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.01)'; e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
           >
             <span style={{ fontWeight: 700 }}>Demo Partner</span>
             <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>Bali Promoter</span>
@@ -291,28 +212,13 @@ export default function LoginPage() {
             onClick={() => handleDemoLogin('business')}
             disabled={loading}
             style={{
-              flex: 1,
-              padding: '12px',
-              borderRadius: '12px',
-              background: 'rgba(255,255,255,0.01)',
-              border: '1px solid var(--surface-border)',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              transition: 'all 0.2s ease'
+              flex: 1, padding: '12px', borderRadius: '12px',
+              background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)',
+              color: 'white', cursor: 'pointer', fontSize: '0.85rem',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-              e.currentTarget.style.borderColor = 'var(--primary)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.01)';
-              e.currentTarget.style.borderColor = 'var(--surface-border)';
-            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.01)'; e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
           >
             <span style={{ fontWeight: 700 }}>Demo Business</span>
             <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>Venue Manager</span>

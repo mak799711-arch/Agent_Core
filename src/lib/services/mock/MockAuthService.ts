@@ -88,6 +88,44 @@ export class MockAuthService implements IAuthService {
       needsSave = true;
     }
 
+    // Ensure Beta Partner Account (goes through 3-step onboarding)
+    if (!this.users.has('beta-partner@agent.core')) {
+      this.users.set('beta-partner@agent.core', {
+        id: 'mock-beta-partner-uuid',
+        role: 'partner',
+        fullName: 'Beta Tester Partner',
+        avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=BetaPartner',
+        createdAt: new Date().toISOString(),
+        email: 'beta-partner@agent.core',
+        password: 'beta123',
+        cardBound: false,
+        cardNumber: null,
+        currency: 'USD',
+        language: 'en',
+        theme: 'dark'
+      });
+      needsSave = true;
+    }
+
+    // Ensure Beta Business Account (goes through 3-step onboarding)
+    if (!this.users.has('beta-business@agent.core')) {
+      this.users.set('beta-business@agent.core', {
+        id: 'mock-beta-business-uuid',
+        role: 'business',
+        fullName: 'Beta Tester Business',
+        avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=BetaBusiness',
+        createdAt: new Date().toISOString(),
+        email: 'beta-business@agent.core',
+        password: 'beta123',
+        cardBound: false,
+        cardNumber: null,
+        currency: 'USD',
+        language: 'en',
+        theme: 'dark'
+      });
+      needsSave = true;
+    }
+
     if (needsSave) {
       this.saveUsersToStorage();
     }
