@@ -42,7 +42,17 @@ function CheckoutContent() {
   const platformFee = billAmountNum * 0.01;
 
   useEffect(() => {
-    if (!code) {
+    let activeCode = code;
+
+    if (!activeCode && typeof window !== 'undefined') {
+      try {
+        activeCode = localStorage.getItem('last_global_referral_code');
+      } catch (e) {
+        console.error('Failed to read from localStorage:', e);
+      }
+    }
+
+    if (!activeCode) {
       setError('Referral code is missing. Please scan a valid QR code.');
       setLoading(false);
       return;
@@ -50,12 +60,21 @@ function CheckoutContent() {
 
     async function loadCheckoutData() {
       try {
-        const activeSession = await referralRepository.getSessionByCode(code as string);
+        const activeSession = await referralRepository.getSessionByCode(activeCode as string);
         if (!activeSession) {
           setError('Invalid or expired referral session.');
           return;
         }
         setSession(activeSession);
+
+        // Запоминаем валидный код
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('last_global_referral_code', activeCode as string);
+          } catch (e) {
+            console.error('Failed to save to localStorage:', e);
+          }
+        }
 
         const activeOffer = await offerRepository.getOfferById(activeSession.offerId);
         if (!activeOffer) {
@@ -127,6 +146,15 @@ function CheckoutContent() {
           sessionId: session.id,
           status: 'completed'
         });
+      }
+
+      // Удаляем сгоревший промокод из памяти устройства
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem('last_global_referral_code');
+        } catch (e) {
+          console.error('Failed to remove from localStorage:', e);
+        }
       }
 
       setPaymentSuccess(true);

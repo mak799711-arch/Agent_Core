@@ -9,11 +9,62 @@ export class MockReferralRepository implements IReferralRepository {
         const stored = localStorage.getItem('mock_sessions');
         if (stored) {
           this.sessions = JSON.parse(stored);
+        } else {
+          this.seedInitialSessions();
         }
       } catch (e) {
         console.error('Error loading mock sessions:', e);
       }
     }
+  }
+
+  private seedInitialSessions() {
+    const partnerId = 'mock-partner-uuid';
+    const businessId = 'mock-business-uuid';
+
+    this.sessions = [
+      {
+        id: 'session-seed-1',
+        partnerId,
+        offerId: 'offer-1',
+        businessId,
+        shortCode: '222222',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        expiresAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'session-seed-2',
+        partnerId,
+        offerId: 'offer-1',
+        businessId,
+        shortCode: '333333',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        expiresAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'session-seed-3',
+        partnerId,
+        offerId: 'offer-1',
+        businessId,
+        shortCode: '444444',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'session-seed-active',
+        partnerId,
+        offerId: 'offer-1',
+        businessId,
+        shortCode: '111111',
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+    this.saveSessions();
   }
 
   private saveSessions() {

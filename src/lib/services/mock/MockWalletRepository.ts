@@ -8,17 +8,93 @@ export class MockWalletRepository implements IWalletRepository {
     if (typeof window !== 'undefined') {
       try {
         const storedBalances = localStorage.getItem('mock_balances');
-        if (storedBalances) {
-          this.balances = new Map(JSON.parse(storedBalances));
-        }
         const storedTx = localStorage.getItem('mock_transactions');
-        if (storedTx) {
+        if (storedBalances && storedTx) {
+          this.balances = new Map(JSON.parse(storedBalances));
           this.transactions = JSON.parse(storedTx);
+        } else {
+          this.seedInitialWalletData();
         }
       } catch (e) {
         console.error('Error loading mock wallet data:', e);
       }
     }
+  }
+
+  private seedInitialWalletData() {
+    const partnerId = 'mock-partner-uuid';
+    const businessId = 'mock-business-uuid';
+
+    this.balances.set(partnerId, 50.00);
+    this.balances.set(businessId, 450.00);
+
+    this.transactions = [
+      {
+        id: 'tx-seed-1',
+        userId: businessId,
+        amount: 500.00,
+        type: 'deposit',
+        sessionId: null,
+        status: 'completed',
+        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'tx-seed-2-biz',
+        userId: businessId,
+        amount: 15.00,
+        type: 'fee',
+        sessionId: 'session-seed-1',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'tx-seed-2-part',
+        userId: partnerId,
+        amount: 15.00,
+        type: 'reward',
+        sessionId: 'session-seed-1',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'tx-seed-3-biz',
+        userId: businessId,
+        amount: 25.00,
+        type: 'fee',
+        sessionId: 'session-seed-2',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'tx-seed-3-part',
+        userId: partnerId,
+        amount: 25.00,
+        type: 'reward',
+        sessionId: 'session-seed-2',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'tx-seed-4-biz',
+        userId: businessId,
+        amount: 10.00,
+        type: 'fee',
+        sessionId: 'session-seed-3',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'tx-seed-4-part',
+        userId: partnerId,
+        amount: 10.00,
+        type: 'reward',
+        sessionId: 'session-seed-3',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+
+    this.saveWalletData();
   }
 
   private saveWalletData() {
