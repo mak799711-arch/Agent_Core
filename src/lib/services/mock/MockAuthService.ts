@@ -27,8 +27,12 @@ export class MockAuthService implements IAuthService {
 
     if (loadedUsers && loadedUsers.length > 0) {
       this.users = new Map(loadedUsers);
-    } else {
-      // Admin Account
+    }
+
+    let needsSave = false;
+
+    // Ensure Admin Account
+    if (!this.users.has('mak799711@gmail.com')) {
       this.users.set('mak799711@gmail.com', {
         id: 'mock-admin-uuid',
         role: 'admin',
@@ -43,7 +47,48 @@ export class MockAuthService implements IAuthService {
         language: 'ru',
         theme: 'dark'
       });
+      needsSave = true;
+    }
 
+    // Ensure Demo Partner Account
+    if (!this.users.has('partner@agent.core')) {
+      this.users.set('partner@agent.core', {
+        id: 'mock-partner-uuid',
+        role: 'partner',
+        fullName: 'John Bali Promoter',
+        avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
+        createdAt: new Date().toISOString(),
+        email: 'partner@agent.core',
+        password: 'password123',
+        cardBound: true,
+        cardNumber: '4242 4242 4242 4242',
+        currency: 'USD',
+        language: 'en',
+        theme: 'dark'
+      });
+      needsSave = true;
+    }
+
+    // Ensure Demo Business Account
+    if (!this.users.has('business@agent.core')) {
+      this.users.set('business@agent.core', {
+        id: 'mock-business-uuid',
+        role: 'business',
+        fullName: 'La Brisa Bali Manager',
+        avatarUrl: 'https://api.dicebear.com/7.x/identicon/svg?seed=LaBrisa',
+        createdAt: new Date().toISOString(),
+        email: 'business@agent.core',
+        password: 'password123',
+        cardBound: true,
+        cardNumber: '5555 5555 5555 5555',
+        currency: 'USD',
+        language: 'en',
+        theme: 'dark'
+      });
+      needsSave = true;
+    }
+
+    if (needsSave) {
       this.saveUsersToStorage();
     }
 
