@@ -484,7 +484,7 @@ export default function BusinessDashboard() {
       minHeight: '100vh',
       background: 'radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.04) 0%, #090a0f 100%)',
       color: 'var(--foreground)',
-      padding: '2rem 1.5rem',
+      padding: 'var(--layout-padding)',
       paddingBottom: '6rem',
       position: 'relative',
       overflow: 'hidden'
@@ -503,10 +503,11 @@ export default function BusinessDashboard() {
       }} />
 
       {/* Header */}
-      <header style={{
+      <header className="glass-header" style={{
         display: 'flex',
+        flexDirection: 'var(--header-flex-direction)' as any,
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'var(--header-align-items)' as any,
         marginBottom: '2.5rem',
         paddingBottom: '1.2rem',
         borderBottom: '1px solid var(--surface-border)',
@@ -528,7 +529,14 @@ export default function BusinessDashboard() {
           </div>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          flexWrap: 'wrap',
+          width: 'var(--header-right-width)' as any,
+          justifyContent: 'var(--header-right-justify)' as any
+        }}>
           {/* Language Selector */}
           <select 
             value={lang} 
@@ -637,15 +645,15 @@ export default function BusinessDashboard() {
         
         {/* Reserve Protection Widget */}
         <div className="glass-panel" style={{
-          padding: '2rem 1.8rem',
+          padding: 'var(--panel-padding)',
           background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(244, 63, 94, 0.03) 100%)',
           borderRadius: '20px',
           border: '1px solid rgba(34, 211, 238, 0.15)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.2rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.2rem', gap: '1rem' }}>
             <div>
               <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>{t.balanceLabel}</span>
-              <h2 style={{ fontSize: '2.8rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-1px' }}>
+              <h2 style={{ fontSize: 'var(--earnings-font-size)', fontWeight: 800, color: '#ffffff', letterSpacing: '-1px', margin: 0 }}>
                 {user && formatCurrency(balance, user.currency)}
               </h2>
             </div>
@@ -671,7 +679,7 @@ export default function BusinessDashboard() {
         </div>
 
         {/* Confirm Referral Code Form */}
-        <div className="glass-panel" style={{ padding: '2rem 1.8rem', borderRadius: '20px' }}>
+        <div className="glass-panel" style={{ padding: 'var(--panel-padding)', borderRadius: '20px' }}>
           <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.2px' }}>{t.attributeTitle}</h3>
           
           {statusMessage && (
@@ -689,7 +697,7 @@ export default function BusinessDashboard() {
             </div>
           )}
 
-          <form onSubmit={handleConfirmReferral} style={{ display: 'flex', gap: '0.75rem' }}>
+          <form onSubmit={handleConfirmReferral} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
             <input
               type="text"
               value={shortCode}
@@ -698,14 +706,14 @@ export default function BusinessDashboard() {
               required
               maxLength={6}
               style={{
-                flex: 1,
+                flex: '1 1 200px',
                 fontSize: '1.2rem',
                 letterSpacing: '4px',
                 textAlign: 'center',
                 fontWeight: 700
               }}
             />
-            <button type="submit" className="btn-primary" style={{ padding: '12px 28px', borderRadius: '10px' }}>
+            <button type="submit" className="btn-primary" style={{ flex: '1 1 120px', padding: '12px 28px', borderRadius: '10px' }}>
               {t.verifyBtn}
             </button>
           </form>

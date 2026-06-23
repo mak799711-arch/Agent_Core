@@ -386,7 +386,7 @@ export default function PartnerDashboard() {
       minHeight: '100vh',
       background: 'var(--bg-gradient)',
       color: 'var(--foreground)',
-      padding: '2rem 1.5rem',
+      padding: 'var(--layout-padding)',
       paddingBottom: '6rem',
       position: 'relative',
       overflow: 'hidden'
@@ -407,18 +407,20 @@ export default function PartnerDashboard() {
       {/* Header */}
       <header className="glass-header" style={{
         display: 'flex',
+        flexDirection: 'var(--header-flex-direction)' as any,
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'var(--header-align-items)' as any,
         marginBottom: '2.5rem',
-        padding: '1rem 1.5rem',
-        marginLeft: '-1.5rem',
-        marginRight: '-1.5rem',
-        marginTop: '-2rem',
+        padding: 'var(--header-padding)',
+        marginLeft: 'var(--header-margin-horizontal)',
+        marginRight: 'var(--header-margin-horizontal)',
+        marginTop: 'var(--header-margin-top)',
         position: 'sticky',
         top: 0,
-        zIndex: 100
+        zIndex: 100,
+        gap: '1rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={user?.avatarUrl || ''}
@@ -434,7 +436,14 @@ export default function PartnerDashboard() {
           </div>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          flexWrap: 'wrap',
+          width: 'var(--header-right-width)' as any,
+          justifyContent: 'var(--header-right-justify)' as any
+        }}>
           {/* Language Selector */}
           <select 
             value={lang} 
@@ -540,7 +549,7 @@ export default function PartnerDashboard() {
 
       {/* Total Earnings Widget */}
       <div className="glass-panel" style={{
-        padding: '2rem 1.8rem',
+        padding: 'var(--panel-padding)',
         marginBottom: '2.5rem',
         background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(244, 63, 94, 0.03) 100%)',
         position: 'relative',
@@ -550,7 +559,7 @@ export default function PartnerDashboard() {
         zIndex: 2
       }}>
         <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>{t.totalEarnedLabel}</span>
-        <h2 style={{ fontSize: '2.8rem', fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: '-1px' }}>
+        <h2 style={{ fontSize: 'var(--earnings-font-size)', fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: '-1px' }}>
           {user && formatCurrency(totalEarnings, user.currency)}
         </h2>
       </div>
@@ -665,7 +674,7 @@ export default function PartnerDashboard() {
           </div>
 
           {/* Category Filter - Rounded Beautiful Badges */}
-          <div style={{
+          <div className="mobile-scroll-x" style={{
             display: 'flex',
             gap: '0.6rem',
             overflowX: 'auto',
@@ -788,7 +797,7 @@ export default function PartnerDashboard() {
                 ✕
               </button>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginRight: '1.5rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', marginRight: '1.5rem', gap: '1rem' }}>
                 <div>
                   <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 600 }}>
                     {t.categories[selectedOffer.category]}

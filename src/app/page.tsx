@@ -7,7 +7,7 @@ export default function Home() {
       alignItems: 'center',
       justifyContent: 'center',
       background: 'var(--bg-gradient)',
-      padding: '2rem',
+      padding: 'var(--layout-padding)',
       textAlign: 'center',
       position: 'relative',
       overflow: 'hidden'
@@ -56,7 +56,7 @@ export default function Home() {
         </div>
 
         <h1 style={{
-          fontSize: '3.5rem',
+          fontSize: 'var(--title-size)',
           fontWeight: 800,
           letterSpacing: '-1.5px',
           lineHeight: '1.1',

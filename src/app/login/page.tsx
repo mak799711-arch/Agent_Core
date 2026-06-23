@@ -65,7 +65,7 @@ export default function LoginPage() {
       alignItems: 'center',
       justifyContent: 'center',
       background: 'var(--bg-gradient)',
-      padding: '1.5rem',
+      padding: 'var(--layout-padding)',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -82,7 +82,7 @@ export default function LoginPage() {
       }} />
 
       <div className="glass-panel" style={{
-        width: '100%', maxWidth: '440px', padding: '3rem 2.5rem',
+        width: '100%', maxWidth: '440px', padding: 'var(--panel-padding)',
         boxShadow: 'var(--card-shadow)', borderRadius: '24px',
         zIndex: 1, border: '1px solid var(--glass-border)'
       }}>
@@ -144,9 +144,9 @@ export default function LoginPage() {
           {isSignUp && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Account Type</label>
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.2rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.2rem' }}>
                 <button type="button" onClick={() => setRole('partner')} style={{
-                  flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid',
+                  flex: '1 1 150px', padding: '12px', borderRadius: '10px', border: '1px solid',
                   borderColor: role === 'partner' ? 'var(--primary)' : 'var(--surface-border)',
                   background: role === 'partner' ? 'rgba(34, 211, 238, 0.08)' : 'rgba(255,255,255,0.01)',
                   color: 'white', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s ease'
@@ -154,7 +154,7 @@ export default function LoginPage() {
                   Partner (Promoter)
                 </button>
                 <button type="button" onClick={() => setRole('business')} style={{
-                  flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid',
+                  flex: '1 1 150px', padding: '12px', borderRadius: '10px', border: '1px solid',
                   borderColor: role === 'business' ? 'var(--primary)' : 'var(--surface-border)',
                   background: role === 'business' ? 'rgba(34, 211, 238, 0.08)' : 'rgba(255,255,255,0.01)',
                   color: 'white', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s ease'
@@ -192,12 +192,12 @@ export default function LoginPage() {
           <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
           <button
             onClick={() => handleDemoLogin('partner')}
             disabled={loading}
             style={{
-              flex: 1, padding: '12px', borderRadius: '12px',
+              flex: '1 1 150px', padding: '12px', borderRadius: '12px',
               background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)',
               color: 'white', cursor: 'pointer', fontSize: '0.85rem',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease'
@@ -212,7 +212,7 @@ export default function LoginPage() {
             onClick={() => handleDemoLogin('business')}
             disabled={loading}
             style={{
-              flex: 1, padding: '12px', borderRadius: '12px',
+              flex: '1 1 150px', padding: '12px', borderRadius: '12px',
               background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)',
               color: 'white', cursor: 'pointer', fontSize: '0.85rem',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease'

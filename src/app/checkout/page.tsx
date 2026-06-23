@@ -194,11 +194,11 @@ function CheckoutContent() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-gradient)', padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-gradient)', padding: 'var(--layout-padding)', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', width: '300px', height: '300px', background: 'var(--ambient-glow)', filter: 'blur(80px)', borderRadius: '50%', top: '20%', left: '10%', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', width: '300px', height: '300px', background: 'var(--ambient-glow)', filter: 'blur(80px)', borderRadius: '50%', bottom: '20%', right: '10%', pointerEvents: 'none' }} />
 
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '460px', padding: '2.5rem 2rem', boxShadow: 'var(--card-shadow)', borderRadius: '24px', zIndex: 1, border: '1px solid var(--glass-border)' }}>
+      <div className="glass-panel" style={{ width: '100%', maxWidth: '460px', padding: 'var(--panel-padding)', boxShadow: 'var(--card-shadow)', borderRadius: '24px', zIndex: 1, border: '1px solid var(--glass-border)' }}>
         
         {!paymentSuccess ? (
           <>

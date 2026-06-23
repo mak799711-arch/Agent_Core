@@ -344,7 +344,7 @@ export default function AdminDashboard() {
       minHeight: '100vh',
       background: 'var(--bg-gradient)',
       color: 'var(--foreground)',
-      padding: '3rem 2.5rem',
+      padding: 'var(--admin-padding)',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -362,18 +362,23 @@ export default function AdminDashboard() {
       }} />
 
       {/* Header */}
-      <header style={{
+      <header className="glass-header" style={{
         display: 'flex',
+        flexDirection: 'var(--header-flex-direction)' as any,
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'var(--header-align-items)' as any,
         marginBottom: '3rem',
-        paddingBottom: '1.5rem',
-        borderBottom: '1px solid var(--surface-border)',
-        position: 'relative',
-        zIndex: 2
+        padding: 'var(--header-padding)',
+        marginLeft: 'var(--header-margin-horizontal)',
+        marginRight: 'var(--header-margin-horizontal)',
+        marginTop: 'var(--header-margin-top)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        gap: '1rem'
       }}>
         <div>
-          <h2 style={{ fontSize: '2.2rem', fontWeight: 800, background: 'linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.7) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0, letterSpacing: '-0.8px' }}>
+          <h2 style={{ fontSize: 'var(--admin-title-size)', fontWeight: 800, background: 'linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.7) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0, letterSpacing: '-0.8px' }}>
             {t.dashboardTitle}
           </h2>
           <span style={{ fontSize: '0.75rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700, color: 'var(--primary)', marginTop: '6px', display: 'block' }}>{t.admin}</span>
@@ -390,7 +395,8 @@ export default function AdminDashboard() {
           fontWeight: 700,
           transition: 'all 0.2s ease',
           outline: 'none',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          alignSelf: 'var(--header-align-self, center)' as any
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)';
@@ -547,7 +553,7 @@ export default function AdminDashboard() {
       }}>
         {/* Card 1: Platform Volume */}
         <div className="glass-panel" style={{
-          padding: '2.2rem 2rem',
+          padding: 'var(--admin-metric-padding)',
           border: '1px solid var(--glass-border)',
           background: 'var(--glass-bg)',
           boxShadow: 'var(--card-shadow)',
@@ -560,7 +566,7 @@ export default function AdminDashboard() {
         }}>
           <div>
             <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>{t.totalVolume}</span>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{formatCurrency(totalVolume, 'USD')}</h2>
+            <h2 style={{ fontSize: 'var(--admin-metric-value-size)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{formatCurrency(totalVolume, 'USD')}</h2>
           </div>
           <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(34, 211, 238, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(34, 211, 238, 0.15)' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -572,7 +578,7 @@ export default function AdminDashboard() {
 
         {/* Card 2: Agents Count */}
         <div className="glass-panel" style={{
-          padding: '2.2rem 2rem',
+          padding: 'var(--admin-metric-padding)',
           border: '1px solid var(--glass-border)',
           background: 'var(--glass-bg)',
           boxShadow: 'var(--card-shadow)',
@@ -585,7 +591,7 @@ export default function AdminDashboard() {
         }}>
           <div>
             <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.totalAgents}</span>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{agents.length}</h2>
+            <h2 style={{ fontSize: 'var(--admin-metric-value-size)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{agents.length}</h2>
           </div>
           <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface-border)' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.75 }}>
@@ -599,7 +605,7 @@ export default function AdminDashboard() {
 
         {/* Card 3: Businesses Count */}
         <div className="glass-panel" style={{
-          padding: '2.2rem 2rem',
+          padding: 'var(--admin-metric-padding)',
           border: '1px solid var(--glass-border)',
           background: 'var(--glass-bg)',
           boxShadow: 'var(--card-shadow)',
@@ -612,7 +618,7 @@ export default function AdminDashboard() {
         }}>
           <div>
             <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.totalBusinesses}</span>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{restaurants.length}</h2>
+            <h2 style={{ fontSize: 'var(--admin-metric-value-size)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{restaurants.length}</h2>
           </div>
           <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface-border)' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.75 }}>
@@ -624,16 +630,17 @@ export default function AdminDashboard() {
       </div>
 
       {/* Tabs Navigation (Segmented Pill Design) */}
-      <div style={{
-        display: 'inline-flex',
+      <div className="mobile-scroll-x" style={{
+        display: 'var(--tabs-display)' as any,
         background: 'rgba(255, 255, 255, 0.02)',
         border: '1px solid var(--surface-border)',
-        borderRadius: '20px',
-        padding: '6px',
-        marginBottom: '3rem',
+        borderRadius: 'var(--tabs-border-radius)',
+        padding: 'var(--tabs-padding)',
+        marginBottom: 'var(--tabs-margin-bottom)',
         boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
         position: 'relative',
-        zIndex: 2
+        zIndex: 2,
+        overflowX: 'auto'
       }}>
         <button
           onClick={() => setActiveTab('active')}
@@ -740,7 +747,7 @@ export default function AdminDashboard() {
             {/* Top Promoters/Agents */}
             <div className="glass-panel" style={{ padding: '2rem 2.2rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)' }}>
               <h3 style={{ marginBottom: '1.8rem', fontSize: '1.25rem', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.3px' }}>{t.promoters}</h3>
-              <div style={{ overflowX: 'auto' }}>
+              <div className="table-wrapper">
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.45, fontSize: '0.75rem', color: 'var(--foreground)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
@@ -855,7 +862,7 @@ export default function AdminDashboard() {
             {/* Top Restaurants */}
             <div className="glass-panel" style={{ padding: '2rem 2.2rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)' }}>
               <h3 style={{ marginBottom: '1.8rem', fontSize: '1.25rem', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.3px' }}>{t.merchants}</h3>
-              <div style={{ overflowX: 'auto' }}>
+              <div className="table-wrapper">
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--surface-border)', opacity: 0.45, fontSize: '0.75rem', color: 'var(--foreground)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>

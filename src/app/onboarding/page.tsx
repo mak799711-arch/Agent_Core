@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -30,27 +30,27 @@ const translations = {
     contactTitle: 'Contact Information'
   },
   ru: {
-    title: '╨Ф╨╛╨▒╤А╨╛ ╨┐╨╛╨╢╨░╨╗╨╛╨▓╨░╤В╤М ╨▓ Agent Core',
-    subtitle: '╨Ф╨░╨▓╨░╨╣╤В╨╡ ╨╜╨░╤Б╤В╤А╨╛╨╕╨╝ ╨▓╨░╤И ╨┐╤А╨╛╤Д╨╕╨╗╤М ╨▓╤Л╨┐╨╗╨░╤В',
-    langLabel: '╨Я╤А╨╡╨┤╨┐╨╛╤З╨╕╤В╨░╨╡╨╝╤Л╨╣ ╤П╨╖╤Л╨║',
-    currLabel: '╨Ю╤Б╨╜╨╛╨▓╨╜╨░╤П ╨▓╨░╨╗╤О╤В╨░',
-    cardLabel: '╨Ъ╤А╨╡╨┤╨╕╤В╨╜╨░╤П / ╨Ф╨╡╨▒╨╡╤В╨╛╨▓╨░╤П ╨║╨░╤А╤В╨░ (╨Ф╨╗╤П ╨▓╤Л╨┐╨╗╨░╤В ╨╕ ╤А╨╡╨╖╨╡╤А╨▓╨╛╨▓)',
-    cardHolder: '╨Э╨╛╨╝╨╡╤А ╨║╨░╤А╤В╤Л',
-    cardExpiry: '╨Ь╨Ь/╨У╨У',
+    title: 'Добро пожаловать в Agent Core',
+    subtitle: 'Давайте настроим ваш профиль выплат',
+    langLabel: 'Предпочитаемый язык',
+    currLabel: 'Основная валюта',
+    cardLabel: 'Кредитная / Дебетовая карта (Для выплат и резервов)',
+    cardHolder: 'Номер карты',
+    cardExpiry: 'ММ/ГГ',
     cardCvc: 'CVC',
-    btnNext: '╨б╨╗╨╡╨┤╤Г╤О╤Й╨╕╨╣ ╤И╨░╨│',
-    btnSubmit: '╨Ч╨░╨▓╨╡╤А╤И╨╕╤В╤М ╤А╨╡╨│╨╕╤Б╤В╤А╨░╤Ж╨╕╤О',
-    errorCard: '╨Я╨╛╨╢╨░╨╗╤Г╨╣╤Б╤В╨░, ╨▓╨▓╨╡╨┤╨╕╤В╨╡ ╨║╨╛╤А╤А╨╡╨║╤В╨╜╤Л╨╣ ╨╜╨╛╨╝╨╡╤А ╨║╨░╤А╤В╤Л',
-    success: '╨Я╤А╨╛╤Д╨╕╨╗╤М ╤Г╤Б╨┐╨╡╤И╨╜╨╛ ╨╜╨░╤Б╤В╤А╨╛╨╡╨╜!',
-    step1: '╨и╨░╨│ 1: ╨Э╨░╤Б╤В╤А╨╛╨╣╨║╨╕',
-    step2: '╨и╨░╨│ 2: ╨Я╨╗╨░╤В╨╡╨╢╨╜╨░╤П ╨║╨░╤А╤В╨░',
-    step3: '╨и╨░╨│ 3: ╨Ъ╨╛╨╜╤В╨░╨║╤В╤Л',
-    secured: '╨Ч╨░╤Й╨╕╤Й╨╡╨╜╨╛ 256-╨▒╨╕╤В╨╜╤Л╨╝ SSL ╤И╨╕╤Д╤А╨╛╨▓╨░╨╜╨╕╨╡╨╝',
-    emailLabel: '╨н╨╗╨╡╨║╤В╤А╨╛╨╜╨╜╨░╤П ╨┐╨╛╤З╤В╨░',
-    phoneLabel: '╨Э╨╛╨╝╨╡╤А ╤В╨╡╨╗╨╡╤Д╨╛╨╜╨░',
+    btnNext: 'Следующий шаг',
+    btnSubmit: 'Завершить регистрацию',
+    errorCard: 'Пожалуйста, введите корректный номер карты',
+    success: 'Профиль успешно настроен!',
+    step1: 'Шаг 1: Настройки',
+    step2: 'Шаг 2: Платежная карта',
+    step3: 'Шаг 3: Контакты',
+    secured: 'Защищено 256-битным SSL шифрованием',
+    emailLabel: 'Электронная почта',
+    phoneLabel: 'Номер телефона',
     emailPlaceholder: 'you@example.com',
     phonePlaceholder: '+7 (999) 000-00-00',
-    contactTitle: '╨Ъ╨╛╨╜╤В╨░╨║╤В╨╜╨░╤П ╨╕╨╜╤Д╨╛╤А╨╝╨░╤Ж╨╕╤П'
+    contactTitle: 'Контактная информация'
   },
   id: {
     title: 'Selamat datang di Agent Core',
@@ -195,7 +195,7 @@ export default function OnboardingPage() {
       alignItems: 'center',
       justifyContent: 'center',
       background: 'radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.06) 0%, #090a0f 100%)',
-      padding: '1.5rem',
+      padding: 'var(--layout-padding)',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -215,7 +215,7 @@ export default function OnboardingPage() {
       <div className="glass-panel" style={{
         width: '100%',
         maxWidth: '480px',
-        padding: '3rem 2.5rem',
+        padding: 'var(--panel-padding)',
         boxShadow: 'var(--card-shadow)',
         borderRadius: '24px',
         border: '1px solid var(--glass-border)',
@@ -223,15 +223,21 @@ export default function OnboardingPage() {
       }}>
         {/* Progress Bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>
-          <span style={{ color: step === 1 ? 'var(--primary)' : 'var(--foreground)', transition: 'color 0.2s' }}>{t.step1.toUpperCase()}</span>
-          <span style={{ color: step === 2 ? 'var(--primary)' : 'var(--foreground)', transition: 'color 0.2s' }}>{t.step2.toUpperCase()}</span>
-          <span style={{ color: step === 3 ? 'var(--primary)' : 'var(--foreground)', transition: 'color 0.2s' }}>{t.step3.toUpperCase()}</span>
+          <span style={{ color: step === 1 ? 'var(--primary)' : 'var(--foreground)', transition: 'color 0.2s' }}>
+            1<span style={{ display: 'var(--onboarding-step-display)' }}>: {t.step1.split(':')[1]?.trim() || t.step1}</span>
+          </span>
+          <span style={{ color: step === 2 ? 'var(--primary)' : 'var(--foreground)', transition: 'color 0.2s' }}>
+            2<span style={{ display: 'var(--onboarding-step-display)' }}>: {t.step2.split(':')[1]?.trim() || t.step2}</span>
+          </span>
+          <span style={{ color: step === 3 ? 'var(--primary)' : 'var(--foreground)', transition: 'color 0.2s' }}>
+            3<span style={{ display: 'var(--onboarding-step-display)' }}>: {t.step3.split(':')[1]?.trim() || t.step3}</span>
+          </span>
         </div>
         <div style={{ width: '100%', height: '4px', background: 'var(--surface-border)', borderRadius: '10px', marginBottom: '2.5rem', overflow: 'hidden' }}>
           <div style={{ width: step === 1 ? '33.3%' : step === 2 ? '66.6%' : '100%', height: '100%', background: 'linear-gradient(90deg, var(--primary), var(--accent))', transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
         </div>
 
-        <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.4rem', textAlign: 'center', letterSpacing: '-0.5px' }}>{t.title}</h2>
+        <h2 style={{ fontSize: 'var(--onboarding-title-size)', fontWeight: 800, marginBottom: '0.4rem', textAlign: 'center', letterSpacing: '-0.5px' }}>{t.title}</h2>
         <p style={{ fontSize: '0.9rem', opacity: 0.6, marginBottom: '2.5rem', textAlign: 'center', fontWeight: 500 }}>{t.subtitle}</p>
 
         {step === 1 && (
@@ -293,13 +299,13 @@ export default function OnboardingPage() {
               {/* Virtual Mock Card Visual */}
               <div className="glass-panel" style={{
                 background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.1) 0%, rgba(34, 211, 238, 0.1) 100%)',
-                padding: '1.8rem',
+                padding: 'clamp(1rem, 4vw, 1.8rem)',
                 borderRadius: '20px',
                 marginBottom: '1rem',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                height: '180px',
+                height: 'clamp(145px, 22vw, 180px)',
                 border: '1px solid var(--glass-border)',
                 position: 'relative',
                 overflow: 'hidden',
@@ -309,8 +315,8 @@ export default function OnboardingPage() {
                   <span style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '1.5px', opacity: 0.9 }}>AGENT CARD</span>
                   <div style={{ width: '36px', height: '24px', background: 'rgba(255,255,255,0.1)', borderRadius: '6px' }}></div>
                 </div>
-                <span style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '2.5px', margin: '1rem 0', fontFamily: 'monospace' }}>
-                  {cardNumber || 'тАвтАвтАвтАв тАвтАвтАвтАв тАвтАвтАвтАв тАвтАвтАвтАв'}
+                <span style={{ fontSize: 'var(--card-font-size)', fontWeight: 700, letterSpacing: 'var(--card-letter-spacing)', margin: '1rem 0', fontFamily: 'monospace', textAlign: 'center' }}>
+                  {cardNumber || '•••• •••• •••• ••••'}
                 </span>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.5px', opacity: 0.8 }}>
                   <span style={{ textTransform: 'uppercase' }}>{user?.fullName || 'CARD HOLDER'}</span>

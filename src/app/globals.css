@@ -18,7 +18,63 @@
   --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
   --bg-gradient: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.04) 0%, #0b0f19 100%);
   --ambient-glow: rgba(59, 130, 246, 0.03);
+
+  /* Responsive Layout Variables */
+  --layout-padding: 3rem 2.5rem;
+  --header-padding: 1rem 1.5rem;
+  --header-margin-top: -2rem;
+  --header-margin-horizontal: -1.5rem;
+  --header-flex-direction: row;
+  --header-align-items: center;
+  --header-right-width: auto;
+  --header-right-justify: flex-end;
+  --panel-padding: 3rem 2.5rem;
+  --title-size: 3.5rem;
+  --h2-size: 2.2rem;
+  --earnings-font-size: 2.8rem;
+  --onboarding-step-display: inline;
+  --onboarding-title-size: 1.8rem;
+  --card-font-size: 1.5rem;
+  --card-letter-spacing: 2.5px;
+  --admin-padding: 3rem 2.5rem;
+  --admin-title-size: 2.2rem;
+  --admin-metric-padding: 2.2rem 2rem;
+  --admin-metric-value-size: 2.5rem;
+  --tabs-display: inline-flex;
+  --tabs-padding: 6px;
+  --tabs-margin-bottom: 3rem;
+  --tabs-border-radius: 20px;
 }
+
+@media (max-width: 768px) {
+  :root {
+    --layout-padding: 1.5rem 1rem;
+    --header-padding: 1rem 1rem;
+    --header-margin-top: -1rem;
+    --header-margin-horizontal: -1rem;
+    --header-flex-direction: column;
+    --header-align-items: stretch;
+    --header-right-width: 100%;
+    --header-right-justify: space-between;
+    --panel-padding: 1.8rem 1.25rem;
+    --title-size: 2.2rem;
+    --h2-size: 1.6rem;
+    --earnings-font-size: 2rem;
+    --onboarding-step-display: none;
+    --onboarding-title-size: 1.4rem;
+    --card-font-size: 1.1rem;
+    --card-letter-spacing: 1.5px;
+    --admin-padding: 1.5rem 1rem;
+    --admin-title-size: 1.6rem;
+    --admin-metric-padding: 1.5rem 1.25rem;
+    --admin-metric-value-size: 1.8rem;
+    --tabs-display: flex;
+    --tabs-padding: 4px;
+    --tabs-margin-bottom: 1.5rem;
+    --tabs-border-radius: 14px;
+  }
+}
+
 
 /* Dark Theme Explicit */
 html[data-theme="dark"] {
@@ -253,4 +309,43 @@ textarea:focus {
     opacity: 0;
   }
 }
+
+/* Responsive Table and List Scroll Utility */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+  margin-bottom: 1.5rem;
+}
+
+.table-wrapper table {
+  min-width: 600px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mobile-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  display: flex !important;
+  scrollbar-width: none; /* Hide scrollbar for standard look */
+}
+.mobile-scroll-x::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Webkit */
+}
+
+/* Base Responsive Page Container */
+.page-container {
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  color: var(--foreground);
+  padding: var(--layout-padding);
+  padding-bottom: 6rem;
+  position: relative;
+  overflow: hidden;
+}
+
 
