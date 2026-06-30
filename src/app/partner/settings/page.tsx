@@ -14,7 +14,7 @@ const translations = {
     langLabel: 'Language',
     currLabel: 'Currency',
     cardLabel: 'Payment Methods',
-    cardBound: 'Active Card',
+    cardBound: 'Active Payment Details',
     cardUnbound: 'No card bound. Payouts are suspended.',
     btnUnbind: 'Unbind Card',
     btnBind: 'Bind New Card',
@@ -36,7 +36,7 @@ const translations = {
     langLabel: 'Язык',
     currLabel: 'Валюта выплат',
     cardLabel: 'Способы оплаты',
-    cardBound: 'Активная карта',
+    cardBound: 'Активные реквизиты',
     cardUnbound: 'Карта не привязана. Выплаты приостановлены.',
     btnUnbind: 'Отвязать карту',
     btnBind: 'Привязать новую карту',
@@ -146,13 +146,8 @@ export default function PartnerSettings() {
 
   const handleBindCard = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanCard = newCardNumber.replace(/\D/g, '');
-    if (cleanCard.length < 16) {
-      alert(t.langLabel === 'Language' ? 'Invalid card number' : 'Некорректный номер карты');
-      return;
-    }
-    const formattedCard = newCardNumber.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
-    setCardNumber(formattedCard);
+    if (!newCardNumber) return;
+    setCardNumber(newCardNumber);
     setCardBound(true);
     setNewCardNumber('');
     setIsBinding(false);
@@ -238,44 +233,15 @@ export default function PartnerSettings() {
         </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {/* Theme Switcher */}
-          <div className="glass-panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
-            <h3 style={{ fontSize: '1rem', marginBottom: '1rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.themeLabel}</h3>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              {(['dark', 'neon', 'light'] as const).map((th) => (
-                <button
-                  key={th}
-                  onClick={() => handleThemeChange(th)}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    borderRadius: '10px',
-                    border: '1px solid',
-                    borderColor: theme === th ? 'var(--primary)' : 'var(--surface-border)',
-                    background: theme === th ? 'var(--primary-glow)' : 'rgba(255,255,255,0.01)',
-                    color: 'var(--foreground)',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {t.themes[th]}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Language & Currency */}
           <div className="glass-panel" style={{ padding: '1.8rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.langLabel}</label>
               <select
+                className="input-field"
                 value={lang}
                 onChange={(e) => setLang(e.target.value as any)}
-                style={{
-                  width: '100%'
-                }}
+                style={{ width: '100%' }}
               >
                 <option value="en">English</option>
                 <option value="ru">Русский</option>
@@ -290,11 +256,10 @@ export default function PartnerSettings() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.currLabel}</label>
               <select
+                className="input-field"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value as any)}
-                style={{
-                  width: '100%'
-                }}
+                style={{ width: '100%' }}
               >
                 <option value="USD">USD ($)</option>
                 <option value="IDR">IDR (Rp)</option>
@@ -345,17 +310,19 @@ export default function PartnerSettings() {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {dealsCount < 100 ? (
                     <button
-                      onClick={handleSimulateDeals}
+                      disabled
                       className="btn-primary"
                       style={{
                         padding: '10px 18px',
                         fontSize: '0.85rem',
-                        background: 'rgba(34, 211, 238, 0.08)',
-                        border: '1px solid var(--primary)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid var(--surface-border)',
+                        color: '#666',
+                        cursor: 'not-allowed',
                         boxShadow: 'none'
                       }}
                     >
-                      ⚡ {t.btnSimulate}
+                      🔒 {t.btnApply} (Locked)
                     </button>
                   ) : (
                     <button
@@ -416,18 +383,15 @@ export default function PartnerSettings() {
                 {isBinding ? (
                   <form onSubmit={handleBindCard} style={{ display: 'flex', gap: '0.5rem' }}>
                     <input
+                      className="input-field"
                       type="text"
                       value={newCardNumber}
                       onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '');
-                        const formatted = val.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
-                        if (formatted.length <= 19) setNewCardNumber(formatted);
+                        setNewCardNumber(e.target.value);
                       }}
-                      placeholder="0000 0000 0000 0000"
+                      placeholder="Card / GoPay / Crypto Wallet"
                       required
-                      style={{
-                        flex: 1
-                      }}
+                      style={{ flex: 1 }}
                     />
                     <button type="submit" className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
                       Add
