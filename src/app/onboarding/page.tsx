@@ -116,8 +116,8 @@ export default function OnboardingPage() {
   }, []);
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (country === 'RU') {
-      setCardNumber(e.target.value); // Allow alphanumeric for crypto
+    if (country === 'RU' || country === 'ID') {
+      setCardNumber(e.target.value); // Allow free text for phone/crypto/bank
       return;
     }
     const value = e.target.value.replace(/\D/g, '');
@@ -306,15 +306,17 @@ export default function OnboardingPage() {
                 overflow: 'hidden',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '1.5px', color: 'var(--foreground)' }}>AGENT CARD</span>
+                  <span style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '1.5px', color: 'var(--foreground)' }}>
+                    {country === 'US' || country === 'EU' || country === 'GLOBAL' ? 'AGENT CARD' : 'PAYMENT PROFILE'}
+                  </span>
                   <div style={{ width: '36px', height: '24px', background: 'var(--background)', borderRadius: '6px' }}></div>
                 </div>
-                <span style={{ fontSize: '1.2rem', fontWeight: 700, letterSpacing: '2px', margin: '1rem 0', fontFamily: 'monospace', textAlign: 'center', color: 'var(--primary)' }}>
-                  {cardNumber || '•••• •••• •••• ••••'}
+                <span style={{ fontSize: '1.2rem', fontWeight: 700, letterSpacing: '2px', margin: '1rem 0', fontFamily: 'monospace', textAlign: 'center', color: 'var(--primary)', wordBreak: 'break-all' }}>
+                  {cardNumber || (country === 'US' || country === 'EU' || country === 'GLOBAL' ? '•••• •••• •••• ••••' : 'NO DETAILS')}
                 </span>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.5px', color: '#888888' }}>
                   <span style={{ textTransform: 'uppercase' }}>{user?.fullName || 'CARD HOLDER'}</span>
-                  <span>{expiry || 'MM/YY'}</span>
+                  <span>{(country === 'US' || country === 'EU' || country === 'GLOBAL') ? (expiry || 'MM/YY') : 'ACTIVE'}</span>
                 </div>
               </div>
 
