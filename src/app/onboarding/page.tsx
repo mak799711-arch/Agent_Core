@@ -83,6 +83,7 @@ export default function OnboardingPage() {
   const [lang, setLang] = useState<'ru' | 'en' | 'id' | 'zh' | 'es' | 'de' | 'fr'>('en');
   const [currency, setCurrency] = useState<'USD' | 'IDR' | 'EUR' | 'RUB' | 'CNY' | 'AUD' | 'SGD' | 'GBP' | 'JPY'>('USD');
   const [country, setCountry] = useState('GLOBAL');
+  const [paymentMethod, setPaymentMethod] = useState<'CARD' | 'EWALLET' | 'CRYPTO' | 'BANK'>('CARD');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
@@ -116,7 +117,7 @@ export default function OnboardingPage() {
   }, []);
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (country === 'RU' || country === 'ID') {
+    if (paymentMethod !== 'CARD') {
       setCardNumber(e.target.value); // Allow free text for phone/crypto/bank
       return;
     }
@@ -146,12 +147,15 @@ export default function OnboardingPage() {
   };
 
   const handleNextStep = () => {
+    // Optionally default the payment method based on country
+    if (country === 'ID') setPaymentMethod('EWALLET');
+    if (country === 'RU') setPaymentMethod('CRYPTO');
     setStep(2);
   };
 
   const handleCardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const needs16Digits = country === 'US' || country === 'EU' || country === 'GLOBAL';
+    const needs16Digits = paymentMethod === 'CARD';
     if (needs16Digits && cardNumber.replace(/\s/g, '').length < 16) {
       alert(t.errorCard);
       return;
@@ -286,12 +290,24 @@ export default function OnboardingPage() {
         {step === 2 && (
           <form onSubmit={handleCardSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div className="form-group">
-              <label className="form-label">{
-                country === 'ID' ? 'Local Bank / GoPay / OVO' :
-                country === 'RU' ? 'Crypto Wallet (USDT) / SBP' :
-                t.cardLabel
-              }</label>
-              
+              <label className="form-label">Payment Method</label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => {
+                  setPaymentMethod(e.target.value as any);
+                  setCardNumber('');
+                  setExpiry('');
+                  setCvc('');
+                }}
+                className="input-field"
+                style={{ marginBottom: '0.5rem' }}
+              >
+                <option value="CARD">Credit / Debit Card</option>
+                <option value="EWALLET">E-Wallet (GoPay / OVO / DANA)</option>
+                <option value="CRYPTO">Crypto Wallet (USDT TRC20)</option>
+                <option value="BANK">Local Bank Transfer</option>
+              </select>
+
               {/* Virtual Mock Card Visual */}
               <div style={{
                 background: 'var(--surface-border)',
@@ -307,16 +323,16 @@ export default function OnboardingPage() {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '1.5px', color: 'var(--foreground)' }}>
-                    {country === 'US' || country === 'EU' || country === 'GLOBAL' ? 'AGENT CARD' : 'PAYMENT PROFILE'}
+                    {paymentMethod === 'CARD' ? 'AGENT CARD' : 'PAYMENT PROFILE'}
                   </span>
                   <div style={{ width: '36px', height: '24px', background: 'var(--background)', borderRadius: '6px' }}></div>
                 </div>
                 <span style={{ fontSize: '1.2rem', fontWeight: 700, letterSpacing: '2px', margin: '1rem 0', fontFamily: 'monospace', textAlign: 'center', color: 'var(--primary)', wordBreak: 'break-all' }}>
-                  {cardNumber || (country === 'US' || country === 'EU' || country === 'GLOBAL' ? '•••• •••• •••• ••••' : 'NO DETAILS')}
+                  {cardNumber || (paymentMethod === 'CARD' ? '•••• •••• •••• ••••' : 'NO DETAILS')}
                 </span>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.5px', color: '#888888' }}>
                   <span style={{ textTransform: 'uppercase' }}>{user?.fullName || 'CARD HOLDER'}</span>
-                  <span>{(country === 'US' || country === 'EU' || country === 'GLOBAL') ? (expiry || 'MM/YY') : 'ACTIVE'}</span>
+                  <span>{paymentMethod === 'CARD' ? (expiry || 'MM/YY') : 'ACTIVE'}</span>
                 </div>
               </div>
 
@@ -328,15 +344,16 @@ export default function OnboardingPage() {
                   value={cardNumber}
                   onChange={handleCardNumberChange}
                   placeholder={
-                    country === 'ID' ? 'Bank Account / GoPay Number' :
-                    country === 'RU' ? 'Crypto TRC20 / SBP Phone' :
+                    paymentMethod === 'EWALLET' ? 'Phone Number (e.g. +62 812...)' :
+                    paymentMethod === 'CRYPTO' ? 'Wallet Address (USDT TRC20)' :
+                    paymentMethod === 'BANK' ? 'Account Number / IBAN' :
                     '0000 0000 0000 0000'
                   }
                   required
                   style={{ textAlign: 'center', letterSpacing: '1px' }}
                 />
 
-                {(country === 'US' || country === 'EU' || country === 'GLOBAL') && (
+                {paymentMethod === 'CARD' && (
                   <div style={{ display: 'flex', gap: '0.75rem' }}>
                     <input
                       className="input-field"
