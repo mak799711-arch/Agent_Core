@@ -27,7 +27,17 @@ const translations = {
     btnSimulate: 'Simulate 105 Deals',
     btnApply: 'Request Verification ✅',
     statusPending: 'Verification request is pending review.',
-    statusVerified: 'Your profile is officially verified!'
+    statusVerified: 'Your profile is officially verified!',
+    posTitle: 'POS Integration (Loyverse)',
+    posDesc: 'Connect your Loyverse POS system to automate promoter rewards. Download the connector helper extension, generate a Backoffice API token, and copy your webhook URL.',
+    posBtnDownload: 'Download Connector (.zip)',
+    posTokenLabel: 'Loyverse Backoffice API Token',
+    posTokenPlaceholder: 'Enter your Backoffice API token',
+    posWebhookLabel: 'Webhook Callback URL',
+    posCopyWebhook: 'Copy Webhook',
+    posWebhookCopied: 'Webhook URL copied!',
+    posStatusConnected: 'Connected',
+    posStatusDisconnected: 'Not Connected'
   },
   ru: {
     title: 'Настройки профиля',
@@ -49,7 +59,17 @@ const translations = {
     btnSimulate: 'Симулировать 105 сделок',
     btnApply: 'Подать заявку на верификацию ✅',
     statusPending: 'Ваша заявка находится на рассмотрении.',
-    statusVerified: 'Ваш профиль официально верифицирован!'
+    statusVerified: 'Ваш профиль официально верифицирован!',
+    posTitle: 'Интеграция с POS (Loyverse)',
+    posDesc: 'Подключите Loyverse POS для автоматизации выплат промоутерам. Скачайте плагин-коннектор, вставьте API-токен Backoffice и скопируйте webhook-ссылку.',
+    posBtnDownload: 'Скачать коннектор (.zip)',
+    posTokenLabel: 'Токен Loyverse Backoffice API',
+    posTokenPlaceholder: 'Введите токен Loyverse Backoffice API',
+    posWebhookLabel: 'Webhook URL для обратного вызова',
+    posCopyWebhook: 'Копировать Webhook',
+    posWebhookCopied: 'Webhook скопирован!',
+    posStatusConnected: 'Подключено',
+    posStatusDisconnected: 'Не подключено'
   },
   id: {
     title: 'Pengaturan Profil',
@@ -71,7 +91,17 @@ const translations = {
     btnSimulate: 'Simulasikan 105 Transaksi',
     btnApply: 'Kirim Permohonan Verifikasi ✅',
     statusPending: 'Permohonan verifikasi Anda sedang ditinjau.',
-    statusVerified: 'Profil Anda telah resmi diverifikasi!'
+    statusVerified: 'Profil Anda telah resmi diverifikasi!',
+    posTitle: 'Integrasi POS (Loyverse)',
+    posDesc: 'Hubungkan sistem Loyverse POS Anda untuk otomatisasi komisi promotor. Unduh ekstensi konektor, buat token API Backoffice, dan salin URL webhook Anda.',
+    posBtnDownload: 'Unduh Konektor (.zip)',
+    posTokenLabel: 'Token API Loyverse Backoffice',
+    posTokenPlaceholder: 'Masukkan token API Backoffice Anda',
+    posWebhookLabel: 'URL Callback Webhook',
+    posCopyWebhook: 'Salin Webhook',
+    posWebhookCopied: 'URL Webhook disalin!',
+    posStatusConnected: 'Terhubung',
+    posStatusDisconnected: 'Belum Terhubung'
   }
 };
 
@@ -90,6 +120,11 @@ export default function BusinessSettings() {
   // Verification states
   const [dealsCount, setDealsCount] = useState(85);
   const [verificationStatus, setVerificationStatus] = useState<'none' | 'pending' | 'verified'>('none');
+
+  // POS Integration states
+  const [loyverseToken, setLoyverseToken] = useState('');
+  const [isLoyverseConnected, setIsLoyverseConnected] = useState(false);
+  const [copiedWebhook, setCopiedWebhook] = useState(false);
 
   const router = useRouter();
   const t = (translations as any)[lang] || translations.en;
@@ -125,6 +160,10 @@ export default function BusinessSettings() {
         } else {
           setVerificationStatus('none');
         }
+
+        const savedToken = localStorage.getItem(`loyverse_token_${currentUser.id}`) || '';
+        setLoyverseToken(savedToken);
+        setIsLoyverseConnected(savedToken.length > 0);
       }
       setLoading(false);
     }
@@ -170,6 +209,12 @@ export default function BusinessSettings() {
     alert(lang === 'ru' ? 'Заявка на верификацию отправлена!' : 'Verification request submitted!');
   };
 
+  const handleCopyWebhook = () => {
+    navigator.clipboard.writeText('https://agent-core-app.vercel.app/api/v1/loyverse/webhook');
+    setCopiedWebhook(true);
+    setTimeout(() => setCopiedWebhook(false), 2000);
+  };
+
   const handleSave = async () => {
     try {
       await authService.updateProfile({
@@ -179,6 +224,9 @@ export default function BusinessSettings() {
         cardBound,
         cardNumber: cardBound ? cardNumber : null
       });
+      if (user) {
+        localStorage.setItem(`loyverse_token_${user.id}`, loyverseToken);
+      }
       alert(t.success);
       if (!cardBound) {
         router.push('/onboarding');
@@ -441,6 +489,90 @@ export default function BusinessSettings() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* POS Integration (Loyverse) */}
+          <div className="glass-panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.posTitle}</h3>
+            <p style={{ fontSize: '0.85rem', opacity: 0.6, marginBottom: '1.2rem', lineHeight: '1.4' }}>{t.posDesc}</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              <div>
+                <a 
+                  href="/downloads/agent-core-connector.zip" 
+                  download 
+                  className="btn-primary" 
+                  style={{ 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: '8px', 
+                    padding: '10px 16px', 
+                    fontSize: '0.85rem', 
+                    background: 'rgba(34, 211, 238, 0.08)', 
+                    border: '1px solid var(--primary)', 
+                    boxShadow: 'none',
+                    textDecoration: 'none',
+                    color: 'var(--foreground)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  📥 {t.posBtnDownload}
+                </a>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7 }}>
+                  {t.posTokenLabel}
+                  <span style={{ 
+                    marginLeft: '8px', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 'bold', 
+                    color: isLoyverseConnected ? 'var(--success)' : 'var(--error)' 
+                  }}>
+                    ● {isLoyverseConnected ? t.posStatusConnected : t.posStatusDisconnected}
+                  </span>
+                </label>
+                <input
+                  type="password"
+                  value={loyverseToken}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setLoyverseToken(val);
+                    setIsLoyverseConnected(val.trim().length > 0);
+                  }}
+                  placeholder={t.posTokenPlaceholder}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7 }}>
+                  {t.posWebhookLabel}
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    readOnly
+                    value="https://agent-core-app.vercel.app/api/v1/loyverse/webhook"
+                    style={{ flex: 1, background: 'rgba(255,255,255,0.02)', cursor: 'default' }}
+                  />
+                  <button 
+                    type="button" 
+                    onClick={handleCopyWebhook} 
+                    className="btn-primary" 
+                    style={{ 
+                      padding: '10px 16px', 
+                      fontSize: '0.85rem', 
+                      background: copiedWebhook ? 'var(--success)' : 'rgba(255,255,255,0.05)', 
+                      border: '1px solid var(--surface-border)', 
+                      boxShadow: 'none' 
+                    }}
+                  >
+                    {copiedWebhook ? '✓' : '📋'} {t.posCopyWebhook}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <button onClick={handleSave} className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)', boxShadow: '0 4px 14px rgba(34, 211, 238, 0.15)' }}>

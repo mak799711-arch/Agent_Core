@@ -44,18 +44,7 @@ export default function LoginPage() {
   };
 
   const handleDemoLogin = async (type: 'partner' | 'business') => {
-    setError('');
-    setLoading(true);
-    try {
-      const email = type === 'partner' ? 'partner@agent.core' : 'business@agent.core';
-      await authService.signIn(email, 'password123');
-      router.push(`/${type}`);
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || 'Demo login failed');
-    } finally {
-      setLoading(false);
-    }
+    alert("Демо-аккаунты отключены, так как мы перешли на реальную базу данных (Supabase). Пожалуйста, используй кнопку Sign Up, чтобы создать свой первый реальный аккаунт!");
   };
 
   return (
@@ -69,17 +58,7 @@ export default function LoginPage() {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Background ambient lights */}
-      <div style={{
-        position: 'absolute', width: '300px', height: '300px',
-        background: 'var(--ambient-glow)', filter: 'blur(80px)',
-        borderRadius: '50%', top: '20%', left: '10%', pointerEvents: 'none'
-      }} />
-      <div style={{
-        position: 'absolute', width: '300px', height: '300px',
-        background: 'var(--ambient-glow)', filter: 'blur(80px)',
-        borderRadius: '50%', bottom: '20%', right: '10%', pointerEvents: 'none'
-      }} />
+
 
       <div className="glass-panel" style={{
         width: '100%', maxWidth: '440px', padding: 'var(--panel-padding)',
@@ -192,12 +171,12 @@ export default function LoginPage() {
           <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
           <button
             onClick={() => handleDemoLogin('partner')}
             disabled={loading}
             style={{
-              flex: '1 1 150px', padding: '12px', borderRadius: '12px',
+              padding: '12px', borderRadius: '12px',
               background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)',
               color: 'white', cursor: 'pointer', fontSize: '0.85rem',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease'
@@ -212,7 +191,7 @@ export default function LoginPage() {
             onClick={() => handleDemoLogin('business')}
             disabled={loading}
             style={{
-              flex: '1 1 150px', padding: '12px', borderRadius: '12px',
+              padding: '12px', borderRadius: '12px',
               background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)',
               color: 'white', cursor: 'pointer', fontSize: '0.85rem',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease'
