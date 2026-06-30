@@ -82,6 +82,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [lang, setLang] = useState<'ru' | 'en' | 'id' | 'zh' | 'es' | 'de' | 'fr'>('en');
   const [currency, setCurrency] = useState<'USD' | 'IDR' | 'EUR' | 'RUB' | 'CNY' | 'AUD' | 'SGD' | 'GBP' | 'JPY'>('USD');
+  const [country, setCountry] = useState('GLOBAL');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
@@ -115,6 +116,10 @@ export default function OnboardingPage() {
   }, []);
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (country === 'RU') {
+      setCardNumber(e.target.value); // Allow alphanumeric for crypto
+      return;
+    }
     const value = e.target.value.replace(/\D/g, '');
     const formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
     if (formattedValue.length <= 19) {
@@ -146,8 +151,13 @@ export default function OnboardingPage() {
 
   const handleCardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (cardNumber.replace(/\s/g, '').length < 16) {
+    const needs16Digits = country === 'US' || country === 'EU' || country === 'GLOBAL';
+    if (needs16Digits && cardNumber.replace(/\s/g, '').length < 16) {
       alert(t.errorCard);
+      return;
+    }
+    if (!cardNumber) {
+      alert('Please enter payment details');
       return;
     }
     setStep(3);
@@ -251,6 +261,22 @@ export default function OnboardingPage() {
               </select>
             </div>
 
+            {/* Country Selector */}
+            <div className="form-group">
+              <label className="form-label">{lang === 'ru' ? 'Страна проживания' : lang === 'id' ? 'Negara Tempat Tinggal' : 'Country of Residence'}</label>
+              <select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="input-field"
+              >
+                <option value="ID">Indonesia</option>
+                <option value="RU">Russia</option>
+                <option value="US">United States</option>
+                <option value="EU">Europe</option>
+                <option value="GLOBAL">Other / Global</option>
+              </select>
+            </div>
+
             <button onClick={handleNextStep} className="btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
               {t.btnNext}
             </button>
@@ -260,7 +286,11 @@ export default function OnboardingPage() {
         {step === 2 && (
           <form onSubmit={handleCardSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div className="form-group">
-              <label className="form-label">{t.cardLabel}</label>
+              <label className="form-label">{
+                country === 'ID' ? 'Local Bank / GoPay / OVO' :
+                country === 'RU' ? 'Crypto Wallet (USDT) / SBP' :
+                t.cardLabel
+              }</label>
               
               {/* Virtual Mock Card Visual */}
               <div style={{
@@ -295,31 +325,37 @@ export default function OnboardingPage() {
                   type="text"
                   value={cardNumber}
                   onChange={handleCardNumberChange}
-                  placeholder="0000 0000 0000 0000"
+                  placeholder={
+                    country === 'ID' ? 'Bank Account / GoPay Number' :
+                    country === 'RU' ? 'Crypto TRC20 / SBP Phone' :
+                    '0000 0000 0000 0000'
+                  }
                   required
                   style={{ textAlign: 'center', letterSpacing: '1px' }}
                 />
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <input
-                    className="input-field"
-                    type="text"
-                    value={expiry}
-                    onChange={handleExpiryChange}
-                    placeholder={t.cardExpiry}
-                    required
-                    style={{ flex: 1, textAlign: 'center' }}
-                  />
-                  <input
-                    className="input-field"
-                    type="password"
-                    value={cvc}
-                    onChange={handleCvcChange}
-                    placeholder={t.cardCvc}
-                    required
-                    style={{ flex: 1, textAlign: 'center' }}
-                  />
-                </div>
+                {(country === 'US' || country === 'EU' || country === 'GLOBAL') && (
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <input
+                      className="input-field"
+                      type="text"
+                      value={expiry}
+                      onChange={handleExpiryChange}
+                      placeholder={t.cardExpiry}
+                      required
+                      style={{ flex: 1, textAlign: 'center' }}
+                    />
+                    <input
+                      className="input-field"
+                      type="password"
+                      value={cvc}
+                      onChange={handleCvcChange}
+                      placeholder={t.cardCvc}
+                      required
+                      style={{ flex: 1, textAlign: 'center' }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
