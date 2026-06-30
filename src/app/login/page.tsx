@@ -53,7 +53,7 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'var(--bg-gradient)',
+      background: 'var(--background)',
       padding: 'var(--layout-padding)',
       position: 'relative',
       overflow: 'hidden'
@@ -62,13 +62,12 @@ export default function LoginPage() {
 
       <div className="glass-panel" style={{
         width: '100%', maxWidth: '440px', padding: 'var(--panel-padding)',
-        boxShadow: 'var(--card-shadow)', borderRadius: '24px',
-        zIndex: 1, border: '1px solid var(--glass-border)'
+        boxShadow: 'none', borderRadius: '24px',
+        zIndex: 1, border: '1px solid var(--surface-border)', background: 'var(--surface)'
       }}>
         <h2 style={{
           fontSize: '2.2rem', fontWeight: 800,
-          background: 'linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.7) 100%)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          color: 'var(--foreground)',
           marginBottom: '0.4rem', textAlign: 'center', letterSpacing: '-1px'
         }}>
           Agent Core
@@ -164,45 +163,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Demo accounts — skip onboarding, go straight to dashboard */}
-        <div style={{ margin: '2rem 0 1.2rem 0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
-          <span style={{ fontSize: '0.7rem', opacity: 0.4, fontWeight: 700, letterSpacing: '1px' }}>DEMO LOGINS</span>
-          <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
-        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
-          <button
-            onClick={() => handleDemoLogin('partner')}
-            disabled={loading}
-            style={{
-              padding: '12px', borderRadius: '12px',
-              background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)',
-              color: 'white', cursor: 'pointer', fontSize: '0.85rem',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.01)'; e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
-          >
-            <span style={{ fontWeight: 700 }}>Demo Partner</span>
-            <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>Bali Promoter</span>
-          </button>
-          <button
-            onClick={() => handleDemoLogin('business')}
-            disabled={loading}
-            style={{
-              padding: '12px', borderRadius: '12px',
-              background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)',
-              color: 'white', cursor: 'pointer', fontSize: '0.85rem',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.01)'; e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
-          >
-            <span style={{ fontWeight: 700 }}>Demo Business</span>
-            <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>Venue Manager</span>
-          </button>
-        </div>
       </div>
     </div>
   );
