@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import ThemeSelector from '@/app/components/ThemeSelector';
 
 export const metadata: Metadata = {
   title: 'Agent Core | Referral Network',
