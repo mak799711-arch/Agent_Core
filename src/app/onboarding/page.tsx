@@ -263,7 +263,7 @@ export default function OnboardingPage() {
 
             {/* Country Selector */}
             <div className="form-group">
-              <label className="form-label">{lang === 'ru' ? 'Страна проживания' : lang === 'id' ? 'Negara Tempat Tinggal' : 'Country of Residence'}</label>
+              <label className="form-label">{lang === 'ru' ? 'Регион для выплат' : lang === 'id' ? 'Wilayah Pembayaran' : 'Billing Region'}</label>
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
