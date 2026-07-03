@@ -8,6 +8,7 @@ import { Offer } from '@/lib/interfaces/offers';
 import { formatCurrency } from '@/lib/utils/currency';
 import VerificationBadge from '@/app/components/VerificationBadge';
 import { Transaction } from '@/lib/interfaces/wallet';
+import { formatUserName } from '@/lib/utils/format';
 
 const translations = {
   en: {
@@ -522,7 +523,7 @@ export default function BusinessDashboard() {
           />
           <div>
             <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {user?.fullName}
+              {formatUserName(user?.fullName, user?.role)}
               {user?.status === 'verified' && <VerificationBadge size={14} />}
             </h4>
             <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'var(--primary)' }}>{t.venue}</span>

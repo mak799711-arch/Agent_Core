@@ -1,6 +1,8 @@
 import { IAuthService, UserProfile } from '../../interfaces/auth';
 import { supabase } from '../../supabase/client';
 
+import { sanitizeName } from '../../utils/format';
+
 export class SupabaseAuthService implements IAuthService {
   private async getProfile(userId: string): Promise<UserProfile | null> {
     const { data, error } = await supabase
@@ -53,12 +55,14 @@ export class SupabaseAuthService implements IAuthService {
       throw new Error('No user returned from signup');
     }
 
+    const safeFullName = sanitizeName(fullName);
+
     // Insert profile data
     const profileData = {
       id: data.user.id,
       role,
-      full_name: fullName || null,
-      avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${fullName || data.user.id}`,
+      full_name: safeFullName,
+      avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${safeFullName || data.user.id}`,
     };
 
     const { error: profileError } = await supabase
@@ -127,7 +131,7 @@ export class SupabaseAuthService implements IAuthService {
 
     // Map UserProfile updates to DB columns
     const dbUpdates: any = {};
-    if (updates.fullName !== undefined) dbUpdates.full_name = updates.fullName;
+    if (updates.fullName !== undefined) dbUpdates.full_name = sanitizeName(updates.fullName);
     if (updates.avatarUrl !== undefined) dbUpdates.avatar_url = updates.avatarUrl;
     if (updates.cardBound !== undefined) dbUpdates.card_bound = updates.cardBound;
     if (updates.cardNumber !== undefined) dbUpdates.card_number = updates.cardNumber;

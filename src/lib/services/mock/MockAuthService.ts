@@ -175,11 +175,12 @@ export class MockAuthService implements IAuthService {
   async signUp(email: string, password: string, role: 'partner' | 'business', fullName?: string): Promise<UserProfile> {
     const id = `mock-user-${Math.random().toString(36).substr(2, 9)}`;
     const cleanEmail = email.trim().toLowerCase();
+    const safeFullName = sanitizeName(fullName);
     const user: MockUser = {
       id,
       role,
-      fullName: fullName || null,
-      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${fullName || id}`,
+      fullName: safeFullName || null,
+      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${safeFullName || id}`,
       createdAt: new Date().toISOString(),
       email: cleanEmail,
       password,
@@ -221,14 +222,10 @@ export class MockAuthService implements IAuthService {
   }
 
   async updateProfile(updates: Partial<UserProfile>): Promise<UserProfile> {
-    if (!this.currentUser) {
-      throw new Error('No authenticated user');
-    }
+    if (!this.currentUser) throw new Error('Not authenticated');
     
-    const updatedUser = {
-      ...this.currentUser,
-      ...updates
-    };
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     let userEmail = '';
     for (const [email, user] of this.users.entries()) {
@@ -238,10 +235,16 @@ export class MockAuthService implements IAuthService {
       }
     }
 
-    if (userEmail) {
-      this.users.set(userEmail, { ...this.users.get(userEmail)!, ...updates });
-      this.saveUsersToStorage();
+    if (!userEmail) throw new Error('User not found');
+
+    const safeUpdates = { ...updates };
+    if (safeUpdates.fullName !== undefined) {
+      safeUpdates.fullName = sanitizeName(safeUpdates.fullName || '');
     }
+
+    const updatedUser = { ...this.users.get(userEmail)!, ...safeUpdates };
+    this.users.set(userEmail, updatedUser);
+    this.saveUsersToStorage();
 
     this.currentUser = updatedUser;
     return updatedUser;
