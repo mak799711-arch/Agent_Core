@@ -534,6 +534,23 @@ export default function PartnerDashboard() {
             <option value="JPY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>¥ JPY</option>
           </select>
 
+          {!user?.cardBound && (
+            <button onClick={() => router.push('/onboarding')} style={{
+              background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)',
+              border: 'none',
+              color: '#fff',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              boxShadow: '0 4px 14px rgba(34, 211, 238, 0.3)',
+              whiteSpace: 'nowrap'
+            }}>
+              {lang === 'ru' ? 'Завершить профиль 🛡️' : 'Complete Profile 🛡️'}
+            </button>
+          )}
           <button onClick={() => router.push('/partner/settings')} style={{
             background: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid var(--surface-border)',
