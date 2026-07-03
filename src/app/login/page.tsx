@@ -7,7 +7,7 @@ import { authService } from '@/lib/services';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'partner' | 'business'>('partner');
+  const [role, setRole] = useState<'partner' | 'business' | null>(null);
   const [fullName, setFullName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
@@ -18,6 +18,12 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (!role) {
+      setError('Please select an account type (Partner or Business) before continuing.');
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -44,8 +50,15 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!role) {
+      setError('Please select an account type (Partner or Business) before continuing with Google.');
+      return;
+    }
     try {
       setLoading(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('agent_core_pending_role', role);
+      }
       await authService.signInWithGoogle();
     } catch (err) {
       const error = err as Error;
@@ -73,6 +86,48 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           
+          <div className="form-group">
+            <label className="form-label">Account Type</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => setRole('partner')}
+                style={{
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid',
+                  borderColor: role === 'partner' ? 'var(--primary)' : 'var(--surface-border)',
+                  background: role === 'partner' ? 'rgba(249, 115, 22, 0.1)' : 'var(--background)',
+                  color: 'var(--foreground)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Partner
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('business')}
+                style={{
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid',
+                  borderColor: role === 'business' ? 'var(--primary)' : 'var(--surface-border)',
+                  background: role === 'business' ? 'rgba(249, 115, 22, 0.1)' : 'var(--background)',
+                  color: 'var(--foreground)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Business
+              </button>
+            </div>
+          </div>
+
           {isSignUp && (
             <div className="form-group">
               <label className="form-label">Full Name / Business Name</label>
@@ -137,51 +192,6 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
-
-          {isSignUp && (
-            <div className="form-group">
-              <label className="form-label">Account Type</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setRole('partner')}
-                  style={{
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: '1px solid',
-                    borderColor: role === 'partner' ? 'var(--primary)' : 'var(--surface-border)',
-                    background: role === 'partner' ? 'rgba(249, 115, 22, 0.1)' : 'var(--background)',
-                    color: 'var(--foreground)',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Partner
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('business')}
-                  style={{
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: '1px solid',
-                    borderColor: role === 'business' ? 'var(--primary)' : 'var(--surface-border)',
-                    background: role === 'business' ? 'rgba(249, 115, 22, 0.1)' : 'var(--background)',
-                    color: 'var(--foreground)',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Business
-                </button>
-              </div>
-            </div>
-          )}
-
           <button
             type="submit"
             disabled={loading}

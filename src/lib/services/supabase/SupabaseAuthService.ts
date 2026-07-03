@@ -38,7 +38,39 @@ export class SupabaseAuthService implements IAuthService {
       return null;
     }
     
-    return this.getProfile(session.user.id);
+    let profile = await this.getProfile(session.user.id);
+    
+    if (!profile) {
+      // Lazy creation for OAuth users
+      const pendingRole = (typeof window !== 'undefined' ? localStorage.getItem('agent_core_pending_role') : 'partner') as 'partner' | 'business';
+      const role = pendingRole || 'partner';
+      
+      const safeFullName = sanitizeName(session.user.user_metadata?.full_name);
+      
+      const profileData = {
+        id: session.user.id,
+        role,
+        full_name: safeFullName || null,
+        avatar_url: session.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.id}`,
+      };
+
+      await supabase.from('profiles').insert(profileData);
+
+      if (role === 'business') {
+        await supabase.from('businesses').insert({
+          owner_id: session.user.id,
+          name: `${safeFullName || 'My Business'} Venue`,
+        });
+      }
+      
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('agent_core_pending_role');
+      }
+      
+      profile = await this.getProfile(session.user.id);
+    }
+
+    return profile;
   }
 
   async signUp(email: string, password: string, role: 'partner' | 'business', fullName?: string): Promise<UserProfile> {
