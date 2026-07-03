@@ -4,6 +4,14 @@ CREATE TABLE profiles (
   role VARCHAR(50) NOT NULL CHECK (role IN ('partner', 'business', 'admin')),
   full_name VARCHAR(255),
   avatar_url TEXT,
+  card_bound BOOLEAN DEFAULT FALSE,
+  card_number VARCHAR(50),
+  currency VARCHAR(10) DEFAULT 'USD',
+  language VARCHAR(10) DEFAULT 'en',
+  theme VARCHAR(20) DEFAULT 'dark',
+  status VARCHAR(50) DEFAULT 'unverified',
+  phone VARCHAR(50),
+  is_blocked BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

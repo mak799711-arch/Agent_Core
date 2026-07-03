@@ -82,7 +82,6 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [lang, setLang] = useState<'ru' | 'en' | 'id' | 'zh' | 'es' | 'de' | 'fr'>('en');
   const [currency, setCurrency] = useState<'USD' | 'IDR' | 'EUR' | 'RUB' | 'CNY' | 'AUD' | 'SGD' | 'GBP' | 'JPY'>('USD');
-  const [country, setCountry] = useState('GLOBAL');
   const [paymentMethod, setPaymentMethod] = useState<'CARD' | 'EWALLET' | 'CRYPTO' | 'BANK'>('CARD');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
@@ -147,9 +146,6 @@ export default function OnboardingPage() {
   };
 
   const handleNextStep = () => {
-    // Optionally default the payment method based on country
-    if (country === 'ID') setPaymentMethod('EWALLET');
-    if (country === 'RU') setPaymentMethod('CRYPTO');
     setStep(2);
   };
 
@@ -265,21 +261,6 @@ export default function OnboardingPage() {
               </select>
             </div>
 
-            {/* Country Selector */}
-            <div className="form-group">
-              <label className="form-label">{lang === 'ru' ? 'Регион для выплат' : lang === 'id' ? 'Wilayah Pembayaran' : 'Billing Region'}</label>
-              <select
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="input-field"
-              >
-                <option value="ID">Indonesia</option>
-                <option value="RU">Russia</option>
-                <option value="US">United States</option>
-                <option value="EU">Europe</option>
-                <option value="GLOBAL">Other / Global</option>
-              </select>
-            </div>
 
             <button onClick={handleNextStep} className="btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
               {t.btnNext}

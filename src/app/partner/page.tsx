@@ -232,6 +232,8 @@ export default function PartnerDashboard() {
   
   // New States
   const [isStarted, setIsStarted] = useState(false);
+  const [needsCityInput, setNeedsCityInput] = useState(false);
+  const [cityName, setCityName] = useState('');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -291,7 +293,36 @@ export default function PartnerDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    // Check if user already saw the intro screen
+    const hasRequested = localStorage.getItem('hasRequestedLocation');
+    if (hasRequested === 'true') {
+      setIsStarted(true);
+      // Silently request location for the map
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            });
+          },
+          (error) => {
+            const savedCity = localStorage.getItem('userCity');
+            if (savedCity) setCityName(savedCity);
+            else setNeedsCityInput(true);
+          }
+        );
+      } else {
+        const savedCity = localStorage.getItem('userCity');
+        if (savedCity) setCityName(savedCity);
+        else setNeedsCityInput(true);
+      }
+    }
+  }, []);
+
   const handleGetStarted = () => {
+    localStorage.setItem('hasRequestedLocation', 'true');
     setLocationStatus(t.locRequesting);
     
     if (navigator.geolocation) {
@@ -306,17 +337,13 @@ export default function PartnerDashboard() {
         },
         (error) => {
           console.warn('Geolocation error:', error);
-          // Дефолтные координаты Бали (Чангу), если гео недоступна
-          setUserLocation({ lat: -8.6534, lng: 115.1305 });
-          setLocationStatus(t.locError);
-          setTimeout(() => {
-            setLocationStatus(null);
-            setIsStarted(true);
-          }, 3000);
+          setNeedsCityInput(true);
+          setLocationStatus(null);
+          setIsStarted(true);
         }
       );
     } else {
-      setUserLocation({ lat: -8.6534, lng: 115.1305 });
+      setNeedsCityInput(true);
       setIsStarted(true);
     }
   };
@@ -547,6 +574,51 @@ export default function PartnerDashboard() {
         </div>
       </header>
 
+      {/* Hero Intro */}
+      <div style={{ textAlign: 'center', marginBottom: '2.5rem', zIndex: 1, position: 'relative' }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid var(--surface-border)',
+          padding: '6px 14px',
+          borderRadius: '30px',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          color: 'var(--primary)',
+          letterSpacing: '0.5px',
+          marginBottom: '1.2rem',
+          textTransform: 'uppercase'
+        }}>
+          <span>🌐</span> Digital Employee Network
+        </div>
+        <h1 style={{
+          fontSize: '2.5rem',
+          fontWeight: 800,
+          letterSpacing: '-1px',
+          lineHeight: '1.1',
+          background: 'linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.7) 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          marginBottom: '0.8rem',
+          fontFamily: "'Plus Jakarta Sans', sans-serif"
+        }}>
+          Agent Core
+        </h1>
+        <p style={{
+          color: 'var(--foreground)',
+          opacity: 0.6,
+          maxWidth: '450px',
+          fontSize: '0.9rem',
+          lineHeight: 1.5,
+          margin: '0 auto'
+        }}>
+          The first universal digital employee network. Connect venue offers with local promoters and track acquisitions reliably.
+        </p>
+      </div>
+
+
       {/* Total Earnings Widget */}
       <div className="glass-panel" style={{
         padding: 'var(--panel-padding)',
@@ -626,6 +698,30 @@ export default function PartnerDashboard() {
           {locationStatus && (
             <p style={{ fontSize: '0.85rem', color: 'var(--accent)' }}>{locationStatus}</p>
           )}
+        </div>
+      ) : needsCityInput ? (
+        <div className="glass-panel" style={{ padding: '3rem 1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Enter Your City</h2>
+          <p style={{ opacity: 0.7 }}>Since location access is unavailable, please enter your city manually to find relevant offers.</p>
+          <input 
+            type="text" 
+            placeholder="e.g. Moscow, New York" 
+            value={cityName} 
+            onChange={(e) => setCityName(e.target.value)}
+            style={{ width: '100%', maxWidth: '300px', padding: '12px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--surface-border)', color: 'var(--foreground)', fontSize: '1rem', outline: 'none' }}
+          />
+          <button 
+            className="btn-primary" 
+            onClick={() => {
+              if(cityName.trim().length > 1) {
+                localStorage.setItem('userCity', cityName.trim());
+                setNeedsCityInput(false);
+              }
+            }}
+            style={{ padding: '12px 24px', fontSize: '1rem' }}
+          >
+            Confirm City
+          </button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

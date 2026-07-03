@@ -1,4 +1,4 @@
-import { MockAuthService } from './mock/MockAuthService';
+import { SupabaseAuthService } from './supabase/SupabaseAuthService';
 import { MockOfferRepository } from './mock/MockOfferRepository';
 import { MockReferralRepository } from './mock/MockReferralRepository';
 import { MockWalletRepository } from './mock/MockWalletRepository';
@@ -6,7 +6,7 @@ import { MockWalletRepository } from './mock/MockWalletRepository';
 // import { StripeWalletRepository } from './payment/StripeWalletRepository';
 
 // Инициализируем синглтоны сервисов
-const authService = new MockAuthService();
+const authService = new SupabaseAuthService();
 const offerRepository = new MockOfferRepository();
 const referralRepository = new MockReferralRepository();
 
