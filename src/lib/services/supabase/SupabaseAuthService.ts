@@ -99,6 +99,19 @@ export class SupabaseAuthService implements IAuthService {
     return profile;
   }
 
+  async signInWithGoogle(): Promise<void> {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      }
+    });
+
+    if (error) {
+      throw error;
+    }
+  }
+
   async signOut(): Promise<void> {
     const { error } = await supabase.auth.signOut();
     if (error) {

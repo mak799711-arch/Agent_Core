@@ -210,6 +210,11 @@ export class MockAuthService implements IAuthService {
     return user;
   }
 
+  async signInWithGoogle(): Promise<void> {
+    // Dummy mock implementation
+    console.log('Mock signInWithGoogle called');
+  }
+
   async signOut(): Promise<void> {
     this.currentUser = null;
     this.clearSession();

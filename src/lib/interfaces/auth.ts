@@ -21,6 +21,7 @@ export interface IAuthService {
   getCurrentUser(): Promise<UserProfile | null>;
   signUp(email: string, password: string, role: 'partner' | 'business', fullName?: string): Promise<UserProfile>;
   signIn(email: string, password: string): Promise<UserProfile>;
+  signInWithGoogle(): Promise<void>;
   signOut(): Promise<void>;
   updateProfile(updates: Partial<UserProfile>): Promise<UserProfile>;
   getAllUsers(): Promise<UserProfile[]>;
