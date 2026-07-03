@@ -228,11 +228,7 @@ export default function BusinessSettings() {
         localStorage.setItem(`loyverse_token_${user.id}`, loyverseToken);
       }
       alert(t.success);
-      if (!cardBound) {
-        router.push('/onboarding');
-      } else {
-        router.push('/business');
-      }
+      router.push('/business');
     } catch (err) {
       alert('Failed to save settings');
     }

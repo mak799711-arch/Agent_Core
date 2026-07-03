@@ -258,13 +258,8 @@ export default function PartnerDashboard() {
         }
 
         if (currentUser) {
-          if (!currentUser.cardBound) {
-            router.push('/onboarding');
-            return;
-          }
-
           setUser(currentUser);
-          
+
           const activeTheme = localStorage.getItem('theme') || currentUser.theme;
           document.documentElement.setAttribute('data-theme', activeTheme);
 

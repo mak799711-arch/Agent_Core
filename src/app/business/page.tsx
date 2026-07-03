@@ -335,11 +335,6 @@ export default function BusinessDashboard() {
         }
 
         if (currentUser) {
-          if (!currentUser.cardBound) {
-            router.push('/onboarding');
-            return;
-          }
-
           setUser(currentUser);
           
           const activeTheme = localStorage.getItem('theme') || currentUser.theme;

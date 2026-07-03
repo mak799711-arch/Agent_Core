@@ -29,16 +29,12 @@ export default function LoginPage() {
     try {
       if (isSignUp) {
         await authService.signUp(email, password, role!, fullName);
-        router.push('/onboarding');
+        router.push(`/${role}`);
       } else {
         await authService.signIn(email, password);
         const user = await authService.getCurrentUser();
         if (user) {
-          if (!user.cardBound) {
-            router.push('/onboarding');
-          } else {
-            router.push(`/${user.role}`);
-          }
+          router.push(`/${user.role}`);
         }
       }
     } catch (err) {

@@ -176,12 +176,7 @@ export default function PartnerSettings() {
         cardNumber: cardBound ? cardNumber : null
       });
       alert(t.success);
-      // Если отвязали карту, перенаправляем на онбординг, так как без нее нельзя работать
-      if (!cardBound) {
-        router.push('/onboarding');
-      } else {
-        router.push('/partner');
-      }
+      router.push('/partner');
     } catch (err) {
       alert('Failed to save settings');
     }
