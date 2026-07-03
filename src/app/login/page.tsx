@@ -19,7 +19,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     
-    if (!role) {
+    if (isSignUp && !role) {
       setError('Please select an account type (Partner or Business) before continuing.');
       return;
     }
@@ -28,7 +28,7 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        await authService.signUp(email, password, role, fullName);
+        await authService.signUp(email, password, role!, fullName);
         router.push('/onboarding');
       } else {
         await authService.signIn(email, password);
@@ -50,13 +50,13 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
-    if (!role) {
+    if (isSignUp && !role) {
       setError('Please select an account type (Partner or Business) before continuing with Google.');
       return;
     }
     try {
       setLoading(true);
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && role) {
         localStorage.setItem('agent_core_pending_role', role);
       }
       await authService.signInWithGoogle();
@@ -86,47 +86,49 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           
-          <div className="form-group">
-            <label className="form-label">Account Type</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <button
-                type="button"
-                onClick={() => setRole('partner')}
-                style={{
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid',
-                  borderColor: role === 'partner' ? 'var(--primary)' : 'var(--surface-border)',
-                  background: role === 'partner' ? 'rgba(249, 115, 22, 0.1)' : 'var(--background)',
-                  color: 'var(--foreground)',
-                  fontWeight: 600,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                Partner
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('business')}
-                style={{
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid',
-                  borderColor: role === 'business' ? 'var(--primary)' : 'var(--surface-border)',
-                  background: role === 'business' ? 'rgba(249, 115, 22, 0.1)' : 'var(--background)',
-                  color: 'var(--foreground)',
-                  fontWeight: 600,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                Business
-              </button>
+          {isSignUp && (
+            <div className="form-group">
+              <label className="form-label">Account Type</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setRole('partner')}
+                  style={{
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: role === 'partner' ? 'var(--primary)' : 'var(--surface-border)',
+                    background: role === 'partner' ? 'rgba(249, 115, 22, 0.1)' : 'var(--background)',
+                    color: 'var(--foreground)',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Partner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('business')}
+                  style={{
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: role === 'business' ? 'var(--primary)' : 'var(--surface-border)',
+                    background: role === 'business' ? 'rgba(249, 115, 22, 0.1)' : 'var(--background)',
+                    color: 'var(--foreground)',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Business
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {isSignUp && (
             <div className="form-group">
