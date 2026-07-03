@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService, offerRepository, referralRepository, walletRepository } from '@/lib/services';
+import { authService, offerRepository, referralRepository, walletRepository, businessRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
 import { Offer } from '@/lib/interfaces/offers';
 import { formatCurrency } from '@/lib/utils/currency';
@@ -268,6 +268,7 @@ const translations = {
 export default function BusinessDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [balance, setBalance] = useState(0);
+  const [businessId, setBusinessId] = useState<string | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [shortCode, setShortCode] = useState('');
   const [history, setHistory] = useState<Transaction[]>([]);
@@ -290,10 +291,24 @@ export default function BusinessDashboard() {
   const t = translations[lang];
 
   const refreshData = async (userId: string) => {
+    let bus = await businessRepository.getBusinessByOwnerId(userId);
+    if (!bus) {
+      // Create default if missing for some reason
+      bus = await businessRepository.createBusiness({
+        ownerId: userId,
+        name: `${user?.fullName || 'My'} Venue`,
+        description: '',
+        address: '',
+        latitude: null,
+        longitude: null
+      });
+    }
+    setBusinessId(bus.id);
+
     const bal = await walletRepository.getBalance(userId);
     setBalance(bal);
 
-    const businessOffers = await offerRepository.getOffers({ businessId: userId });
+    const businessOffers = await offerRepository.getOffers({ businessId: bus.id });
     
     // Reserve Protection Layer Logic:
     const updatedOffers = await Promise.all(businessOffers.map(async (offer) => {
@@ -422,8 +437,13 @@ export default function BusinessDashboard() {
     }
 
     try {
+      if (!businessId) {
+        alert('Business record not found');
+        return;
+      }
+      
       await offerRepository.createOffer({
-        businessId: user.id,
+        businessId: businessId,
         title: newOfferTitle,
         rewardAmount: computedReward,
         rewardType,

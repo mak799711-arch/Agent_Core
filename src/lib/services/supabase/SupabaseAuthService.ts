@@ -73,6 +73,21 @@ export class SupabaseAuthService implements IAuthService {
       throw profileError;
     }
 
+    if (role === 'business') {
+      const businessData = {
+        owner_id: data.user.id,
+        name: `${safeFullName || 'My Business'} Venue`,
+      };
+      
+      const { error: businessError } = await supabase
+        .from('businesses')
+        .insert(businessData);
+        
+      if (businessError) {
+        console.error('Failed to create business record:', businessError);
+      }
+    }
+
     const profile = await this.getProfile(data.user.id);
     if (!profile) {
       throw new Error('Failed to load created profile');
