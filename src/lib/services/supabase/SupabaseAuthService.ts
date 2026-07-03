@@ -1,5 +1,5 @@
 import { IAuthService, UserProfile } from '../../interfaces/auth';
-import { supabase } from '../supabase/client';
+import { supabase } from '../../supabase/client';
 
 export class SupabaseAuthService implements IAuthService {
   private async getProfile(userId: string): Promise<UserProfile | null> {
