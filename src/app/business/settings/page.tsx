@@ -25,7 +25,7 @@ const translations = {
     verificationLock: 'Verification is locked. Complete 100+ deals to apply.',
     verificationCurrent: 'Completed Deals Progress',
     btnSimulate: 'Simulate 105 Deals',
-    btnApply: 'Request Verification ✅',
+    btnApply: 'Request Verification',
     statusPending: 'Verification request is pending review.',
     statusVerified: 'Your profile is officially verified!',
     posTitle: 'POS Integration (Loyverse)',
