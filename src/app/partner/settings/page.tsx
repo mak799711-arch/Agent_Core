@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService } from '@/lib/services';
+import { authService, walletRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
 import VerificationBadge from '@/app/components/VerificationBadge';
 
@@ -110,13 +110,17 @@ export default function PartnerSettings() {
         const activeTheme = (localStorage.getItem('theme') as 'dark' | 'neon' | 'light' | null) || currentUser.theme;
         setTheme(activeTheme);
 
-        // Load verification status from mock and localStorage
+        // Load verification status from real DB
         const isVerified = currentUser.status === 'verified';
-        const hasPendingRequest = localStorage.getItem(`verification_requested_${currentUser.id}`) === 'true';
-        const simulatedDeals = localStorage.getItem(`simulated_deals_${currentUser.id}`);
+        const hasPendingRequest = currentUser.status === 'pending_verification';
         
-        if (simulatedDeals) {
-          setDealsCount(parseInt(simulatedDeals));
+        try {
+          const txs = await walletRepository.getTransactions(currentUser.id);
+          const completedRewards = txs.filter(t => t.type === 'reward' && t.status === 'completed').length;
+          setDealsCount(completedRewards);
+        } catch (e) {
+          console.error('Failed to load deals', e);
+          setDealsCount(0);
         }
 
         if (isVerified) {
@@ -153,17 +157,15 @@ export default function PartnerSettings() {
     setIsBinding(false);
   };
 
-  const handleSimulateDeals = () => {
+  const handleApplyVerification = async () => {
     if (!user) return;
-    setDealsCount(105);
-    localStorage.setItem(`simulated_deals_${user.id}`, '105');
-  };
-
-  const handleApplyVerification = () => {
-    if (!user) return;
-    localStorage.setItem(`verification_requested_${user.id}`, 'true');
-    setVerificationStatus('pending');
-    alert(lang === 'ru' ? 'Заявка на верификацию отправлена!' : 'Verification request submitted!');
+    try {
+      await authService.updateProfile({ status: 'pending_verification' });
+      setVerificationStatus('pending');
+      alert(lang === 'ru' ? 'Заявка на верификацию отправлена!' : 'Verification request submitted!');
+    } catch (err) {
+      alert('Error submitting verification request');
+    }
   };
 
   const handleSave = async () => {
