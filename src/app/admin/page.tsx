@@ -221,15 +221,14 @@ export default function AdminDashboard() {
         document.documentElement.setAttribute('data-theme', activeTheme);
 
         await loadPlatformData();
+        setLoading(false);
       } catch (err) {
         console.error('Error loading admin panel:', err);
         router.push('/login');
-      } finally {
-        setLoading(false);
       }
     }
     checkAdminAndLoad();
-  }, []);
+  }, [router]);
 
   const handleVerifyUser = async (id: string) => {
     await authService.adminUpdateUserProfile(id, { status: 'verified' });
