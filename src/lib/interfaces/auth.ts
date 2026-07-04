@@ -3,6 +3,7 @@ export interface UserProfile {
   role: 'partner' | 'business' | 'admin';
   fullName: string | null;
   avatarUrl: string | null;
+  bio?: string | null;
   createdAt: string;
   
   // Новые поля для Phase 1.1 Onboarding & Settings

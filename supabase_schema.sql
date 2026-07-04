@@ -4,6 +4,7 @@ CREATE TABLE profiles (
   role VARCHAR(50) NOT NULL CHECK (role IN ('partner', 'business', 'admin')),
   full_name VARCHAR(255),
   avatar_url TEXT,
+  bio TEXT,
   card_bound BOOLEAN DEFAULT FALSE,
   card_number VARCHAR(50),
   currency VARCHAR(10) DEFAULT 'USD',

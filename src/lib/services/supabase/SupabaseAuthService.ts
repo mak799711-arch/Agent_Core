@@ -20,6 +20,7 @@ export class SupabaseAuthService implements IAuthService {
       role: data.role as 'partner' | 'business' | 'admin',
       fullName: data.full_name,
       avatarUrl: data.avatar_url,
+      bio: data.bio,
       cardBound: data.card_bound,
       cardNumber: data.card_number,
       currency: data.currency,
@@ -180,6 +181,7 @@ export class SupabaseAuthService implements IAuthService {
     const dbUpdates: any = {};
     if (updates.fullName !== undefined) dbUpdates.full_name = sanitizeName(updates.fullName);
     if (updates.avatarUrl !== undefined) dbUpdates.avatar_url = updates.avatarUrl;
+    if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
     if (updates.cardBound !== undefined) dbUpdates.card_bound = updates.cardBound;
     if (updates.cardNumber !== undefined) dbUpdates.card_number = updates.cardNumber;
     if (updates.currency !== undefined) dbUpdates.currency = updates.currency;
@@ -261,5 +263,25 @@ export class SupabaseAuthService implements IAuthService {
     if (error) {
       throw error;
     }
+  }
+
+  async uploadAvatar(userId: string, file: File): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}-${Math.random()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
   }
 }

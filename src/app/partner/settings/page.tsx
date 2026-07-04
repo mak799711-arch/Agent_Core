@@ -87,6 +87,11 @@ export default function PartnerSettings() {
   const [isBinding, setIsBinding] = useState(false);
   const [loading, setLoading] = useState(true);
   
+  // Profile specific
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [bio, setBio] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  
   // Verification states
   const [dealsCount, setDealsCount] = useState(85);
   const [verificationStatus, setVerificationStatus] = useState<'none' | 'pending' | 'verified'>('none');
@@ -105,6 +110,8 @@ export default function PartnerSettings() {
         setCurrency(currentUser.currency);
         setCardBound(currentUser.cardBound);
         setCardNumber(currentUser.cardNumber || '');
+        setAvatarUrl(currentUser.avatarUrl || '');
+        setBio(currentUser.bio || '');
         
         // Get theme
         const activeTheme = (localStorage.getItem('theme') as 'dark' | 'neon' | 'light' | null) || currentUser.theme;
@@ -143,6 +150,24 @@ export default function PartnerSettings() {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !user) return;
+    const file = e.target.files[0];
+    
+    setUploadingAvatar(true);
+    try {
+      const newAvatarUrl = await authService.uploadAvatar(user.id, file);
+      setAvatarUrl(newAvatarUrl);
+      // Automatically save the avatar change to the profile
+      await authService.updateProfile({ avatarUrl: newAvatarUrl });
+    } catch (err) {
+      alert('Error uploading avatar');
+      console.error(err);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const handleUnbindCard = async () => {
     setCardBound(false);
     setCardNumber('');
@@ -175,6 +200,7 @@ export default function PartnerSettings() {
         currency,
         theme,
         cardBound,
+        bio,
         cardNumber: cardBound ? cardNumber : null
       });
       alert(t.success);
@@ -230,6 +256,34 @@ export default function PartnerSettings() {
         </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {/* Profile Info (Avatar & Bio) */}
+          <div className="glass-panel" style={{ padding: '1.8rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }} />
+                <label style={{
+                  position: 'absolute', bottom: 0, right: -4, background: 'var(--primary)', color: '#000',
+                  width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', opacity: uploadingAvatar ? 0.5 : 1
+                }}>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+                  <span style={{ fontSize: '14px' }}>{uploadingAvatar ? '⏳' : '📷'}</span>
+                </label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px', marginBottom: '0.6rem', display: 'block' }}>О себе (Bio)</label>
+                <textarea 
+                  className="input-field" 
+                  value={bio} 
+                  onChange={(e) => setBio(e.target.value)} 
+                  placeholder={lang === 'ru' ? "Расскажите о себе, где вы работаете, ваши интересы..." : "Tell us about yourself, your work, your interests..."}
+                  style={{ width: '100%', minHeight: '80px', resize: 'vertical' }}
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Language & Currency */}
           <div className="glass-panel" style={{ padding: '1.8rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
