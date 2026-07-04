@@ -393,11 +393,38 @@ export default function PartnerDashboard() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ border: '3px solid rgba(59, 130, 246, 0.1)', borderTop: '3px solid var(--primary)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' }} />
-          <p style={{ color: 'var(--foreground)', fontWeight: 600 }}>{t?.loading || 'Loading...'}</p>
-          <style dangerouslySetInnerHTML={{__html: `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}} />
+      <div style={{ minHeight: '100vh', background: 'var(--bg-gradient)', padding: 'var(--layout-padding)', paddingBottom: '6rem' }}>
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+          .skeleton { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; background: rgba(255,255,255,0.05); }
+        `}} />
+        {/* Header Skeleton */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', marginTop: 'var(--header-margin-top)' }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+             <div className="skeleton" style={{ width: '46px', height: '46px', borderRadius: '50%' }}></div>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="skeleton" style={{ width: '120px', height: '14px', borderRadius: '4px' }}></div>
+                <div className="skeleton" style={{ width: '80px', height: '10px', borderRadius: '4px' }}></div>
+             </div>
+          </div>
+          <div className="skeleton" style={{ width: '150px', height: '40px', borderRadius: '10px' }}></div>
+        </div>
+        
+        {/* Map Skeleton */}
+        <div className="skeleton" style={{ width: '100%', height: '280px', marginBottom: '1.5rem', borderRadius: '20px' }}></div>
+        
+        {/* Filters Skeleton */}
+        <div style={{ display: 'flex', gap: '0.6rem', overflow: 'hidden', marginBottom: '2rem' }}>
+           <div className="skeleton" style={{ width: '80px', height: '36px', borderRadius: '30px' }}></div>
+           <div className="skeleton" style={{ width: '100px', height: '36px', borderRadius: '30px' }}></div>
+           <div className="skeleton" style={{ width: '90px', height: '36px', borderRadius: '30px' }}></div>
+        </div>
+        
+        {/* Offers Skeleton */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+           <div className="skeleton" style={{ width: '100%', height: '90px', borderRadius: '16px' }}></div>
+           <div className="skeleton" style={{ width: '100%', height: '90px', borderRadius: '16px' }}></div>
+           <div className="skeleton" style={{ width: '100%', height: '90px', borderRadius: '16px' }}></div>
         </div>
       </div>
     );
@@ -462,7 +489,7 @@ export default function PartnerDashboard() {
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
-          flexWrap: 'wrap',
+          flexWrap: 'nowrap',
           width: 'var(--header-right-width)' as any,
           justifyContent: 'var(--header-right-justify)' as any
         }}>
@@ -490,13 +517,13 @@ export default function PartnerDashboard() {
               outline: 'none'
             }}
           >
-            <option value="en" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇬🇧 EN</option>
-            <option value="ru" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇷🇺 RU</option>
-            <option value="id" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇮🇩 ID</option>
-            <option value="zh" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇨🇳 ZH</option>
-            <option value="es" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇪🇸 ES</option>
-            <option value="de" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇩🇪 DE</option>
-            <option value="fr" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇫🇷 FR</option>
+            <option value="en" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>EN</option>
+            <option value="ru" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>RU</option>
+            <option value="id" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>ID</option>
+            <option value="zh" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>ZH</option>
+            <option value="es" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>ES</option>
+            <option value="de" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>DE</option>
+            <option value="fr" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>FR</option>
           </select>
 
           {/* Currency Selector */}
@@ -548,7 +575,7 @@ export default function PartnerDashboard() {
               boxShadow: '0 4px 14px rgba(34, 211, 238, 0.3)',
               whiteSpace: 'nowrap'
             }}>
-              {lang === 'ru' ? 'Завершить профиль 🛡️' : 'Complete Profile 🛡️'}
+              {lang === 'ru' ? 'Завершить профиль ⚠️' : 'Complete Profile ⚠️'}
             </button>
           )}
           <button onClick={() => router.push('/partner/settings')} style={{
@@ -585,107 +612,6 @@ export default function PartnerDashboard() {
           </button>
         </div>
       </header>
-
-      {/* Hero Intro */}
-      <div style={{ textAlign: 'center', marginBottom: '2.5rem', zIndex: 1, position: 'relative' }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          background: 'rgba(255, 255, 255, 0.03)',
-          border: '1px solid var(--surface-border)',
-          padding: '6px 14px',
-          borderRadius: '30px',
-          fontSize: '0.75rem',
-          fontWeight: 600,
-          color: 'var(--primary)',
-          letterSpacing: '0.5px',
-          marginBottom: '1.2rem',
-          textTransform: 'uppercase'
-        }}>
-          <span>🌐</span> Digital Employee Network
-        </div>
-        <h1 style={{
-          fontSize: '2.5rem',
-          fontWeight: 800,
-          letterSpacing: '-1px',
-          lineHeight: '1.1',
-          background: 'linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.7) 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '0.8rem',
-          fontFamily: "'Plus Jakarta Sans', sans-serif"
-        }}>
-          Agent Core
-        </h1>
-        <p style={{
-          color: 'var(--foreground)',
-          opacity: 0.6,
-          maxWidth: '450px',
-          fontSize: '0.9rem',
-          lineHeight: 1.5,
-          margin: '0 auto'
-        }}>
-          The first universal digital employee network. Connect venue offers with local promoters and track acquisitions reliably.
-        </p>
-      </div>
-
-
-      {/* Total Earnings Widget */}
-      <div className="glass-panel" style={{
-        padding: 'var(--panel-padding)',
-        marginBottom: '2.5rem',
-        background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(244, 63, 94, 0.03) 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-        borderRadius: '20px',
-        border: '1px solid rgba(34, 211, 238, 0.15)',
-        zIndex: 2
-      }}>
-        <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>{t.totalEarnedLabel}</span>
-        <h2 style={{ fontSize: 'var(--earnings-font-size)', fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: '-1px' }}>
-          {user && formatCurrency(totalEarnings, user.currency)}
-        </h2>
-      </div>
-
-      {/* Active Sessions Queue */}
-      {activeSessions.length > 0 && (
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ width: '8px', height: '8px', background: '#52c41a', borderRadius: '50%', display: 'inline-block' }}></span>
-            {t.activeCodes}
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {activeSessions.map(session => {
-              const offer = offers.find(o => o.id === session.offerId);
-              return (
-                <div key={session.id} className="card-interactive" style={{
-                  padding: '1rem',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  borderLeft: '4px solid var(--primary)'
-                }}>
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: '0.9rem' }}>{offer?.title || 'Offer'}</h4>
-                    <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>Code: <strong style={{ color: 'var(--primary)', letterSpacing: '1px' }}>{session.shortCode}</strong></span>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{
-                      fontSize: '1.2rem',
-                      fontWeight: 700,
-                      color: 'var(--primary)'
-                    }}>
-                      {user && offer && formatCurrency(offer.rewardAmount, user.currency)}
-                    </div>
-                    <span style={{ fontSize: '0.65rem', opacity: 0.4 }}>{t.waiting}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Get Started Section or Interactive map */}
       {!isStarted ? (
@@ -961,6 +887,46 @@ export default function PartnerDashboard() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      
+{/* Active Sessions Queue */}
+      {activeSessions.length > 0 && (
+        <div style={{ marginBottom: '2rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ width: '8px', height: '8px', background: '#52c41a', borderRadius: '50%', display: 'inline-block' }}></span>
+            {t.activeCodes}
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {activeSessions.map(session => {
+              const offer = offers.find(o => o.id === session.offerId);
+              return (
+                <div key={session.id} className="card-interactive" style={{
+                  padding: '1rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderLeft: '4px solid var(--primary)'
+                }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '0.9rem' }}>{offer?.title || 'Offer'}</h4>
+                    <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>Code: <strong style={{ color: 'var(--primary)', letterSpacing: '1px' }}>{session.shortCode}</strong></span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{
+                      fontSize: '1.2rem',
+                      fontWeight: 700,
+                      color: 'var(--primary)'
+                    }}>
+                      {user && offer && formatCurrency(offer.rewardAmount, user.currency)}
+                    </div>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.4 }}>{t.waiting}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

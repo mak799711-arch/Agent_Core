@@ -144,9 +144,11 @@ export default function BusinessSettings() {
         const activeTheme = (localStorage.getItem('theme') as 'dark' | 'neon' | 'light' | null) || currentUser.theme;
         setTheme(activeTheme);
 
-        // Load verification status from mock and localStorage
+        // Load verification status from profile
         const isVerified = currentUser.status === 'verified';
-        const hasPendingRequest = localStorage.getItem(`verification_requested_${currentUser.id}`) === 'true';
+        const isPending = currentUser.status === 'pending';
+        
+        // Temporarily keep simulated deals in UI state (not DB) since it's just a UI mock for now
         const simulatedDeals = localStorage.getItem(`simulated_deals_${currentUser.id}`);
         
         if (simulatedDeals) {
@@ -155,12 +157,13 @@ export default function BusinessSettings() {
 
         if (isVerified) {
           setVerificationStatus('verified');
-        } else if (hasPendingRequest) {
+        } else if (isPending) {
           setVerificationStatus('pending');
         } else {
           setVerificationStatus('none');
         }
 
+        // We will move loyverse_token to DB in next iteration
         const savedToken = localStorage.getItem(`loyverse_token_${currentUser.id}`) || '';
         setLoyverseToken(savedToken);
         setIsLoyverseConnected(savedToken.length > 0);
@@ -202,11 +205,15 @@ export default function BusinessSettings() {
     localStorage.setItem(`simulated_deals_${user.id}`, '105');
   };
 
-  const handleApplyVerification = () => {
+  const handleApplyVerification = async () => {
     if (!user) return;
-    localStorage.setItem(`verification_requested_${user.id}`, 'true');
-    setVerificationStatus('pending');
-    alert(lang === 'ru' ? 'Заявка на верификацию отправлена!' : 'Verification request submitted!');
+    try {
+      await authService.updateProfile({ status: 'pending' });
+      setVerificationStatus('pending');
+      alert(lang === 'ru' ? 'Заявка на верификацию отправлена!' : 'Verification request submitted!');
+    } catch (e) {
+      alert('Error submitting request');
+    }
   };
 
   const handleCopyWebhook = () => {

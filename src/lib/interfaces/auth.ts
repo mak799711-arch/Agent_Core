@@ -24,6 +24,7 @@ export interface IAuthService {
   signInWithGoogle(): Promise<void>;
   signOut(): Promise<void>;
   updateProfile(updates: Partial<UserProfile>): Promise<UserProfile>;
+  adminUpdateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<void>;
   getAllUsers(): Promise<UserProfile[]>;
   blockUser(id: string, isBlocked: boolean): Promise<void>;
 }

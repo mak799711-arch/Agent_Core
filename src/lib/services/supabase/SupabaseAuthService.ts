@@ -206,6 +206,26 @@ export class SupabaseAuthService implements IAuthService {
     return updatedProfile;
   }
 
+  async adminUpdateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
+    const currentUser = await this.getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      throw new Error('Only admins can update other profiles');
+    }
+    
+    const dbUpdates: any = {};
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.isBlocked !== undefined) dbUpdates.is_blocked = updates.isBlocked;
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update(dbUpdates)
+      .eq('id', userId);
+
+    if (error) {
+      throw error;
+    }
+  }
+
   async getAllUsers(): Promise<UserProfile[]> {
     const { data, error } = await supabase
       .from('profiles')

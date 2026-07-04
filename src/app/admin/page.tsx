@@ -161,8 +161,7 @@ export default function AdminDashboard() {
           .filter(t => t.type === 'escrow_release' && t.status === 'completed')
           .reduce((sum, t) => sum + t.amount, 0);
 
-        const storedStatus = localStorage.getItem(`user_status_${u.id}`);
-        const status = storedStatus || u.status || 'unverified';
+        const status = u.status || 'unverified';
         const banDuration = localStorage.getItem(`user_ban_dur_${u.id}`) || '';
 
         return {
@@ -233,7 +232,7 @@ export default function AdminDashboard() {
   }, []);
 
   const handleVerifyUser = async (id: string) => {
-    localStorage.setItem(`user_status_${id}`, 'verified');
+    await authService.adminUpdateUserProfile(id, { status: 'verified' });
     localStorage.removeItem(`verification_requested_${id}`);
     
     const currentUser = await authService.getCurrentUser();
@@ -246,7 +245,7 @@ export default function AdminDashboard() {
   };
 
   const handleVerifyFromRequests = async (reqId: string, targetId: string) => {
-    localStorage.setItem(`user_status_${targetId}`, 'verified');
+    await authService.adminUpdateUserProfile(targetId, { status: 'verified' });
     localStorage.removeItem(`verification_requested_${targetId}`);
     
     const currentUser = await authService.getCurrentUser();
@@ -286,7 +285,7 @@ export default function AdminDashboard() {
     if (!selectedBanUser) return;
     const { id } = selectedBanUser;
     
-    localStorage.setItem(`user_status_${id}`, 'banned');
+    await authService.adminUpdateUserProfile(id, { status: 'banned', isBlocked: true });
     localStorage.setItem(`user_ban_dur_${id}`, duration);
     localStorage.removeItem(`verification_requested_${id}`);
     
@@ -301,7 +300,7 @@ export default function AdminDashboard() {
   };
 
   const handleUnbanUser = async (id: string) => {
-    localStorage.setItem(`user_status_${id}`, 'unverified');
+    await authService.adminUpdateUserProfile(id, { status: 'unverified', isBlocked: false });
     localStorage.removeItem(`user_ban_dur_${id}`);
     
     const currentUser = await authService.getCurrentUser();
