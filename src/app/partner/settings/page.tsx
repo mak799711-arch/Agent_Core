@@ -20,7 +20,7 @@ const translations = {
     btnBind: 'Bind New Card',
     btnSave: 'Save Changes',
     success: 'Settings updated successfully!',
-    themes: { dark: 'Dark', light: 'Light', neon: 'Neon' },
+    themes: { dark: 'Dark', light: 'Light' },
     verificationTitle: 'Verification Status',
     verificationLock: 'Verification is locked. Complete 100+ deals to apply.',
     verificationCurrent: 'Completed Deals Progress',
@@ -42,7 +42,7 @@ const translations = {
     btnBind: 'Привязать новую карту',
     btnSave: 'Сохранить изменения',
     success: 'Настройки успешно обновлены!',
-    themes: { dark: 'Тёмная', light: 'Светлая', neon: 'Неоновая' },
+    themes: { dark: 'Тёмная', light: 'Светлая' },
     verificationTitle: 'Статус верификации',
     verificationLock: 'Верификация закрыта. Требуется 100+ завершенных сделок.',
     verificationCurrent: 'Прогресс завершенных сделок',
@@ -64,7 +64,7 @@ const translations = {
     btnBind: 'Ikatkan Kartu Baru',
     btnSave: 'Simpan Perubahan',
     success: 'Pengaturan berhasil diperbarui!',
-    themes: { dark: 'Gelap', light: 'Terang', neon: 'Neon' },
+    themes: { dark: 'Gelap', light: 'Terang' },
     verificationTitle: 'Status Verifikasi',
     verificationLock: 'Verifikasi terkunci. Selesaikan 100+ transaksi untuk melamar.',
     verificationCurrent: 'Kemajuan Transaksi Selesai',
@@ -79,7 +79,7 @@ export default function PartnerSettings() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [lang, setLang] = useState<'ru' | 'en' | 'id' | 'zh' | 'es' | 'de' | 'fr'>('en');
   const [currency, setCurrency] = useState<'USD' | 'IDR' | 'EUR' | 'RUB' | 'CNY' | 'AUD' | 'SGD' | 'GBP' | 'JPY'>('USD');
-  const [theme, setTheme] = useState<'dark' | 'neon' | 'light'>('neon');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [cardBound, setCardBound] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
   
@@ -114,7 +114,12 @@ export default function PartnerSettings() {
         setBio(currentUser.bio || '');
         
         // Get theme
-        const activeTheme = (localStorage.getItem('theme') as 'dark' | 'neon' | 'light' | null) || currentUser.theme;
+        let activeTheme = (localStorage.getItem('theme') as 'dark' | 'light' | null) || currentUser.theme as 'dark' | 'light';
+        if (activeTheme !== 'dark' && activeTheme !== 'light') {
+          activeTheme = 'dark'; // Fallback for old 'neon' users
+          localStorage.setItem('theme', 'dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
         setTheme(activeTheme);
 
         // Load verification status from real DB
@@ -144,7 +149,7 @@ export default function PartnerSettings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleThemeChange = (newTheme: 'dark' | 'neon' | 'light') => {
+  const handleThemeChange = (newTheme: 'dark' | 'light') => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
@@ -293,8 +298,21 @@ export default function PartnerSettings() {
             </div>
           </div>
 
-          {/* Language & Currency */}
-          <div className="glass-panel" style={{ padding: '1.8rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+          {/* Theme, Language & Currency */}
+          <div className="glass-panel" style={{ padding: '1.8rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.themeLabel || 'Theme'}</label>
+              <select
+                className="input-field"
+                value={theme}
+                onChange={(e) => handleThemeChange(e.target.value as any)}
+                style={{ width: '100%' }}
+              >
+                <option value="dark">{t.themes?.dark || 'Dark Mode'}</option>
+                <option value="light">{t.themes?.light || 'Light Mode'}</option>
+              </select>
+            </div>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.langLabel}</label>
               <select
@@ -469,7 +487,7 @@ export default function PartnerSettings() {
             )}
           </div>
 
-          <button onClick={handleSave} className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)', boxShadow: '0 4px 14px rgba(34, 211, 238, 0.15)' }}>
+          <button onClick={handleSave} className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '12px' }}>
             {t.btnSave}
           </button>
 
