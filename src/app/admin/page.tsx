@@ -343,7 +343,6 @@ export default function AdminDashboard() {
       minHeight: '100vh',
       background: 'var(--bg-gradient)',
       color: 'var(--foreground)',
-      padding: 'var(--admin-padding)',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -359,6 +358,9 @@ export default function AdminDashboard() {
         left: '25%',
         pointerEvents: 'none'
       }} />
+
+      {/* Container to restrict max width */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: 'var(--admin-padding)', position: 'relative', zIndex: 1 }}>
 
       {/* Header */}
       <header className="glass-header" style={{
@@ -1385,6 +1387,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
+      </div>
       </div>
 
       <style dangerouslySetInnerHTML={{__html: `
