@@ -457,7 +457,7 @@ export default function PartnerDashboard() {
       <header className="glass-header" style={{
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         marginBottom: '2.5rem',
         padding: 'var(--header-padding)',
@@ -471,30 +471,16 @@ export default function PartnerDashboard() {
         cursor: 'pointer'
       }} onClick={() => router.push('/partner/settings')}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {user?.fullName}
+            {user?.status === 'verified' && <VerificationBadge size={14} />}
+          </h4>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`}
             alt="Avatar"
             style={{ width: '46px', height: '46px', borderRadius: '50%', border: '2.5px solid var(--primary)', objectFit: 'cover' }}
           />
-          <div>
-            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {user?.fullName}
-              {user?.status === 'verified' && <VerificationBadge size={14} />}
-            </h4>
-            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'var(--primary)' }}>{t.promoter}</span>
-          </div>
-        </div>
-        <div>
-           {/* Кнопка перехода в настройки визуально, чтобы пользователь понимал */}
-           <button style={{
-             background: 'rgba(255, 255, 255, 0.05)',
-             border: 'none',
-             width: '36px', height: '36px',
-             borderRadius: '50%',
-             display: 'flex', alignItems: 'center', justifyContent: 'center',
-             color: 'var(--foreground)'
-           }}>⚙️</button>
         </div>
       </header>
 
