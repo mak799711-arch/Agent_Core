@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/lib/services';
 
@@ -14,6 +14,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    async function checkExistingSession() {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user && user.role) {
+          router.push(`/${user.role}`);
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+    checkExistingSession();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
