@@ -20,7 +20,7 @@ const translations = {
     locError: 'Location access denied or unavailable. Using default Bali center.',
     activeCodes: 'Active Referral Codes',
     waiting: 'Waiting for scan',
-    offersTitle: 'Active Offers in Bali',
+    offersTitle: 'Nearest Offers',
     mapHint: '📍 Live Bali Map (Canggu/Seminyak)',
     mapPending: 'Mapbox Integration Pending Token Setup',
     rewardLabel: 'Reward',
@@ -49,7 +49,7 @@ const translations = {
     locError: 'Доступ к геопозиции отклонен. Используем центр Бали по умолчанию.',
     activeCodes: 'Активные реферальные коды',
     waiting: 'Ожидает сканирования',
-    offersTitle: 'Активные офферы на Бали',
+    offersTitle: 'Ближайшие предложения',
     mapHint: '📍 Карта Бали (Чангу/Семиньяк)',
     mapPending: 'Ожидает настройки токена Mapbox',
     rewardLabel: 'Награда',
@@ -456,9 +456,9 @@ export default function PartnerDashboard() {
       {/* Header */}
       <header className="glass-header" style={{
         display: 'flex',
-        flexDirection: 'var(--header-flex-direction)' as any,
+        flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'var(--header-align-items)' as any,
+        alignItems: 'center',
         marginBottom: '2.5rem',
         padding: 'var(--header-padding)',
         marginLeft: 'var(--header-margin-horizontal)',
@@ -467,12 +467,13 @@ export default function PartnerDashboard() {
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        gap: '1rem'
-      }}>
+        gap: '1rem',
+        cursor: 'pointer'
+      }} onClick={() => router.push('/partner/settings')}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={user?.avatarUrl || ''}
+            src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`}
             alt="Avatar"
             style={{ width: '46px', height: '46px', borderRadius: '50%', border: '2.5px solid var(--primary)', objectFit: 'cover' }}
           />
@@ -484,132 +485,16 @@ export default function PartnerDashboard() {
             <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'var(--primary)' }}>{t.promoter}</span>
           </div>
         </div>
-        
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          flexWrap: 'nowrap',
-          width: 'var(--header-right-width)' as any,
-          justifyContent: 'var(--header-right-justify)' as any
-        }}>
-          {/* Language Selector */}
-          <select 
-            value={lang} 
-            onChange={async (e) => {
-              const newLang = e.target.value as any;
-              try {
-                const updated = await authService.updateProfile({ language: newLang });
-                setUser(updated);
-              } catch (err) {
-                console.error("Failed to update language:", err);
-              }
-            }}
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid var(--surface-border)',
-              color: 'var(--foreground)',
-              padding: '8px 12px',
-              borderRadius: '10px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              outline: 'none'
-            }}
-          >
-            <option value="en" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>EN</option>
-            <option value="ru" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>RU</option>
-            <option value="id" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>ID</option>
-            <option value="zh" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>ZH</option>
-            <option value="es" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>ES</option>
-            <option value="de" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>DE</option>
-            <option value="fr" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>FR</option>
-          </select>
-
-          {/* Currency Selector */}
-          <select 
-            value={user?.currency || 'USD'} 
-            onChange={async (e) => {
-              const newCurr = e.target.value as any;
-              try {
-                const updated = await authService.updateProfile({ currency: newCurr });
-                setUser(updated);
-              } catch (err) {
-                console.error("Failed to update currency:", err);
-              }
-            }}
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid var(--surface-border)',
-              color: 'var(--foreground)',
-              padding: '8px 12px',
-              borderRadius: '10px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              outline: 'none'
-            }}
-          >
-            <option value="USD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>$ USD</option>
-            <option value="IDR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>Rp IDR</option>
-            <option value="EUR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>€ EUR</option>
-            <option value="RUB" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>₽ RUB</option>
-            <option value="CNY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>¥ CNY</option>
-            <option value="AUD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>A$ AUD</option>
-            <option value="SGD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>S$ SGD</option>
-            <option value="GBP" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>£ GBP</option>
-            <option value="JPY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>¥ JPY</option>
-          </select>
-
-          {!user?.cardBound && (
-            <button onClick={() => router.push('/onboarding')} style={{
-              background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)',
-              border: 'none',
-              color: '#fff',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              boxShadow: '0 4px 14px rgba(34, 211, 238, 0.3)',
-              whiteSpace: 'nowrap'
-            }}>
-              {lang === 'ru' ? 'Завершить профиль ⚠️' : 'Complete Profile ⚠️'}
-            </button>
-          )}
-          <button onClick={() => router.push('/partner/settings')} style={{
-            background: 'rgba(255, 255, 255, 0.02)',
-            border: '1px solid var(--surface-border)',
-            color: 'var(--foreground)',
-            padding: '8px 16px',
-            borderRadius: '10px',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)'}
-          >
-            {t.settings}
-          </button>
-          <button onClick={handleLogout} style={{
-            background: 'rgba(244, 63, 94, 0.06)',
-            border: '1px solid rgba(244, 63, 94, 0.15)',
-            color: 'var(--error)',
-            padding: '8px 16px',
-            borderRadius: '10px',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.06)'}
-          >
-            {t.exit}
-          </button>
+        <div>
+           {/* Кнопка перехода в настройки визуально, чтобы пользователь понимал */}
+           <button style={{
+             background: 'rgba(255, 255, 255, 0.05)',
+             border: 'none',
+             width: '36px', height: '36px',
+             borderRadius: '50%',
+             display: 'flex', alignItems: 'center', justifyContent: 'center',
+             color: 'var(--foreground)'
+           }}>⚙️</button>
         </div>
       </header>
 
@@ -707,36 +592,31 @@ export default function PartnerDashboard() {
             </svg>
           </div>
 
-          {/* Category Filter - Rounded Beautiful Badges */}
-          <div className="mobile-scroll-x" style={{
-            display: 'flex',
-            gap: '0.6rem',
-            overflowX: 'auto',
-            paddingBottom: '0.5rem',
-            scrollbarWidth: 'none'
-          }}>
-            {(['all', 'restaurant', 'nightlife', 'villa', 'activity'] as const).map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                style={{
-                  flexShrink: 0,
-                  padding: '10px 18px',
-                  borderRadius: '30px',
-                  border: '1px solid',
-                  borderColor: selectedCategory === cat ? 'var(--primary)' : 'var(--surface-border)',
-                  background: selectedCategory === cat ? 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)' : 'var(--surface)',
-                  color: selectedCategory === cat ? '#ffffff' : 'var(--foreground)',
-                  fontWeight: 600,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  boxShadow: selectedCategory === cat ? '0 4px 12px rgba(0, 210, 255, 0.2)' : 'none',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {t.categories[cat]}
-              </button>
-            ))}
+          {/* Category Filter - Dropdown list */}
+          <div style={{ width: '100%' }}>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                background: 'var(--surface)',
+                border: '1px solid var(--surface-border)',
+                borderRadius: '14px',
+                color: 'var(--foreground)',
+                fontSize: '0.95rem',
+                outline: 'none',
+                cursor: 'pointer',
+                appearance: 'none',
+                WebkitAppearance: 'none'
+              }}
+            >
+              {(['all', 'restaurant', 'nightlife', 'villa', 'activity'] as const).map(cat => (
+                <option key={cat} value={cat} style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+                  {t.categories[cat]}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Interactive Mock Map showing only selected category pins */}

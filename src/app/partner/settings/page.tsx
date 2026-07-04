@@ -210,6 +210,15 @@ export default function PartnerSettings() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await authService.signOut();
+      router.push('/login');
+    } catch (err) {
+      console.error('Error logging out', err);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
@@ -462,6 +471,19 @@ export default function PartnerSettings() {
 
           <button onClick={handleSave} className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)', boxShadow: '0 4px 14px rgba(34, 211, 238, 0.15)' }}>
             {t.btnSave}
+          </button>
+
+          <button onClick={handleLogout} style={{ 
+            width: '100%', padding: '14px', borderRadius: '12px', 
+            background: 'rgba(244, 63, 94, 0.05)', 
+            border: '1px solid rgba(244, 63, 94, 0.2)', 
+            color: 'var(--error)', 
+            fontSize: '0.9rem', fontWeight: 700, 
+            cursor: 'pointer', transition: 'all 0.2s' 
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.05)'}>
+            {lang === 'ru' ? 'Выйти из аккаунта' : 'Log Out'}
           </button>
         </div>
       </div>
