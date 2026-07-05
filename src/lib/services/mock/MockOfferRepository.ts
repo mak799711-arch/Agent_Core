@@ -49,7 +49,7 @@ export class MockOfferRepository implements IOfferRepository {
       rewardType: 'fixed',
       rewardPercent: null,
       averageBill: null,
-      category: 'villa',
+      category: 'real_estate',
       conditions: 'Reward is $100 for verified 3+ nights stay.',
       isActive: true,
       createdAt: new Date().toISOString()

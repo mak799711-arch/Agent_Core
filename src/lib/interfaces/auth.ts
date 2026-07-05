@@ -16,6 +16,8 @@ export interface UserProfile {
   email?: string;
   isBlocked?: boolean;
   phone?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface IAuthService {

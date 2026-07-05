@@ -44,8 +44,8 @@ export default function CashierPage() {
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: '100vh',
-      backgroundColor: '#0a0a0a',
-      color: '#ffffff',
+      backgroundColor: 'var(--background)',
+      color: 'var(--foreground)',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       padding: '20px'
     }}>
@@ -59,7 +59,7 @@ export default function CashierPage() {
         width: '100%',
         maxWidth: '320px',
         height: '80px',
-        backgroundColor: '#1a1a1a',
+        backgroundColor: 'var(--surface)',
         borderRadius: '16px',
         display: 'flex',
         alignItems: 'center',
@@ -95,11 +95,11 @@ export default function CashierPage() {
             onClick={() => handleKeyPress(num.toString())}
             style={{
               height: '70px',
-              backgroundColor: '#1a1a1a',
-              border: '1px solid #333',
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--surface-border)',
               borderRadius: '16px',
               fontSize: '28px',
-              color: '#fff',
+              color: 'var(--foreground)',
               cursor: 'pointer',
               transition: 'all 0.1s ease',
             }}
@@ -113,8 +113,8 @@ export default function CashierPage() {
           onClick={handleReset}
           style={{
             height: '70px',
-            backgroundColor: '#1a1a1a',
-            border: '1px solid #333',
+            backgroundColor: 'var(--surface)',
+            border: '1px solid var(--surface-border)',
             borderRadius: '16px',
             fontSize: '18px',
             color: '#888',
@@ -127,11 +127,11 @@ export default function CashierPage() {
           onClick={() => handleKeyPress('0')}
           style={{
             height: '70px',
-            backgroundColor: '#1a1a1a',
-            border: '1px solid #333',
+            backgroundColor: 'var(--surface)',
+            border: '1px solid var(--surface-border)',
             borderRadius: '16px',
             fontSize: '28px',
-            color: '#fff',
+            color: 'var(--foreground)',
             cursor: 'pointer'
           }}
         >
@@ -141,11 +141,11 @@ export default function CashierPage() {
           onClick={handleBackspace}
           style={{
             height: '70px',
-            backgroundColor: '#1a1a1a',
-            border: '1px solid #333',
+            backgroundColor: 'var(--surface)',
+            border: '1px solid var(--surface-border)',
             borderRadius: '16px',
             fontSize: '24px',
-            color: '#fff',
+            color: 'var(--foreground)',
             cursor: 'pointer'
           }}
         >

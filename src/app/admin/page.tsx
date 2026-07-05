@@ -418,7 +418,7 @@ export default function AdminDashboard() {
           bottom: '24px',
           left: '24px',
           background: 'var(--success)',
-          color: '#ffffff',
+          color: 'var(--foreground)',
           padding: '14px 28px',
           borderRadius: '14px',
           fontWeight: 700,
@@ -566,7 +566,7 @@ export default function AdminDashboard() {
         }}>
           <div>
             <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>{t.totalVolume}</span>
-            <h2 style={{ fontSize: 'var(--admin-metric-value-size)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{formatCurrency(totalVolume, 'USD')}</h2>
+            <h2 style={{ fontSize: 'var(--admin-metric-value-size)', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.5px' }}>{formatCurrency(totalVolume, 'USD')}</h2>
           </div>
           <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(34, 211, 238, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(34, 211, 238, 0.15)' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -591,7 +591,7 @@ export default function AdminDashboard() {
         }}>
           <div>
             <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.totalAgents}</span>
-            <h2 style={{ fontSize: 'var(--admin-metric-value-size)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{agents.length}</h2>
+            <h2 style={{ fontSize: 'var(--admin-metric-value-size)', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.5px' }}>{agents.length}</h2>
           </div>
           <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface-border)' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.75 }}>
@@ -618,7 +618,7 @@ export default function AdminDashboard() {
         }}>
           <div>
             <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.totalBusinesses}</span>
-            <h2 style={{ fontSize: 'var(--admin-metric-value-size)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.5px' }}>{restaurants.length}</h2>
+            <h2 style={{ fontSize: 'var(--admin-metric-value-size)', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.5px' }}>{restaurants.length}</h2>
           </div>
           <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface-border)' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.75 }}>

@@ -6,7 +6,7 @@ export interface Offer {
   rewardType: 'fixed' | 'percentage';
   rewardPercent: number | null;
   averageBill: number | null;
-  category: 'nightlife' | 'restaurant' | 'villa' | 'activity'; // Категории для фильтрации
+  category: 'restaurant' | 'nightlife' | 'real_estate' | 'beauty' | 'fitness' | 'retail' | 'activity' | 'services';
   conditions: string | null;
   isActive: boolean;
   createdAt: string;

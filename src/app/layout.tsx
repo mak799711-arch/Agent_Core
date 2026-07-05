@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-theme="orange">
+    <html lang="en" data-theme="dark">
       <head>
         <script
           dangerouslySetInnerHTML={{

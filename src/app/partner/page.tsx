@@ -597,11 +597,15 @@ export default function PartnerDashboard() {
                 WebkitAppearance: 'none'
               }}
             >
-              {(['all', 'restaurant', 'nightlife', 'villa', 'activity'] as const).map(cat => (
-                <option key={cat} value={cat} style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
-                  {t.categories[cat]}
-                </option>
-              ))}
+              <option value="all" style={{ background: 'var(--background)' }}>All Categories 🌍</option>
+              <option value="restaurant" style={{ background: 'var(--background)' }}>Restaurants & Cafes 🍽️</option>
+              <option value="nightlife" style={{ background: 'var(--background)' }}>Bars & Nightclubs 🍸</option>
+              <option value="real_estate" style={{ background: 'var(--background)' }}>Real Estate & Villas 🏡</option>
+              <option value="beauty" style={{ background: 'var(--background)' }}>Beauty & Spa 💅</option>
+              <option value="fitness" style={{ background: 'var(--background)' }}>Gyms & Fitness 🏋️‍♂️</option>
+              <option value="retail" style={{ background: 'var(--background)' }}>Retail & Fashion 🛍️</option>
+              <option value="activity" style={{ background: 'var(--background)' }}>Tours & Activities 🏄</option>
+              <option value="services" style={{ background: 'var(--background)' }}>Other Services 🛠️</option>
             </select>
           </div>
 
@@ -635,7 +639,7 @@ export default function PartnerDashboard() {
                 boxShadow: '0 0 12px #52c41a',
                 zIndex: 10
               }}>
-                <span style={{ fontSize: '0.55rem', color: 'white', position: 'absolute', top: '-15px', left: '-10px', background: 'rgba(0,0,0,0.8)', padding: '1px 4px', borderRadius: '2px' }}>YOU</span>
+                <span style={{ fontSize: '0.55rem', color: '#ffffff', position: 'absolute', top: '-15px', left: '-10px', background: 'rgba(0,0,0,0.8)', padding: '1px 4px', borderRadius: '2px' }}>YOU</span>
               </div>
             )}
 
@@ -692,7 +696,7 @@ export default function PartnerDashboard() {
             <div className="glass-panel" style={{ padding: '1.25rem', border: '1px solid var(--primary)', position: 'relative' }}>
               <button 
                 onClick={() => setSelectedOffer(null)} 
-                style={{ position: 'absolute', right: '1rem', top: '1rem', background: 'none', border: 'none', color: 'white', opacity: 0.5, cursor: 'pointer', fontSize: '1rem' }}
+                style={{ position: 'absolute', right: '1rem', top: '1rem', background: 'none', border: 'none', color: 'var(--foreground)', opacity: 0.5, cursor: 'pointer', fontSize: '1rem' }}
               >
                 ✕
               </button>
@@ -700,7 +704,16 @@ export default function PartnerDashboard() {
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', marginRight: '1.5rem', gap: '1rem' }}>
                 <div>
                   <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 600 }}>
-                    {t.categories[selectedOffer.category]}
+                    {{
+                      restaurant: 'Restaurants 🍽️',
+                      nightlife: 'Nightlife 🍸',
+                      real_estate: 'Real Estate 🏡',
+                      beauty: 'Beauty 💅',
+                      fitness: 'Fitness 🏋️‍♂️',
+                      retail: 'Retail 🛍️',
+                      activity: 'Activities 🏄',
+                      services: 'Services 🛠️'
+                    }[selectedOffer.category as string] || selectedOffer.category}
                   </span>
                   <h4 style={{ margin: '0.25rem 0 0.5rem 0', fontSize: '1.2rem', fontWeight: 700 }}>{selectedOffer.title}</h4>
                   <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>{selectedOffer.conditions}</p>
@@ -735,7 +748,16 @@ export default function PartnerDashboard() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--primary)' }}>
-                        {t.categories[offer.category]}
+                        {{
+                          restaurant: 'Restaurants 🍽️',
+                          nightlife: 'Nightlife 🍸',
+                          real_estate: 'Real Estate 🏡',
+                          beauty: 'Beauty 💅',
+                          fitness: 'Fitness 🏋️‍♂️',
+                          retail: 'Retail 🛍️',
+                          activity: 'Activities 🏄',
+                          services: 'Services 🛠️'
+                        }[offer.category as string] || offer.category}
                       </span>
                       <h4 style={{ margin: '0.1rem 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 600 }}>{offer.title}</h4>
                       <p style={{ fontSize: '0.8rem', opacity: 0.5, margin: 0 }}>Click for details</p>

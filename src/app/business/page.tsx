@@ -498,221 +498,47 @@ export default function BusinessDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.04) 0%, #090a0f 100%)',
+      background: 'var(--background)',
       color: 'var(--foreground)',
       padding: 'var(--layout-padding)',
       paddingBottom: '6rem',
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Ambient background light */}
-      <div style={{
-        position: 'absolute',
-        width: '350px',
-        height: '350px',
-        background: 'rgba(34, 211, 238, 0.03)',
-        filter: 'blur(100px)',
-        borderRadius: '50%',
-        top: '0%',
-        right: '15%',
-        pointerEvents: 'none'
-      }} />
-
       {/* Header */}
       <header className="glass-header" style={{
         display: 'flex',
-        flexDirection: 'var(--header-flex-direction)' as any,
-        justifyContent: 'space-between',
-        alignItems: 'var(--header-align-items)' as any,
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
         marginBottom: '2.5rem',
-        paddingBottom: '1.2rem',
-        borderBottom: '1px solid var(--surface-border)',
-        position: 'relative',
-        zIndex: 2
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        padding: 'var(--header-padding, 1rem)',
+        marginLeft: 'var(--header-margin-horizontal, 0)',
+        marginRight: 'var(--header-margin-horizontal, 0)',
+        marginTop: 'var(--header-margin-top, 0)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        gap: '1rem',
+        cursor: 'pointer'
+      }} onClick={() => router.push('/business/settings')}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {user?.fullName}
+            {user?.status === 'verified' && <VerificationBadge size={14} />}
+          </h4>
           <img
-            src={user?.avatarUrl || ''}
+            src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`}
             alt="Avatar"
             style={{ width: '46px', height: '46px', borderRadius: '50%', border: '2.5px solid var(--primary)', objectFit: 'cover' }}
           />
-          <div>
-            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {formatUserName(user?.fullName, user?.role)}
-              {user?.status === 'verified' && <VerificationBadge size={14} />}
-            </h4>
-            <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'var(--primary)' }}>{t.venue}</span>
-          </div>
-        </div>
-        
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          flexWrap: 'wrap',
-          width: 'var(--header-right-width)' as any,
-          justifyContent: 'var(--header-right-justify)' as any
-        }}>
-          {/* Language Selector */}
-          <select 
-            value={lang} 
-            onChange={async (e) => {
-              const newLang = e.target.value as any;
-              try {
-                const updated = await authService.updateProfile({ language: newLang });
-                setUser(updated);
-              } catch (err) {
-                console.error("Failed to update language:", err);
-              }
-            }}
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid var(--surface-border)',
-              color: 'var(--foreground)',
-              padding: '8px 12px',
-              borderRadius: '10px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              outline: 'none'
-            }}
-          >
-            <option value="en" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇬🇧 EN</option>
-            <option value="ru" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇷🇺 RU</option>
-            <option value="id" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇮🇩 ID</option>
-            <option value="zh" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇨🇳 ZH</option>
-            <option value="es" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇪🇸 ES</option>
-            <option value="de" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇩🇪 DE</option>
-            <option value="fr" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>🇫🇷 FR</option>
-          </select>
-
-          {/* Currency Selector */}
-          <select 
-            value={user?.currency || 'USD'} 
-            onChange={async (e) => {
-              const newCurr = e.target.value as any;
-              try {
-                const updated = await authService.updateProfile({ currency: newCurr });
-                setUser(updated);
-              } catch (err) {
-                console.error("Failed to update currency:", err);
-              }
-            }}
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid var(--surface-border)',
-              color: 'var(--foreground)',
-              padding: '8px 12px',
-              borderRadius: '10px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              outline: 'none'
-            }}
-          >
-            <option value="USD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>$ USD</option>
-            <option value="IDR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>Rp IDR</option>
-            <option value="EUR" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>€ EUR</option>
-            <option value="RUB" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>₽ RUB</option>
-            <option value="CNY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>¥ CNY</option>
-            <option value="AUD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>A$ AUD</option>
-            <option value="SGD" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>S$ SGD</option>
-            <option value="GBP" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>£ GBP</option>
-            <option value="JPY" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>¥ JPY</option>
-          </select>
-
-          {!user?.cardBound && (
-            <button onClick={() => router.push('/onboarding')} style={{
-              background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)',
-              border: 'none',
-              color: '#fff',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              boxShadow: '0 4px 14px rgba(34, 211, 238, 0.3)',
-              whiteSpace: 'nowrap'
-            }}>
-              {lang === 'ru' ? 'Завершить профиль 🛡️' : 'Complete Profile 🛡️'}
-            </button>
-          )}
-          <button onClick={() => router.push('/business/settings')} style={{
-            background: 'rgba(255, 255, 255, 0.02)',
-            border: '1px solid var(--surface-border)',
-            color: 'var(--foreground)',
-            padding: '8px 16px',
-            borderRadius: '10px',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)'}
-          >
-            {t.settings}
-          </button>
-          <button onClick={handleLogout} style={{
-            background: 'rgba(244, 63, 94, 0.06)',
-            border: '1px solid rgba(244, 63, 94, 0.15)',
-            color: 'var(--error)',
-            padding: '8px 16px',
-            borderRadius: '10px',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.06)'}
-          >
-            {t.exit}
-          </button>
         </div>
       </header>
 
       {/* Centered Single Column Layout */}
       <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem', position: 'relative', zIndex: 2 }}>
-        
-        {/* Reserve Protection Widget */}
-        <div className="glass-panel" style={{
-          padding: 'var(--panel-padding)',
-          background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(244, 63, 94, 0.03) 100%)',
-          borderRadius: '20px',
-          border: '1px solid rgba(34, 211, 238, 0.15)'
-        }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.2rem', gap: '1rem' }}>
-            <div>
-              <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>{t.balanceLabel}</span>
-              <h2 style={{ fontSize: 'var(--earnings-font-size)', fontWeight: 800, color: '#ffffff', letterSpacing: '-1px', margin: 0 }}>
-                {user && formatCurrency(balance, user.currency)}
-              </h2>
-            </div>
-            <button className="btn-primary" onClick={handleDepositReserve} style={{ 
-              background: 'linear-gradient(135deg, var(--accent) 0%, #b91c1c 100%)',
-              boxShadow: '0 4px 14px rgba(244, 63, 94, 0.2)'
-            }}>
-              {user && t.depositBtn.replace('$100', formatCurrency(100.00, user.currency))}
-            </button>
-          </div>
-          <div style={{
-            background: 'rgba(5, 5, 8, 0.25)',
-            padding: '10px 14px',
-            borderRadius: '10px',
-            border: '1px solid var(--surface-border)',
-            fontSize: '0.8rem',
-            opacity: 0.8,
-            fontWeight: 500,
-            lineHeight: 1.5
-          }}>
-            {t.reserveNote}
-          </div>
-        </div>
-
         {/* Confirm Referral Code Form */}
-        <div className="glass-panel" style={{ padding: 'var(--panel-padding)', borderRadius: '20px' }}>
+        <div className="panel" style={{ padding: 'var(--panel-padding)', borderRadius: '20px' }}>
           <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.2px' }}>{t.attributeTitle}</h3>
           
           {statusMessage && (
@@ -733,6 +559,7 @@ export default function BusinessDashboard() {
           <form onSubmit={handleConfirmReferral} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
             <input
               type="text"
+              className="input-field"
               value={shortCode}
               onChange={(e) => setShortCode(e.target.value)}
               placeholder="000000"
@@ -754,7 +581,7 @@ export default function BusinessDashboard() {
 
 
         {/* Offers List */}
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <div className="panel" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 style={{ margin: 0 }}>{t.offersTitle}</h3>
             {/* Small Plus Button */}
@@ -764,8 +591,8 @@ export default function BusinessDashboard() {
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                background: 'var(--accent)',
-                color: 'white',
+                background: 'var(--primary)',
+                color: '#000000',
                 border: 'none',
                 fontSize: '1.5rem',
                 fontWeight: 'bold',
@@ -773,7 +600,6 @@ export default function BusinessDashboard() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(255, 0, 127, 0.3)',
                 transition: 'transform 0.1s ease'
               }}
               onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
@@ -831,7 +657,7 @@ export default function BusinessDashboard() {
         </div>
 
         {/* Transaction History */}
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <div className="panel" style={{ padding: '1.5rem' }}>
           <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700 }}>Recent Transactions</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {history.slice(0, 10).map((tx) => (
@@ -896,7 +722,7 @@ export default function BusinessDashboard() {
           zIndex: 1000,
           padding: '1rem'
         }}>
-          <div className="glass-panel" style={{
+          <div className="panel" style={{
             width: '100%',
             maxWidth: '480px',
             padding: '2rem',
@@ -916,11 +742,11 @@ export default function BusinessDashboard() {
                   placeholder={t.offerTitlePlaceholder}
                   required
                   style={{
-                    background: 'rgba(255,255,255,0.05)',
+                    background: 'var(--input-bg)',
                     border: '1px solid var(--surface-border)',
                     borderRadius: '8px',
                     padding: '10px 14px',
-                    color: 'white',
+                    color: 'var(--foreground)',
                     outline: 'none'
                   }}
                 />
@@ -931,20 +757,24 @@ export default function BusinessDashboard() {
                 <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.categoryLabel}</label>
                 <select
                   value={newOfferCategory}
-                  onChange={(e) => setNewOfferCategory(e.target.value as 'restaurant' | 'nightlife' | 'villa' | 'activity')}
+                  onChange={(e) => setNewOfferCategory(e.target.value as any)}
                   style={{
-                    background: 'rgba(255,255,255,0.05)',
+                    background: 'var(--input-bg)',
                     border: '1px solid var(--surface-border)',
-                    color: 'white',
+                    color: 'var(--foreground)',
                     padding: '10px',
                     borderRadius: '6px',
                     outline: 'none'
                   }}
                 >
-                  <option value="restaurant" style={{ background: 'var(--background)' }}>Restaurant 🍕</option>
-                  <option value="nightlife" style={{ background: 'var(--background)' }}>Nightlife 🍸</option>
-                  <option value="villa" style={{ background: 'var(--background)' }}>Villa 🏡</option>
-                  <option value="activity" style={{ background: 'var(--background)' }}>Activity 🏄</option>
+                  <option value="restaurant" style={{ background: 'var(--background)' }}>Restaurants & Cafes 🍽️</option>
+                  <option value="nightlife" style={{ background: 'var(--background)' }}>Bars & Nightclubs 🍸</option>
+                  <option value="real_estate" style={{ background: 'var(--background)' }}>Real Estate & Villas 🏡</option>
+                  <option value="beauty" style={{ background: 'var(--background)' }}>Beauty & Spa 💅</option>
+                  <option value="fitness" style={{ background: 'var(--background)' }}>Gyms & Fitness 🏋️‍♂️</option>
+                  <option value="retail" style={{ background: 'var(--background)' }}>Retail & Fashion 🛍️</option>
+                  <option value="activity" style={{ background: 'var(--background)' }}>Tours & Activities 🏄</option>
+                  <option value="services" style={{ background: 'var(--background)' }}>Other Services 🛠️</option>
                 </select>
               </div>
 
@@ -962,7 +792,7 @@ export default function BusinessDashboard() {
                       border: '1px solid',
                       borderColor: rewardType === 'fixed' ? 'var(--accent)' : 'var(--surface-border)',
                       background: rewardType === 'fixed' ? 'rgba(255, 0, 127, 0.1)' : 'transparent',
-                      color: 'white',
+                      color: 'var(--foreground)',
                       cursor: 'pointer',
                       fontSize: '0.85rem'
                     }}
@@ -979,7 +809,7 @@ export default function BusinessDashboard() {
                       border: '1px solid',
                       borderColor: rewardType === 'percentage' ? 'var(--accent)' : 'var(--surface-border)',
                       background: rewardType === 'percentage' ? 'rgba(255, 0, 127, 0.1)' : 'transparent',
-                      color: 'white',
+                      color: 'var(--foreground)',
                       cursor: 'pointer',
                       fontSize: '0.85rem'
                     }}
@@ -991,7 +821,7 @@ export default function BusinessDashboard() {
 
               {rewardType === 'fixed' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.rewardAmountLabel}</label>
+                  <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.rewardAmountLabel.replace('USD', user?.currency || 'USD')}</label>
                   <input
                     type="number"
                     value={newOfferReward}
@@ -1001,11 +831,11 @@ export default function BusinessDashboard() {
                     min="0.01"
                     step="0.01"
                     style={{
-                      background: 'rgba(255,255,255,0.05)',
+                      background: 'var(--input-bg)',
                       border: '1px solid var(--surface-border)',
                       borderRadius: '8px',
                       padding: '10px 14px',
-                      color: 'white',
+                      color: 'var(--foreground)',
                       outline: 'none'
                     }}
                   />
@@ -1013,7 +843,7 @@ export default function BusinessDashboard() {
               ) : (
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.avgBillLabel}</label>
+                    <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.avgBillLabel.replace('USD', user?.currency || 'USD')}</label>
                     <input
                       type="number"
                       value={newOfferAvgBill}
@@ -1023,11 +853,11 @@ export default function BusinessDashboard() {
                       min="1"
                       step="0.01"
                       style={{
-                        background: 'rgba(255,255,255,0.05)',
+                        background: 'var(--input-bg)',
                         border: '1px solid var(--surface-border)',
                         borderRadius: '8px',
                         padding: '10px 14px',
-                        color: 'white',
+                        color: 'var(--foreground)',
                         outline: 'none'
                       }}
                     />
@@ -1044,11 +874,11 @@ export default function BusinessDashboard() {
                       max="100"
                       step="0.1"
                       style={{
-                        background: 'rgba(255,255,255,0.05)',
+                        background: 'var(--input-bg)',
                         border: '1px solid var(--surface-border)',
                         borderRadius: '8px',
                         padding: '10px 14px',
-                        color: 'white',
+                        color: 'var(--foreground)',
                         outline: 'none'
                       }}
                     />
@@ -1064,11 +894,11 @@ export default function BusinessDashboard() {
                   placeholder={t.conditionsPlaceholder}
                   rows={3}
                   style={{
-                    background: 'rgba(255,255,255,0.05)',
+                    background: 'var(--input-bg)',
                     border: '1px solid var(--surface-border)',
                     borderRadius: '8px',
                     padding: '10px 14px',
-                    color: 'white',
+                    color: 'var(--foreground)',
                     outline: 'none',
                     resize: 'none',
                     fontFamily: 'inherit'
@@ -1080,12 +910,20 @@ export default function BusinessDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="btn-primary"
-                  style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)' }}
+                  style={{ 
+                    flex: 1, 
+                    background: 'var(--input-bg)', 
+                    border: '1px solid var(--surface-border)',
+                    color: 'var(--foreground)',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
                 >
                   {t.cancelBtn}
                 </button>
-                <button type="submit" className="btn-primary" style={{ flex: 2, background: 'var(--accent)' }}>
+                <button type="submit" className="btn-primary" style={{ flex: 2 }}>
                   {t.createBtn}
                 </button>
               </div>

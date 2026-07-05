@@ -20,7 +20,7 @@ const translations = {
     btnBind: 'Bind New Card',
     btnSave: 'Save Changes',
     success: 'Settings updated successfully!',
-    themes: { dark: 'Dark', light: 'Light', neon: 'Neon' },
+    themes: { dark: 'Dark', light: 'Light' },
     verificationTitle: 'Verification Status',
     verificationLock: 'Verification is locked. Complete 100+ deals to apply.',
     verificationCurrent: 'Completed Deals Progress',
@@ -52,7 +52,7 @@ const translations = {
     btnBind: 'Привязать новую карту',
     btnSave: 'Сохранить изменения',
     success: 'Настройки успешно обновлены!',
-    themes: { dark: 'Тёмная', light: 'Светлая', neon: 'Неоновая' },
+    themes: { dark: 'Тёмная', light: 'Светлая' },
     verificationTitle: 'Статус верификации',
     verificationLock: 'Верификация закрыта. Требуется 100+ завершенных сделок.',
     verificationCurrent: 'Прогресс завершенных сделок',
@@ -84,7 +84,7 @@ const translations = {
     btnBind: 'Ikatkan Kartu Baru',
     btnSave: 'Simpan Perubahan',
     success: 'Pengaturan berhasil diperbarui!',
-    themes: { dark: 'Gelap', light: 'Terang', neon: 'Neon' },
+    themes: { dark: 'Gelap', light: 'Terang' },
     verificationTitle: 'Status Verifikasi',
     verificationLock: 'Verifikasi terkunci. Selesaikan 100+ transaksi untuk melamar.',
     verificationCurrent: 'Kemajuan Transaksi Selesai',
@@ -109,13 +109,18 @@ export default function BusinessSettings() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [lang, setLang] = useState<'ru' | 'en' | 'id' | 'zh' | 'es' | 'de' | 'fr'>('en');
   const [currency, setCurrency] = useState<'USD' | 'IDR' | 'EUR' | 'RUB' | 'CNY' | 'AUD' | 'SGD' | 'GBP' | 'JPY'>('USD');
-  const [theme, setTheme] = useState<'dark' | 'neon' | 'light'>('neon');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [cardBound, setCardBound] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
   
   const [newCardNumber, setNewCardNumber] = useState('');
   const [isBinding, setIsBinding] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Profile specific
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [bio, setBio] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Verification states
   const [dealsCount, setDealsCount] = useState(85);
@@ -140,8 +145,15 @@ export default function BusinessSettings() {
         setCurrency(currentUser.currency);
         setCardBound(currentUser.cardBound);
         setCardNumber(currentUser.cardNumber || '');
+        setAvatarUrl(currentUser.avatarUrl || '');
+        setBio(currentUser.bio || '');
         
-        const activeTheme = (localStorage.getItem('theme') as 'dark' | 'neon' | 'light' | null) || currentUser.theme;
+        let activeTheme = (localStorage.getItem('theme') as 'dark' | 'light' | null) || currentUser.theme as 'dark' | 'light';
+        if (activeTheme !== 'dark' && activeTheme !== 'light') {
+          activeTheme = 'dark'; // Fallback for old 'neon' users
+          localStorage.setItem('theme', 'dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
         setTheme(activeTheme);
 
         // Load verification status from profile
@@ -174,10 +186,28 @@ export default function BusinessSettings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleThemeChange = (newTheme: 'dark' | 'neon' | 'light') => {
+  const handleThemeChange = (newTheme: 'dark' | 'light') => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !user) return;
+    const file = e.target.files[0];
+    
+    setUploadingAvatar(true);
+    try {
+      const newAvatarUrl = await authService.uploadAvatar(user.id, file);
+      setAvatarUrl(newAvatarUrl);
+      // Automatically save the avatar change to the profile
+      await authService.updateProfile({ avatarUrl: newAvatarUrl });
+    } catch (err) {
+      alert('Error uploading avatar');
+      console.error(err);
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleUnbindCard = async () => {
@@ -229,6 +259,7 @@ export default function BusinessSettings() {
         currency,
         theme,
         cardBound,
+        bio,
         cardNumber: cardBound ? cardNumber : null
       });
       if (user) {
@@ -238,6 +269,17 @@ export default function BusinessSettings() {
       router.push('/business');
     } catch (err) {
       alert('Failed to save settings');
+    }
+  };
+
+  const handleLogout = async () => {
+    const confirmMessage = lang === 'ru' ? "Вы точно хотите выйти из аккаунта?" : "Are you sure you want to log out?";
+    if (!window.confirm(confirmMessage)) return;
+    try {
+      await authService.signOut();
+      router.push('/login');
+    } catch (err) {
+      console.error('Error logging out', err);
     }
   };
 
@@ -287,11 +329,38 @@ export default function BusinessSettings() {
         </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {/* Profile Info (Avatar & Bio) */}
+          <div className="panel" style={{ padding: '1.8rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }} />
+                <label style={{
+                  position: 'absolute', bottom: 0, right: -4, background: 'var(--primary)', color: '#000',
+                  width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', opacity: uploadingAvatar ? 0.5 : 1
+                }}>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+                  <span style={{ fontSize: '14px' }}>{uploadingAvatar ? '⏳' : '📷'}</span>
+                </label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px', marginBottom: '0.6rem', display: 'block' }}>О себе (Bio) / Название</label>
+                <textarea 
+                  className="input-field" 
+                  value={bio} 
+                  onChange={(e) => setBio(e.target.value)} 
+                  placeholder={lang === 'ru' ? "Кратко о заведении..." : "Brief info about your venue..."}
+                  style={{ width: '100%', minHeight: '80px', resize: 'vertical', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)', color: 'var(--foreground)', padding: '10px', borderRadius: '8px' }}
+                />
+              </div>
+            </div>
+          </div>
           {/* Theme Switcher */}
-          <div className="glass-panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+          <div className="panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
             <h3 style={{ fontSize: '1rem', marginBottom: '1rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.themeLabel}</h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              {(['dark', 'neon', 'light'] as const).map((th) => (
+              {(['dark', 'light'] as const).map((th) => (
                 <button
                   key={th}
                   onClick={() => handleThemeChange(th)}
@@ -316,10 +385,11 @@ export default function BusinessSettings() {
           </div>
 
           {/* Language & Currency */}
-          <div className="glass-panel" style={{ padding: '1.8rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+          <div className="panel" style={{ padding: '1.8rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.langLabel}</label>
               <select
+                className="input-field"
                 value={lang}
                 onChange={(e) => setLang(e.target.value as any)}
                 style={{
@@ -339,6 +409,7 @@ export default function BusinessSettings() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.currLabel}</label>
               <select
+                className="input-field"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value as any)}
                 style={{
@@ -359,7 +430,7 @@ export default function BusinessSettings() {
           </div>
 
           {/* Verification Progress Box */}
-          <div className="glass-panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+          <div className="panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
             <h3 style={{ fontSize: '1rem', marginBottom: '1.2rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.verificationTitle}</h3>
             
             {verificationStatus === 'verified' && (
@@ -424,7 +495,7 @@ export default function BusinessSettings() {
           </div>
 
           {/* Card Management */}
-          <div className="glass-panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+          <div className="panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
             <h3 style={{ fontSize: '1rem', marginBottom: '1.2rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.cardLabel}</h3>
             
             {cardBound ? (
@@ -465,6 +536,7 @@ export default function BusinessSettings() {
                 {isBinding ? (
                   <form onSubmit={handleBindCard} style={{ display: 'flex', gap: '0.5rem' }}>
                     <input
+                      className="input-field"
                       type="text"
                       value={newCardNumber}
                       onChange={(e) => {
@@ -474,14 +546,12 @@ export default function BusinessSettings() {
                       }}
                       placeholder="0000 0000 0000 0000"
                       required
-                      style={{
-                        flex: 1
-                      }}
+                      style={{ flex: 1 }}
                     />
                     <button type="submit" className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
                       Add
                     </button>
-                    <button type="button" onClick={() => setIsBinding(false)} className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)', boxShadow: 'none' }}>
+                    <button type="button" onClick={() => setIsBinding(false)} className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)', boxShadow: 'none' }}>
                       Cancel
                     </button>
                   </form>
@@ -494,8 +564,8 @@ export default function BusinessSettings() {
             )}
           </div>
 
-          {/* POS Integration (Loyverse) */}
-          <div className="glass-panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
+          {/* ARCHIVED FOR MVP: POS Integration (Loyverse)
+          <div className="panel" style={{ padding: '1.8rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>{t.posTitle}</h3>
             <p style={{ fontSize: '0.85rem', opacity: 0.6, marginBottom: '1.2rem', lineHeight: '1.4' }}>{t.posDesc}</p>
             
@@ -536,6 +606,7 @@ export default function BusinessSettings() {
                   </span>
                 </label>
                 <input
+                  className="input-field"
                   type="password"
                   value={loyverseToken}
                   onChange={(e) => {
@@ -554,10 +625,11 @@ export default function BusinessSettings() {
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
+                    className="input-field"
                     type="text"
                     readOnly
                     value="https://agent-core-app.vercel.app/api/v1/loyverse/webhook"
-                    style={{ flex: 1, background: 'rgba(255,255,255,0.02)', cursor: 'default' }}
+                    style={{ flex: 1, cursor: 'default', opacity: 0.7 }}
                   />
                   <button 
                     type="button" 
@@ -568,7 +640,8 @@ export default function BusinessSettings() {
                       fontSize: '0.85rem', 
                       background: copiedWebhook ? 'var(--success)' : 'rgba(255,255,255,0.05)', 
                       border: '1px solid var(--surface-border)', 
-                      boxShadow: 'none' 
+                      boxShadow: 'none',
+                      color: 'var(--foreground)'
                     }}
                   >
                     {copiedWebhook ? '✓' : '📋'} {t.posCopyWebhook}
@@ -577,9 +650,14 @@ export default function BusinessSettings() {
               </div>
             </div>
           </div>
+          */}
 
-          <button onClick={handleSave} className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%)', boxShadow: '0 4px 14px rgba(34, 211, 238, 0.15)' }}>
+          <button onClick={handleSave} className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '12px' }}>
             {t.btnSave}
+          </button>
+
+          <button onClick={handleLogout} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'rgba(244, 63, 94, 0.06)', border: '1px solid rgba(244, 63, 94, 0.15)', color: 'var(--error)', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.06)'}>
+            Logout / Выйти
           </button>
         </div>
       </div>
