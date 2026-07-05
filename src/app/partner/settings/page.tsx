@@ -180,8 +180,13 @@ export default function PartnerSettings() {
 
   const handleBindCard = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCardNumber) return;
-    setCardNumber(newCardNumber);
+    const cleanCard = newCardNumber.replace(/\D/g, '');
+    if (cleanCard.length < 16) {
+      alert(t.langLabel === 'Language' ? 'Invalid card number' : 'Некорректный номер карты');
+      return;
+    }
+    const formattedCard = newCardNumber.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+    setCardNumber(formattedCard);
     setCardBound(true);
     setNewCardNumber('');
     setIsBinding(false);
