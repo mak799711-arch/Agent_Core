@@ -230,13 +230,16 @@ export default function AdminDashboard() {
     checkAdminAndLoad();
   }, [router]);
 
-  const handleVerifyUser = async (id: string) => {
-    await authService.adminUpdateUserProfile(id, { status: 'verified' });
-    localStorage.removeItem(`verification_requested_${id}`);
+  const handleToggleVerification = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'verified' ? 'unverified' : 'verified';
+    await authService.adminUpdateUserProfile(id, { status: newStatus });
+    if (newStatus === 'verified') {
+      localStorage.removeItem(`verification_requested_${id}`);
+    }
     
     const currentUser = await authService.getCurrentUser();
     if (currentUser && currentUser.id === id) {
-      currentUser.status = 'verified';
+      currentUser.status = newStatus;
     }
     
     await loadPlatformData();
@@ -781,8 +784,8 @@ export default function AdminDashboard() {
                         <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                           <div style={{ display: 'inline-flex', gap: '10px' }}>
                             <button
-                              onClick={() => handleVerifyUser(usr.id)}
-                              disabled={usr.status === 'verified'}
+                              onClick={() => handleToggleVerification(usr.id, usr.status)}
+                              title={usr.status === 'verified' ? 'Снять верификацию' : 'Верифицировать'}
                               style={{
                                 width: '36px',
                                 height: '36px',
@@ -792,7 +795,7 @@ export default function AdminDashboard() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                cursor: usr.status === 'verified' ? 'default' : 'pointer',
+                                cursor: 'pointer',
                                 filter: usr.status === 'verified' ? 'drop-shadow(0 0 6px #52c41a)' : 'none',
                                 opacity: usr.status === 'verified' ? 1 : 0.5,
                                 transition: 'all 0.25s ease',
@@ -902,8 +905,8 @@ export default function AdminDashboard() {
                         <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                           <div style={{ display: 'inline-flex', gap: '10px' }}>
                             <button
-                              onClick={() => handleVerifyUser(usr.id)}
-                              disabled={usr.status === 'verified'}
+                              onClick={() => handleToggleVerification(usr.id, usr.status)}
+                              title={usr.status === 'verified' ? 'Снять верификацию' : 'Верифицировать'}
                               style={{
                                 width: '36px',
                                 height: '36px',
@@ -913,7 +916,7 @@ export default function AdminDashboard() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                cursor: usr.status === 'verified' ? 'default' : 'pointer',
+                                cursor: 'pointer',
                                 filter: usr.status === 'verified' ? 'drop-shadow(0 0 6px #52c41a)' : 'none',
                                 opacity: usr.status === 'verified' ? 1 : 0.5,
                                 transition: 'all 0.25s ease',
