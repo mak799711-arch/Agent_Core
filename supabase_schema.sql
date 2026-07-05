@@ -42,6 +42,7 @@ CREATE TABLE offers (
   category VARCHAR(50) DEFAULT 'activity',
   conditions TEXT,
   is_active BOOLEAN DEFAULT TRUE, -- Отключается, если reserve_balance < reward_amount
+  image_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

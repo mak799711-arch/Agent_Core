@@ -276,13 +276,14 @@ export default function BusinessDashboard() {
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newOfferTitle, setNewOfferTitle] = useState('');
-  const [newOfferCategory, setNewOfferCategory] = useState<'nightlife' | 'restaurant' | 'villa' | 'activity'>('restaurant');
+  const [newOfferCategory, setNewOfferCategory] = useState<'nightlife' | 'restaurant' | 'real_estate' | 'beauty' | 'fitness' | 'retail' | 'activity' | 'services'>('restaurant');
   const [rewardType, setRewardType] = useState<'fixed' | 'percentage'>('fixed');
   const [newOfferReward, setNewOfferReward] = useState('');
   const [newOfferPercent, setNewOfferPercent] = useState('');
   const [newOfferAvgBill, setNewOfferAvgBill] = useState('');
   const [newOfferConditions, setNewOfferConditions] = useState('');
-  
+  const [newOfferImage, setNewOfferImage] = useState<string | null>(null);
+
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -445,7 +446,8 @@ export default function BusinessDashboard() {
         rewardPercent: percentVal,
         averageBill: avgBillVal,
         category: newOfferCategory,
-        conditions: newOfferConditions || null
+        conditions: newOfferConditions || null,
+        imageUrl: newOfferImage || undefined
       });
 
       setNewOfferTitle('');
@@ -454,6 +456,7 @@ export default function BusinessDashboard() {
       setNewOfferAvgBill('');
       setNewOfferConditions('');
       setNewOfferCategory('restaurant');
+      setNewOfferImage(null);
       setShowCreateModal(false);
       await refreshData(user.id);
     } catch (err) {
@@ -535,10 +538,28 @@ export default function BusinessDashboard() {
         </div>
       </header>
 
-      {/* Centered Single Column Layout */}
-      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem', position: 'relative', zIndex: 2 }}>
-        {/* Confirm Referral Code Form */}
-        <div className="panel" style={{ padding: 'var(--panel-padding)', borderRadius: '20px' }}>
+      {/* Grid Dashboard Layout */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2.5rem', position: 'relative', zIndex: 2 }}>
+        
+        {/* Left Column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          
+          {/* Top Stats Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="panel" style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '16px' }}>
+              <div style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Active Offers</div>
+              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)', marginTop: '0.5rem' }}>{offers.filter(o => o.isActive).length}</div>
+            </div>
+            <div className="panel" style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '16px' }}>
+              <div style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Paid Out</div>
+              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--success)', marginTop: '0.5rem' }}>
+                {user ? formatCurrency(history.filter(tx => tx.type === 'reward').reduce((acc, tx) => acc + tx.amount, 0), user.currency) : '$0'}
+              </div>
+            </div>
+          </div>
+
+          {/* Confirm Referral Code Form */}
+          <div className="panel" style={{ padding: 'var(--panel-padding)', borderRadius: '20px' }}>
           <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.2px' }}>{t.attributeTitle}</h3>
           
           {statusMessage && (
@@ -621,6 +642,9 @@ export default function BusinessDashboard() {
                 alignItems: 'center'
               }}>
                 <div>
+                  {offer.imageUrl && (
+                    <img src={offer.imageUrl} alt={offer.title} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover', float: 'left', marginRight: '12px' }} />
+                  )}
                   <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{offer.title}</h4>
                   <span style={{ fontSize: '0.75rem', opacity: 0.5, display: 'block', marginTop: '4px' }}>
                     {t.rewardLabel}: <strong>{user && formatCurrency(offer.rewardAmount, user.currency)}</strong>
@@ -655,9 +679,12 @@ export default function BusinessDashboard() {
             )}
           </div>
         </div>
+        </div>
 
-        {/* Transaction History */}
-        <div className="panel" style={{ padding: '1.5rem' }}>
+        {/* Right Column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          {/* Transaction History */}
+          <div className="panel" style={{ padding: '1.5rem' }}>
           <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700 }}>Recent Transactions</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {history.slice(0, 10).map((tx) => (
@@ -706,6 +733,7 @@ export default function BusinessDashboard() {
           </div>
         </div>
       </div>
+      </div>
 
       {/* Modal dialog for creating new offer */}
       {showCreateModal && (
@@ -733,6 +761,32 @@ export default function BusinessDashboard() {
             <h3 style={{ marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: 700 }}>{t.createTitle}</h3>
             
             <form onSubmit={handleCreateOffer} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              {/* Image Upload */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Offer Image (Optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      const url = URL.createObjectURL(e.target.files[0]);
+                      setNewOfferImage(url);
+                    }
+                  }}
+                  style={{
+                    background: 'var(--input-bg)',
+                    border: '1px solid var(--surface-border)',
+                    borderRadius: '8px',
+                    padding: '8px 10px',
+                    color: 'var(--foreground)',
+                    fontSize: '0.85rem'
+                  }}
+                />
+                {newOfferImage && (
+                  <img src={newOfferImage} alt="Preview" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', marginTop: '4px' }} />
+                )}
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.offerTitleLabel}</label>
                 <input

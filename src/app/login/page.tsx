@@ -94,7 +94,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} action="javascript:void(0)">
           
           {isSignUp && (
             <div className="form-group">
@@ -220,7 +220,8 @@ export default function LoginPage() {
             {isSignUp ? 'Already have an account?' : 'New to Agent Core?'}
           </span>{' '}
           <button
-            onClick={() => setIsSignUp(!isSignUp)}
+            type="button"
+            onClick={(e) => { e.preventDefault(); setIsSignUp(!isSignUp); }}
             style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, fontSize: 'inherit' }}
           >
             {isSignUp ? 'Sign In' : 'Sign Up'}

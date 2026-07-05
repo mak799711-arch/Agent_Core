@@ -43,6 +43,7 @@ export class SupabaseOfferRepository implements IOfferRepository {
       average_bill: offer.averageBill,
       category: offer.category,
       conditions: offer.conditions,
+      image_url: offer.imageUrl,
     };
 
     const { data, error } = await supabase
@@ -65,6 +66,7 @@ export class SupabaseOfferRepository implements IOfferRepository {
     if (updates.category !== undefined) dbUpdates.category = updates.category;
     if (updates.conditions !== undefined) dbUpdates.conditions = updates.conditions;
     if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
+    if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
 
     const { data, error } = await supabase
       .from('offers')
@@ -86,9 +88,10 @@ export class SupabaseOfferRepository implements IOfferRepository {
       rewardType: data.reward_type as 'fixed' | 'percentage',
       rewardPercent: data.reward_percent ? Number(data.reward_percent) : null,
       averageBill: data.average_bill ? Number(data.average_bill) : null,
-      category: data.category as 'nightlife' | 'restaurant' | 'villa' | 'activity',
+      category: data.category as 'nightlife' | 'restaurant' | 'real_estate' | 'beauty' | 'fitness' | 'retail' | 'activity' | 'services',
       conditions: data.conditions,
       isActive: data.is_active,
+      imageUrl: data.image_url || undefined,
       createdAt: data.created_at,
     };
   }

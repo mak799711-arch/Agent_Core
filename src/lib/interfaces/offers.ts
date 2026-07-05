@@ -9,6 +9,7 @@ export interface Offer {
   category: 'restaurant' | 'nightlife' | 'real_estate' | 'beauty' | 'fitness' | 'retail' | 'activity' | 'services';
   conditions: string | null;
   isActive: boolean;
+  imageUrl?: string;
   createdAt: string;
 }
 

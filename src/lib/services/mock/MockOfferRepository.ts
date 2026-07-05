@@ -13,6 +13,7 @@ export class MockOfferRepository implements IOfferRepository {
       category: 'restaurant',
       conditions: 'Reward is $5 per customer.',
       isActive: true,
+      imageUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=600',
       createdAt: new Date().toISOString()
     },
     {
@@ -26,6 +27,7 @@ export class MockOfferRepository implements IOfferRepository {
       category: 'nightlife',
       conditions: 'Reward is $12.5 per referral group.',
       isActive: true,
+      imageUrl: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&q=80&w=600',
       createdAt: new Date().toISOString()
     },
     {
@@ -39,6 +41,7 @@ export class MockOfferRepository implements IOfferRepository {
       category: 'nightlife',
       conditions: '10% of total table spend. Estimated reward: $50.',
       isActive: true,
+      imageUrl: 'https://images.unsplash.com/photo-1574096079513-d8259312b78a?auto=format&fit=crop&q=80&w=600',
       createdAt: new Date().toISOString()
     },
     {
@@ -52,6 +55,7 @@ export class MockOfferRepository implements IOfferRepository {
       category: 'real_estate',
       conditions: 'Reward is $100 for verified 3+ nights stay.',
       isActive: true,
+      imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=600',
       createdAt: new Date().toISOString()
     },
     {
@@ -65,6 +69,7 @@ export class MockOfferRepository implements IOfferRepository {
       category: 'activity',
       conditions: 'Reward is $8 per referral booking.',
       isActive: true,
+      imageUrl: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&q=80&w=600',
       createdAt: new Date().toISOString()
     }
   ];

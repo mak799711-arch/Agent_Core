@@ -701,6 +701,11 @@ export default function PartnerDashboard() {
                 ✕
               </button>
               
+              {selectedOffer.imageUrl && (
+                <div style={{ width: '100%', height: '140px', marginBottom: '1rem', borderRadius: '10px', overflow: 'hidden' }}>
+                  <img src={selectedOffer.imageUrl} alt={selectedOffer.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', marginRight: '1.5rem', gap: '1rem' }}>
                 <div>
                   <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 600 }}>
@@ -746,21 +751,26 @@ export default function PartnerDashboard() {
                   onClick={() => setSelectedOffer(offer)}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--primary)' }}>
-                        {{
-                          restaurant: 'Restaurants 🍽️',
-                          nightlife: 'Nightlife 🍸',
-                          real_estate: 'Real Estate 🏡',
-                          beauty: 'Beauty 💅',
-                          fitness: 'Fitness 🏋️‍♂️',
-                          retail: 'Retail 🛍️',
-                          activity: 'Activities 🏄',
-                          services: 'Services 🛠️'
-                        }[offer.category as string] || offer.category}
-                      </span>
-                      <h4 style={{ margin: '0.1rem 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 600 }}>{offer.title}</h4>
-                      <p style={{ fontSize: '0.8rem', opacity: 0.5, margin: 0 }}>Click for details</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      {offer.imageUrl && (
+                        <img src={offer.imageUrl} alt={offer.title} style={{ width: '60px', height: '60px', borderRadius: '10px', objectFit: 'cover' }} />
+                      )}
+                      <div>
+                        <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--primary)' }}>
+                          {{
+                            restaurant: 'Restaurants 🍽️',
+                            nightlife: 'Nightlife 🍸',
+                            real_estate: 'Real Estate 🏡',
+                            beauty: 'Beauty 💅',
+                            fitness: 'Fitness 🏋️‍♂️',
+                            retail: 'Retail 🛍️',
+                            activity: 'Activities 🏄',
+                            services: 'Services 🛠️'
+                          }[offer.category as string] || offer.category}
+                        </span>
+                        <h4 style={{ margin: '0.1rem 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 600 }}>{offer.title}</h4>
+                        <p style={{ fontSize: '0.8rem', opacity: 0.5, margin: 0 }}>Click for details</p>
+                      </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>
