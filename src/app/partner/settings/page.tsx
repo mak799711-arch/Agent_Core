@@ -241,6 +241,14 @@ export default function PartnerSettings() {
     );
   }
 
+  if (user?.status === 'banned' || user?.isBlocked) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-gradient)' }}>
+        <h1 style={{ color: 'var(--foreground)', fontSize: '1.5rem', fontWeight: 600 }}>Ваш аккаунт заблокирован</h1>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
