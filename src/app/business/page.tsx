@@ -538,27 +538,8 @@ export default function BusinessDashboard() {
         </div>
       </header>
 
-      {/* Grid Dashboard Layout */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2.5rem', position: 'relative', zIndex: 2 }}>
-        
-        {/* Left Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-          
-          {/* Top Stats Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div className="panel" style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '16px' }}>
-              <div style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Active Offers</div>
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)', marginTop: '0.5rem' }}>{offers.filter(o => o.isActive).length}</div>
-            </div>
-            <div className="panel" style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '16px' }}>
-              <div style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Paid Out</div>
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--success)', marginTop: '0.5rem' }}>
-                {user ? formatCurrency(history.filter(tx => tx.type === 'reward').reduce((acc, tx) => acc + tx.amount, 0), user.currency) : '$0'}
-              </div>
-            </div>
-          </div>
-
-          {/* Confirm Referral Code Form */}
+      {/* Centered Single Column Layout */}
+      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem', position: 'relative', zIndex: 2 }}>
           <div className="panel" style={{ padding: 'var(--panel-padding)', borderRadius: '20px' }}>
           <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.2px' }}>{t.attributeTitle}</h3>
           
@@ -679,12 +660,9 @@ export default function BusinessDashboard() {
             )}
           </div>
         </div>
-        </div>
 
-        {/* Right Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-          {/* Transaction History */}
-          <div className="panel" style={{ padding: '1.5rem' }}>
+        {/* Transaction History */}
+        <div className="panel" style={{ padding: '1.5rem' }}>
           <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700 }}>Recent Transactions</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {history.slice(0, 10).map((tx) => (
@@ -732,7 +710,6 @@ export default function BusinessDashboard() {
             )}
           </div>
         </div>
-      </div>
       </div>
 
       {/* Modal dialog for creating new offer */}
