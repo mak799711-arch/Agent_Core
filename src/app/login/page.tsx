@@ -94,7 +94,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} action="javascript:void(0)">
+        <form onSubmit={handleSubmit}>
           
           {isSignUp && (
             <div className="form-group">

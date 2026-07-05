@@ -218,13 +218,29 @@ export class SupabaseAuthService implements IAuthService {
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.isBlocked !== undefined) dbUpdates.is_blocked = updates.isBlocked;
     
-    const { error } = await supabase
-      .from('profiles')
-      .update(dbUpdates)
-      .eq('id', userId);
+    // Get session token for authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    
+    if (!token) {
+      throw new Error('No valid session found');
+    }
 
-    if (error) {
-      throw error;
+    const response = await fetch('/api/v1/admin/users/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        targetUserId: userId,
+        updates: dbUpdates
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update user profile via admin API');
     }
   }
 

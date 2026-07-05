@@ -345,18 +345,7 @@ export default function AdminDashboard() {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Background ambient light */}
-      <div style={{
-        position: 'absolute',
-        width: '400px',
-        height: '400px',
-        background: 'var(--ambient-glow)',
-        filter: 'blur(120px)',
-        borderRadius: '50%',
-        top: '0%',
-        left: '25%',
-        pointerEvents: 'none'
-      }} />
+      {/* Background ambient light removed for performance */}
 
       {/* Container to restrict max width */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: 'var(--admin-padding)', position: 'relative', zIndex: 1 }}>
@@ -442,9 +431,7 @@ export default function AdminDashboard() {
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(5, 5, 8, 0.5)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
+          background: 'rgba(5, 5, 8, 0.9)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
