@@ -1,0 +1,2 @@
+ALTER TABLE profiles ADD COLUMN ban_until TIMESTAMP WITH TIME ZONE;
+ALTER TABLE profiles ADD COLUMN ban_reason TEXT;

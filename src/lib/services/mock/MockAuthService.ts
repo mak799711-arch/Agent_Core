@@ -270,6 +270,26 @@ export class MockAuthService implements IAuthService {
       this.currentUser.isBlocked = isBlocked;
     }
   }
+
+  async adminUpdateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
+    for (const [email, user] of this.users.entries()) {
+      if (user.id === userId) {
+        if (updates.status !== undefined) user.status = updates.status;
+        if (updates.isBlocked !== undefined) user.isBlocked = updates.isBlocked;
+        if (updates.banUntil !== undefined) user.banUntil = updates.banUntil;
+        if (updates.banReason !== undefined) user.banReason = updates.banReason;
+        this.users.set(email, user);
+        break;
+      }
+    }
+    this.saveUsersToStorage();
+    if (this.currentUser && this.currentUser.id === userId) {
+      if (updates.status !== undefined) this.currentUser.status = updates.status;
+      if (updates.isBlocked !== undefined) this.currentUser.isBlocked = updates.isBlocked;
+      if (updates.banUntil !== undefined) this.currentUser.banUntil = updates.banUntil;
+      if (updates.banReason !== undefined) this.currentUser.banReason = updates.banReason;
+    }
+  }
 }
 
 

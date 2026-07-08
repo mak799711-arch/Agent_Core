@@ -128,6 +128,8 @@ export default function AdminDashboard() {
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'banned' | 'requests' | 'audit'>('active');
   const [selectedBanUser, setSelectedBanUser] = useState<{ id: string; name: string } | null>(null);
+  const [banReason, setBanReason] = useState('');
+  const [banUntil, setBanUntil] = useState('');
   const router = useRouter();
 
   const [agents, setAgents] = useState<EnrichedUser[]>([]);
@@ -281,19 +283,27 @@ export default function AdminDashboard() {
 
   const handleInitiateBan = (id: string, name: string) => {
     setSelectedBanUser({ id, name });
+    setBanReason('');
+    setBanUntil('');
   };
 
-  const handleConfirmBan = async (duration: string) => {
+  const handleConfirmBan = async () => {
     if (!selectedBanUser) return;
     const { id } = selectedBanUser;
     
-    await authService.adminUpdateUserProfile(id, { status: 'banned', isBlocked: true });
-    localStorage.setItem(`user_ban_dur_${id}`, duration);
+    await authService.adminUpdateUserProfile(id, { 
+      status: 'banned', 
+      isBlocked: true,
+      banReason: banReason || 'Не указана',
+      banUntil: banUntil ? new Date(banUntil).toISOString() : null
+    });
     localStorage.removeItem(`verification_requested_${id}`);
     
     const currentUser = await authService.getCurrentUser();
     if (currentUser && currentUser.id === id) {
       currentUser.status = 'banned';
+      currentUser.banReason = banReason || 'Не указана';
+      if (banUntil) currentUser.banUntil = new Date(banUntil).toISOString();
     }
     
     setSelectedBanUser(null);
@@ -467,54 +477,60 @@ export default function AdminDashboard() {
               Restricting access for user: <strong style={{ color: 'var(--foreground)' }}>{selectedBanUser.name}</strong>
             </p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '2rem' }}>
-              {(['1d', '1w', '1m', '1y', 'forever'] as const).map((dur) => (
-                <button
-                  key={dur}
-                  onClick={() => handleConfirmBan(
-                    dur === '1d' ? t.banOption1d :
-                    dur === '1w' ? t.banOption1w :
-                    dur === '1m' ? t.banOption1m :
-                    dur === '1y' ? t.banOption1y : t.banOptionForever
-                  )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.85rem', color: 'var(--foreground)', opacity: 0.8, fontWeight: 500 }}>Дата разблокировки (оставьте пустым для пермабана)</label>
+                <input
+                  type="date"
+                  value={banUntil}
+                  onChange={(e) => setBanUntil(e.target.value)}
                   style={{
-                    background: 'rgba(244, 63, 94, 0.03)',
-                    border: '1px solid rgba(244, 63, 94, 0.15)',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid var(--surface-border)',
                     color: 'var(--foreground)',
-                    padding: '14px 20px',
+                    padding: '12px 16px',
                     borderRadius: '12px',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                    textAlign: 'left',
-                    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    outline: 'none'
+                    width: '100%',
+                    outline: 'none',
+                    fontSize: '0.9rem'
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(244, 63, 94, 0.1)';
-                    e.currentTarget.style.borderColor = 'var(--error)';
-                    e.currentTarget.style.transform = 'translateX(4px)';
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.85rem', color: 'var(--foreground)', opacity: 0.8, fontWeight: 500 }}>Причина блокировки</label>
+                <input
+                  type="text"
+                  placeholder="Например: Фрод с геопозицией"
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid var(--surface-border)',
+                    color: 'var(--foreground)',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    width: '100%',
+                    outline: 'none',
+                    fontSize: '0.9rem'
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(244, 63, 94, 0.03)';
-                    e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.15)';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                  }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    {
-                      dur === '1d' ? t.banOption1d :
-                      dur === '1w' ? t.banOption1w :
-                      dur === '1m' ? t.banOption1m :
-                      dur === '1y' ? t.banOption1y : t.banOptionForever
-                    }
-                  </span>
-                  <span style={{ fontSize: '0.75rem', opacity: 0.4 }}>→</span>
-                </button>
-              ))}
+                />
+              </div>
+              <button
+                onClick={handleConfirmBan}
+                style={{
+                  background: 'var(--error)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '14px 20px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  marginTop: '10px'
+                }}
+              >
+                Подтвердить бан
+              </button>
             </div>
 
             <button

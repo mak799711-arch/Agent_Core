@@ -29,15 +29,9 @@ export default function LoginPage() {
     checkExistingSession();
   }, [router]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    // Fallback to DOM values if state is empty (iOS Autofill workaround)
-    const formData = new FormData(e.currentTarget);
-    const actualEmail = (formData.get('email') as string) || email;
-    const actualPassword = (formData.get('password') as string) || password;
-    const actualFullName = (formData.get('fullName') as string) || fullName;
     
     if (isSignUp && !role) {
       setError('Please select an account type (Partner or Business) before continuing.');
@@ -48,10 +42,10 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        await authService.signUp(actualEmail, actualPassword, role!, actualFullName);
+        await authService.signUp(email, password, role!, fullName);
         router.push(`/${role}`);
       } else {
-        await authService.signIn(actualEmail, actualPassword);
+        await authService.signIn(email, password);
         const user = await authService.getCurrentUser();
         if (user) {
           router.push(`/${user.role}`);
@@ -100,7 +94,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form action="javascript:void(0);" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           
           {isSignUp && (
             <div className="form-group">
@@ -152,7 +146,6 @@ export default function LoginPage() {
               <input
                 className="input-field"
                 type="text"
-                name="fullName"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
@@ -166,7 +159,6 @@ export default function LoginPage() {
             <input
               className="input-field"
               type="email"
-              name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -179,7 +171,6 @@ export default function LoginPage() {
             <div style={{ position: 'relative' }}>
               <input
                 className="input-field"
-                name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

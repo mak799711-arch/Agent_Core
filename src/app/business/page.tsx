@@ -500,8 +500,32 @@ export default function BusinessDashboard() {
 
   if (user?.status === 'banned' || user?.isBlocked) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-gradient)' }}>
-        <h1 style={{ color: 'var(--foreground)', fontSize: '1.5rem', fontWeight: 600 }}>Ваш аккаунт заблокирован</h1>
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-gradient)', padding: '20px', textAlign: 'center' }}>
+        <div style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '24px', padding: '30px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
+          <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(244, 63, 94, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h1 style={{ color: 'var(--foreground)', fontSize: '1.4rem', fontWeight: 700, marginBottom: '15px' }}>Аккаунт заблокирован</h1>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '12px' }}>
+            <div>
+              <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '4px' }}>Дата разблокировки:</span>
+              <span style={{ fontWeight: 600, color: 'var(--foreground)' }}>
+                {user.banUntil ? new Date(user.banUntil).toLocaleDateString('ru-RU') : 'Навсегда (Пермабан)'}
+              </span>
+            </div>
+            <div>
+              <span style={{ fontSize: '0.8rem', opacity: 0.6, display: 'block', marginBottom: '4px' }}>Причина:</span>
+              <span style={{ fontWeight: 600, color: 'var(--error)' }}>
+                {user.banReason || 'Нарушение правил платформы'}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

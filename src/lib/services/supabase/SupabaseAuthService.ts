@@ -29,6 +29,8 @@ export class SupabaseAuthService implements IAuthService {
       status: data.status,
       phone: data.phone,
       isBlocked: data.is_blocked,
+      banUntil: data.ban_until,
+      banReason: data.ban_reason,
       createdAt: data.created_at,
     };
   }
@@ -217,6 +219,8 @@ export class SupabaseAuthService implements IAuthService {
     const dbUpdates: any = {};
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.isBlocked !== undefined) dbUpdates.is_blocked = updates.isBlocked;
+    if (updates.banUntil !== undefined) dbUpdates.ban_until = updates.banUntil;
+    if (updates.banReason !== undefined) dbUpdates.ban_reason = updates.banReason;
     
     // Get session token for authentication
     const { data: { session } } = await supabase.auth.getSession();
@@ -266,6 +270,8 @@ export class SupabaseAuthService implements IAuthService {
       status: p.status,
       phone: p.phone,
       isBlocked: p.is_blocked,
+      banUntil: p.ban_until,
+      banReason: p.ban_reason,
       createdAt: p.created_at,
     }));
   }

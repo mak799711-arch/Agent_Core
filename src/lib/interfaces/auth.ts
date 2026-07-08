@@ -18,6 +18,8 @@ export interface UserProfile {
   phone?: string;
   latitude?: number;
   longitude?: number;
+  banUntil?: string | null;
+  banReason?: string | null;
 }
 
 export interface IAuthService {
