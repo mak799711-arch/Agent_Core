@@ -4,8 +4,10 @@ export interface Offer {
   title: string;
   rewardAmount: number;
   rewardType: 'fixed' | 'percentage';
-  rewardPercent: number | null;
-  averageBill: number | null;
+  rewardPercent?: number | null; // % если 'percentage'
+  customerDiscountPercent?: number | null; // Скидка для туриста
+  platformFeePercent?: number | null; // Комиссия платформы
+  averageBill?: number | null;
   category: 'restaurant' | 'nightlife' | 'real_estate' | 'beauty' | 'fitness' | 'retail' | 'activity' | 'services';
   conditions: string | null;
   isActive: boolean;

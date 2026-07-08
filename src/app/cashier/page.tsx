@@ -1,200 +1,258 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import Script from 'next/script';
 
 export default function CashierPage() {
   const [code, setCode] = useState('');
-  const [status, setStatus] = useState<'idle' | 'checking' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'verified' | 'completed' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  const [sessionData, setSessionData] = useState<any>(null);
+  const [billAmount, setBillAmount] = useState<number | ''>('');
 
-  const handleKeyPress = (num: string) => {
-    if (code.length < 6) {
-      setCode(prev => prev + num);
-      setStatus('idle');
+  const [isScanning, setIsScanning] = useState(false);
+  const scannerRef = useRef<any>(null);
+
+  const handleVerify = async (codeToVerify: string = code) => {
+    if (!codeToVerify || codeToVerify.length < 6) return;
+    setStatus('loading');
+    setErrorMsg('');
+    
+    try {
+      const res = await fetch(`/api/v1/referrals/verify?code=${codeToVerify.toUpperCase()}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        setSessionData(data);
+        setStatus('verified');
+      } else {
+        setErrorMsg(data.error || 'Код не найден');
+        setStatus('error');
+      }
+    } catch (e) {
+      setErrorMsg('Ошибка сети');
+      setStatus('error');
     }
   };
 
-  const handleBackspace = () => {
-    setCode(prev => prev.slice(0, -1));
-    setStatus('idle');
-  };
-
-  const handleCheck = () => {
-    if (code.length !== 6) return;
-    setStatus('checking');
+  const handleComplete = async () => {
+    if (!billAmount || Number(billAmount) <= 0) {
+      setErrorMsg('Введите корректную сумму чека');
+      return;
+    }
     
-    // Мокап-проверка: имитируем задержку сети
-    setTimeout(() => {
-      if (code === '123456') {
-        setStatus('success');
+    setStatus('loading');
+    setErrorMsg('');
+    
+    try {
+      const res = await fetch('/api/v1/referrals/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code.toUpperCase(),
+          billAmount: Number(billAmount)
+        })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setStatus('completed');
       } else {
+        setErrorMsg(data.error || 'Ошибка при проведении транзакции');
         setStatus('error');
       }
-    }, 1000);
+    } catch (e) {
+      setErrorMsg('Ошибка сети');
+      setStatus('error');
+    }
   };
 
-  const handleReset = () => {
-    setCode('');
-    setStatus('idle');
+  const calculateDiscount = () => {
+    if (!sessionData || !billAmount) return 0;
+    const discountPercent = sessionData.offer.customerDiscountPercent || 0;
+    return (Number(billAmount) * discountPercent) / 100;
+  };
+
+  const calculateTotal = () => {
+    if (!billAmount) return 0;
+    return Number(billAmount) - calculateDiscount();
+  };
+
+  const startScanner = () => {
+    setIsScanning(true);
+    setTimeout(() => {
+      // @ts-ignore
+      if (window.Html5QrcodeScanner) {
+        // @ts-ignore
+        const scanner = new window.Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
+        scannerRef.current = scanner;
+        scanner.render((text: string) => {
+           setCode(text);
+           setIsScanning(false);
+           scanner.clear();
+           // Auto verify when scanned
+           handleVerify(text);
+        }, (err: any) => {
+           // ignore errors during scanning (usually just means no QR found yet)
+        });
+      }
+    }, 200);
+  };
+
+  const stopScanner = () => {
+    setIsScanning(false);
+    if (scannerRef.current) {
+      scannerRef.current.clear();
+    }
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      backgroundColor: 'var(--background)',
-      color: 'var(--foreground)',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      padding: '20px'
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#00e5ff' }}>AgentCore Terminal</h1>
-        <p style={{ color: '#888', margin: 0 }}>Введите 6-значный код гостя</p>
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <Script src="https://unpkg.com/html5-qrcode" strategy="lazyOnload" />
+      
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-blue-600 p-6 text-white text-center">
+          <h1 className="text-2xl font-bold">Касса (AgentCore)</h1>
+          <p className="text-blue-100 mt-1">Оффлайн-трекинг</p>
+        </div>
+
+        <div className="p-6">
+          {status === 'error' && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-center text-sm font-medium">
+              {errorMsg}
+            </div>
+          )}
+
+          {isScanning && (
+             <div className="mb-4">
+               <div id="reader" style={{ width: '100%' }}></div>
+               <button 
+                 onClick={stopScanner}
+                 className="mt-4 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-xl transition"
+               >
+                 Отменить сканирование
+               </button>
+             </div>
+          )}
+
+          {!isScanning && (status === 'idle' || status === 'error') && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Код гостя (6 символов)</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    className="w-full text-center text-3xl tracking-widest uppercase p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 transition"
+                    placeholder="XXXXXX"
+                  />
+                  <button 
+                    onClick={startScanner}
+                    className="bg-blue-50 p-4 border-2 border-blue-200 rounded-xl hover:bg-blue-100 transition text-2xl"
+                    title="Сканировать QR"
+                  >
+                    📷
+                  </button>
+                </div>
+              </div>
+              <button 
+                onClick={() => handleVerify(code)}
+                disabled={code.length < 6}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold py-4 rounded-xl transition"
+              >
+                Проверить код
+              </button>
+            </div>
+          )}
+
+          {status === 'loading' && (
+            <div className="text-center py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-500">Обработка...</p>
+            </div>
+          )}
+
+          {status === 'verified' && sessionData && (
+            <div className="space-y-5">
+              <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <p className="text-sm text-gray-500">Заведение</p>
+                <p className="font-bold text-gray-900">{sessionData.business.name}</p>
+                <div className="mt-2 flex justify-between items-center border-t border-blue-200 pt-2">
+                  <span className="text-sm text-gray-500">Скидка гостю:</span>
+                  <span className="font-bold text-green-600 text-lg">
+                    {sessionData.offer.customerDiscountPercent || 0}%
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Сумма чека (до скидки)</label>
+                <input 
+                  type="number" 
+                  value={billAmount}
+                  onChange={(e) => setBillAmount(e.target.value ? Number(e.target.value) : '')}
+                  className="w-full text-right text-2xl p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 transition"
+                  placeholder="0"
+                />
+              </div>
+
+              {Number(billAmount) > 0 && (
+                <div className="bg-gray-50 p-4 rounded-xl space-y-2">
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>Сумма:</span>
+                    <span>{Number(billAmount).toLocaleString()} IDR</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-green-600 font-medium">
+                    <span>Скидка ({(sessionData.offer.customerDiscountPercent || 0)}%):</span>
+                    <span>- {calculateDiscount().toLocaleString()} IDR</span>
+                  </div>
+                  <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t border-gray-200">
+                    <span>К оплате:</span>
+                    <span>{calculateTotal().toLocaleString()} IDR</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex space-x-3 pt-2">
+                <button 
+                  onClick={() => { setStatus('idle'); setCode(''); setBillAmount(''); }}
+                  className="w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-xl transition"
+                >
+                  Отмена
+                </button>
+                <button 
+                  onClick={handleComplete}
+                  disabled={!billAmount || Number(billAmount) <= 0}
+                  className="w-2/3 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white font-bold py-3 rounded-xl transition"
+                >
+                  Оплата получена
+                </button>
+              </div>
+            </div>
+          )}
+
+          {status === 'completed' && (
+            <div className="text-center py-6 space-y-4">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Успешно!</h2>
+              <p className="text-gray-500">Скидка применена, вознаграждение партнеру зачислено.</p>
+              <button 
+                onClick={() => { setStatus('idle'); setCode(''); setBillAmount(''); }}
+                className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition"
+              >
+                Новый чек
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Дисплей ввода */}
-      <div style={{
-        width: '100%',
-        maxWidth: '320px',
-        height: '80px',
-        backgroundColor: 'var(--surface)',
-        borderRadius: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: '40px',
-        boxShadow: '0 4px 20px rgba(0, 229, 255, 0.1)',
-        border: status === 'error' ? '2px solid #ff4444' : status === 'success' ? '2px solid #00c853' : '1px solid #333'
-      }}>
-        <span style={{ fontSize: '40px', letterSpacing: '8px', fontWeight: '500', fontFamily: 'monospace' }}>
-          {code || '------'}
-        </span>
-      </div>
-
-      {/* Статус */}
-      <div style={{ height: '30px', marginBottom: '20px', textAlign: 'center' }}>
-        {status === 'checking' && <span style={{ color: '#888' }}>Проверка...</span>}
-        {status === 'error' && <span style={{ color: '#ff4444' }}>Код не найден! Попробуйте '123456'</span>}
-        {status === 'success' && <span style={{ color: '#00c853', fontWeight: 'bold' }}>Скидка применена! Agent: Maxim</span>}
-      </div>
-
-      {/* Клавиатура */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '16px',
-        width: '100%',
-        maxWidth: '320px',
-        marginBottom: '30px'
-      }}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-          <button
-            key={num}
-            onClick={() => handleKeyPress(num.toString())}
-            style={{
-              height: '70px',
-              backgroundColor: 'var(--surface)',
-              border: '1px solid var(--surface-border)',
-              borderRadius: '16px',
-              fontSize: '28px',
-              color: 'var(--foreground)',
-              cursor: 'pointer',
-              transition: 'all 0.1s ease',
-            }}
-            onMouseDown={(e) => e.currentTarget.style.backgroundColor = '#333'}
-            onMouseUp={(e) => e.currentTarget.style.backgroundColor = '#1a1a1a'}
-          >
-            {num}
-          </button>
-        ))}
-        <button
-          onClick={handleReset}
-          style={{
-            height: '70px',
-            backgroundColor: 'var(--surface)',
-            border: '1px solid var(--surface-border)',
-            borderRadius: '16px',
-            fontSize: '18px',
-            color: '#888',
-            cursor: 'pointer'
-          }}
-        >
-          C
-        </button>
-        <button
-          onClick={() => handleKeyPress('0')}
-          style={{
-            height: '70px',
-            backgroundColor: 'var(--surface)',
-            border: '1px solid var(--surface-border)',
-            borderRadius: '16px',
-            fontSize: '28px',
-            color: 'var(--foreground)',
-            cursor: 'pointer'
-          }}
-        >
-          0
-        </button>
-        <button
-          onClick={handleBackspace}
-          style={{
-            height: '70px',
-            backgroundColor: 'var(--surface)',
-            border: '1px solid var(--surface-border)',
-            borderRadius: '16px',
-            fontSize: '24px',
-            color: 'var(--foreground)',
-            cursor: 'pointer'
-          }}
-        >
-          ⌫
-        </button>
-      </div>
-
-      {/* Кнопка Проверить */}
-      <button
-        onClick={handleCheck}
-        disabled={code.length !== 6 || status === 'checking' || status === 'success'}
-        style={{
-          width: '100%',
-          maxWidth: '320px',
-          height: '60px',
-          backgroundColor: code.length === 6 && status !== 'success' ? '#00e5ff' : '#333',
-          color: code.length === 6 && status !== 'success' ? '#000' : '#666',
-          border: 'none',
-          borderRadius: '16px',
-          fontSize: '18px',
-          fontWeight: 'bold',
-          cursor: code.length === 6 ? 'pointer' : 'not-allowed',
-          transition: 'background-color 0.2s',
-          display: status === 'success' ? 'none' : 'block'
-        }}
-      >
-        Проверить код
-      </button>
-
-      {/* Кнопка "Новый клиент" после успеха */}
-      {status === 'success' && (
-        <button
-          onClick={handleReset}
-          style={{
-            width: '100%',
-            maxWidth: '320px',
-            height: '60px',
-            backgroundColor: '#00c853',
-            color: '#000',
-            border: 'none',
-            borderRadius: '16px',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-          }}
-        >
-          Следующий гость
-        </button>
-      )}
     </div>
   );
 }

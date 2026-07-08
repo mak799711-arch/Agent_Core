@@ -38,6 +38,8 @@ CREATE TABLE offers (
   reward_amount DECIMAL(10,2) NOT NULL, -- Сколько получает партнер
   reward_type VARCHAR(50) DEFAULT 'fixed', -- 'fixed' или 'percentage'
   reward_percent DECIMAL(5,2), -- % если reward_type = 'percentage'
+  customer_discount_percent DECIMAL(5,2) DEFAULT 0.00, -- Скидка туристу
+  platform_fee_percent DECIMAL(5,2) DEFAULT 1.00, -- Комиссия платформы
   average_bill DECIMAL(10,2), -- Средний чек для просчета
   category VARCHAR(50) DEFAULT 'activity',
   conditions TEXT,

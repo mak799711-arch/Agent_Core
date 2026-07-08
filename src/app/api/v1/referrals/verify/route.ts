@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
         rewardAmount: offer.rewardAmount,
         rewardType: offer.rewardType,
         rewardPercent: offer.rewardPercent,
+        customerDiscountPercent: offer.customerDiscountPercent,
         conditions: offer.conditions,
       },
       business: {

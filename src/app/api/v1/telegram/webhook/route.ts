@@ -209,7 +209,8 @@ async function processCompleteTransaction(chatId: number, code: string, billAmou
     }
     computedReward = Math.round(computedReward * 100) / 100;
 
-    const platformFee = Math.round(billAmount * 0.01 * 100) / 100;
+    const feePercent = offer.platformFeePercent ?? 1.00;
+    const platformFee = Math.round(billAmount * (feePercent / 100) * 100) / 100;
     const totalRequired = computedReward + platformFee;
 
     // 4. Check business balance

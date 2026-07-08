@@ -55,8 +55,9 @@ export async function POST(request: NextRequest) {
     // Округляем до 2 знаков после запятой
     computedReward = Math.round(computedReward * 100) / 100;
 
-    // Вычисляем комиссию платформы (1% от суммы чека)
-    const platformFee = Math.round(billAmount * 0.01 * 100) / 100;
+    // Вычисляем комиссию платформы (dynamic from DB, fallback to 1%)
+    const feePercent = offer.platformFeePercent ?? 1.00;
+    const platformFee = Math.round(billAmount * (feePercent / 100) * 100) / 100;
 
     const totalRequired = computedReward + platformFee;
 

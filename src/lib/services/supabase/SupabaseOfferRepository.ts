@@ -40,6 +40,8 @@ export class SupabaseOfferRepository implements IOfferRepository {
       reward_amount: offer.rewardAmount,
       reward_type: offer.rewardType,
       reward_percent: offer.rewardPercent,
+      customer_discount_percent: offer.customerDiscountPercent,
+      platform_fee_percent: offer.platformFeePercent,
       average_bill: offer.averageBill,
       category: offer.category,
       conditions: offer.conditions,
@@ -62,6 +64,8 @@ export class SupabaseOfferRepository implements IOfferRepository {
     if (updates.rewardAmount !== undefined) dbUpdates.reward_amount = updates.rewardAmount;
     if (updates.rewardType !== undefined) dbUpdates.reward_type = updates.rewardType;
     if (updates.rewardPercent !== undefined) dbUpdates.reward_percent = updates.rewardPercent;
+    if (updates.customerDiscountPercent !== undefined) dbUpdates.customer_discount_percent = updates.customerDiscountPercent;
+    if (updates.platformFeePercent !== undefined) dbUpdates.platform_fee_percent = updates.platformFeePercent;
     if (updates.averageBill !== undefined) dbUpdates.average_bill = updates.averageBill;
     if (updates.category !== undefined) dbUpdates.category = updates.category;
     if (updates.conditions !== undefined) dbUpdates.conditions = updates.conditions;
@@ -87,6 +91,8 @@ export class SupabaseOfferRepository implements IOfferRepository {
       rewardAmount: Number(data.reward_amount),
       rewardType: data.reward_type as 'fixed' | 'percentage',
       rewardPercent: data.reward_percent ? Number(data.reward_percent) : null,
+      customerDiscountPercent: data.customer_discount_percent ? Number(data.customer_discount_percent) : 0,
+      platformFeePercent: data.platform_fee_percent ? Number(data.platform_fee_percent) : 1,
       averageBill: data.average_bill ? Number(data.average_bill) : null,
       category: data.category as 'nightlife' | 'restaurant' | 'real_estate' | 'beauty' | 'fitness' | 'retail' | 'activity' | 'services',
       conditions: data.conditions,

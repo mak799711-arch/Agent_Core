@@ -123,7 +123,7 @@ a {
   border-radius: 8px;
   padding: 14px 16px;
   color: var(--foreground);
-  font-size: 0.95rem;
+  font-size: 16px;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s ease;

@@ -872,7 +872,7 @@ export default function PartnerDashboard() {
               borderRadius: '12px',
               marginBottom: '1.5rem'
             }}>
-              {/* QR Mock */}
+              {/* Real QR Code from qrserver API */}
               <div style={{
                 width: '140px',
                 height: '140px',
@@ -884,12 +884,12 @@ export default function PartnerDashboard() {
                 padding: '10px',
                 borderRadius: '8px'
               }}>
-                <div style={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundImage: 'radial-gradient(black 30%, transparent 35%)',
-                  backgroundSize: '8px 8px'
-                }}></div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${generatedSession.shortCode}`} 
+                  alt="QR Code" 
+                  style={{ width: '100%', height: '100%' }}
+                />
               </div>
               <span style={{ fontSize: '0.75rem', opacity: 0.4, display: 'block', marginBottom: '0.25rem' }}>{t.shortCodeLabel}</span>
               <div style={{

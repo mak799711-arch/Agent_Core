@@ -10,24 +10,24 @@
 
 Цель: подключить реальную базу данных, убить localStorage.
 
-- [ ] **1.4** Создать `.env.local` с `NEXT_PUBLIC_SUPABASE_URL` и `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- [ ] **1.5** Заменить `MockAuthService` → Supabase Auth (email + password)
-- [ ] **1.6** Проверить: регистрация → логин → редирект работает с реальной БД
+- [x] **1.4** Создать `.env.local` с `NEXT_PUBLIC_SUPABASE_URL` и `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- [x] **1.5** Заменить `MockAuthService` → Supabase Auth (email + password)
+- [x] **1.6** Проверить: регистрация → логин → редирект работает с реальной БД
 
 > [!IMPORTANT]
 > После Фазы 1 у тебя есть реальная авторизация и реальная база данных. Это фундамент всего остального.
 
 ---
 
-## Фаза 2 — Ядро (Неделя 3–4)
+## [x] Фаза 2 — Ядро (Неделя 3–4)
 
 Цель: один рабочий флоу — от создания оффера до оплаты агенту.
 
-- [ ] **2.1** Заменить `MockOfferRepository` → Supabase (таблица `offers`)
-- [ ] **2.2** Заменить `MockReferralRepository` → Supabase (таблица `referral_sessions`)
-- [ ] **2.3** Заменить `MockWalletRepository` → Supabase (таблица `transactions` + `wallets`)
-- [ ] **2.4** Починить API-роуты: `/api/v1/referrals/verify` и `/complete` — они сейчас используют in-memory моки, которые не делят состояние с клиентом
-- [ ] **2.5** Проверить полный цикл: бизнес создаёт оффер → партнёр берёт код → кассир вводит код → деньги начисляются
+- [x] **2.1** Заменить `MockOfferRepository` → Supabase (таблица `offers`)
+- [x] **2.2** Заменить `MockReferralRepository` → Supabase (таблица `referral_sessions`)
+- [x] **2.3** Заменить `MockWalletRepository` → Supabase (таблица `transactions` + `wallets`)
+- [x] **2.4** Починить API-роуты: `/api/v1/referrals/verify` и `/complete` — они сейчас используют in-memory моки, которые не делят состояние с клиентом
+- [x] **2.5** Проверить полный цикл: бизнес создаёт оффер → партнёр берёт код → кассир вводит код → деньги начисляются
 
 > [!IMPORTANT]
 > После Фазы 2 — весь основной флоу работает на реальных данных. Это уже MVP.
@@ -76,7 +76,6 @@
 | Dynamic Risk Engine | Нет данных для анализа |
 | Xendit / QRIS сплит-платежи | Сначала ручные выплаты |
 | Telegram-бот | PWA проще и быстрее для старта |
-| Mapbox карта | Не критично для пилота |
 | 7 языков | Достаточно EN + ID для Бали |
 
 ---
