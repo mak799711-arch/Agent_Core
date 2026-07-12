@@ -1,3 +1,5 @@
+'use client';
+
 import SettingsSidebar from '@/app/components/SettingsSidebar';
 
 // Inside the component... I need to replace from line 58. Wait, I should fetch the whole page first to do it properly. Let's do a multi-replace, but first read the top of partner/page.tsx
