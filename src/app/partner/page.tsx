@@ -10,6 +10,36 @@ import { UserProfile } from "@/lib/interfaces/auth";
 import { Offer } from "@/lib/interfaces/offers";
 import AgentMap from "@/app/components/AgentMap";
 
+const translations: Record<string, any> = {
+  en: {
+    totalEarnings: "Total Earnings",
+    mapView: "Map View",
+    listView: "List View",
+    exploreMap:
+      "Explore active venues around you. Click a pin to copy your checkout link.",
+    exploreList:
+      "Generate a direct checkout link and send it to the tourist. You will receive commission automatically when they pay.",
+  },
+  ru: {
+    totalEarnings: "Общий заработок",
+    mapView: "Ближайшие предложения",
+    listView: "Доска заданий",
+    exploreMap:
+      "Изучайте активные заведения вокруг. Нажмите на пин, чтобы скопировать вашу ссылку.",
+    exploreList:
+      "Сгенерируйте прямую ссылку на оплату и отправьте туристу. Вы автоматически получите комиссию при оплате.",
+  },
+  id: {
+    totalEarnings: "Total Pendapatan",
+    mapView: "Tawaran Terdekat",
+    listView: "Papan Tugas",
+    exploreMap:
+      "Jelajahi tempat aktif di sekitar Anda. Klik pin untuk menyalin tautan checkout.",
+    exploreList:
+      "Hasilkan tautan pembayaran langsung dan kirimkan ke turis. Anda akan menerima komisi secara otomatis saat mereka membayar.",
+  },
+};
+
 export default function PartnerDashboardV4() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -58,6 +88,9 @@ export default function PartnerDashboardV4() {
     await authService.signOut();
     router.push("/login");
   };
+
+  const lang = user?.language || "en";
+  const t = translations[lang] || translations.en;
 
   if (loading)
     return (
@@ -162,7 +195,9 @@ export default function PartnerDashboardV4() {
           border: "1px solid var(--surface-border)",
         }}
       >
-        <p style={{ opacity: 0.7, marginBottom: "0.5rem" }}>Total Earnings</p>
+        <p style={{ opacity: 0.7, marginBottom: "0.5rem" }}>
+          {t.totalEarnings}
+        </p>
         <h1 style={{ fontSize: "2.5rem", color: "var(--primary)", margin: 0 }}>
           IDR 0
         </h1>
@@ -183,7 +218,7 @@ export default function PartnerDashboardV4() {
             cursor: "pointer",
           }}
         >
-          📍 Map View
+          {t.mapView}
         </button>
         <button
           onClick={() => setActiveTab("list")}
@@ -199,7 +234,7 @@ export default function PartnerDashboardV4() {
             cursor: "pointer",
           }}
         >
-          📋 List View
+          {t.listView}
         </button>
       </div>
 

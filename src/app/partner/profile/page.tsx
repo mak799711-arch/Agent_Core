@@ -95,20 +95,7 @@ export default function PartnerProfile() {
           <h2 style={{ fontSize: "2.2rem", fontWeight: 800 }}>
             Профиль Агента
           </h2>
-          <button
-            onClick={handleSave}
-            style={{
-              padding: "8px 16px",
-              background: "var(--primary)",
-              color: "#000",
-              borderRadius: "8px",
-              border: "none",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Сохранить
-          </button>
+
         </div>
 
         <div

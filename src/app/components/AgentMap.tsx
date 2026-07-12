@@ -56,26 +56,30 @@ export default function AgentMap({
       const defaultLat = -8.65; // Bali
       const defaultLng = 115.2167; // Bali
 
-      const map = new window.mapboxgl.Map({
-        container: mapContainer.current,
-        style:
-          theme === "dark"
-            ? "mapbox://styles/mapbox/dark-v11"
-            : "mapbox://styles/mapbox/light-v11",
-        center: [defaultLng, defaultLat],
-        zoom: 11,
-      });
+      try {
+        const map = new window.mapboxgl.Map({
+          container: mapContainer.current,
+          style:
+            theme === "dark"
+              ? "mapbox://styles/mapbox/dark-v11"
+              : "mapbox://styles/mapbox/light-v11",
+          center: [defaultLng, defaultLat],
+          zoom: 11,
+        });
 
-      map.addControl(new window.mapboxgl.NavigationControl(), "top-right");
+        map.addControl(new window.mapboxgl.NavigationControl(), "top-right");
 
-      mapboxMap.current = map;
+        mapboxMap.current = map;
 
-      // Fix for map resizing issues
-      setTimeout(() => {
-        map.resize();
-      }, 500);
+        // Fix for map resizing issues
+        setTimeout(() => {
+          map.resize();
+        }, 500);
 
-      renderMarkers();
+        renderMarkers();
+      } catch (err) {
+        console.error("Failed to initialize Mapbox:", err);
+      }
     }
 
     return () => {
