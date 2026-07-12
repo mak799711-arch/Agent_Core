@@ -4,6 +4,7 @@ import SettingsSidebar from '@/app/components/SettingsSidebar';
 
 // Inside the component... I need to replace from line 58. Wait, I should fetch the whole page first to do it properly. Let's do a multi-replace, but first read the top of partner/page.tsx
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { authService, offerRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
 import { Offer } from '@/lib/interfaces/offers';
@@ -135,7 +136,7 @@ export default function PartnerDashboardV4() {
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {offers.map(offer => (
+          {offers.map((offer: any) => (
             <div key={offer.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '16px', border: '1px solid var(--surface-border)' }}>
               <div>
                 <h4 style={{ fontSize: '1.2rem', margin: '0 0 0.5rem 0' }}>{offer.title}</h4>

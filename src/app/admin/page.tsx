@@ -780,21 +780,21 @@ export default function AdminDashboard() {
                           <span style={{
                             fontSize: '0.65rem',
                             fontWeight: 800,
-                            color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
-                            background: usr.status === 'verified' ? 'rgba(82, 196, 26, 0.08)' : 'rgba(255, 77, 79, 0.08)',
-                            border: `1px solid ${usr.status === 'verified' ? 'rgba(82, 196, 26, 0.3)' : 'rgba(255, 77, 79, 0.3)'}`,
+                            color: (usr.status || '') === 'verified' ? 'var(--success)' : 'var(--error)',
+                            background: (usr.status || '') === 'verified' ? 'rgba(82, 196, 26, 0.08)' : 'rgba(255, 77, 79, 0.08)',
+                            border: `1px solid ${(usr.status || '') === 'verified' ? 'rgba(82, 196, 26, 0.3)' : 'rgba(255, 77, 79, 0.3)'}`,
                             padding: '4px 10px',
                             borderRadius: '20px',
                             display: 'inline-block',
                             letterSpacing: '0.5px'
                           }}>
-                            {usr.status === 'verified' ? t.verified : t.unverified}
+                            {(usr.status || '') === 'verified' ? t.verified : t.unverified}
                           </span>
                         </td>
                         <td>
                           <div style={{ fontWeight: 650, display: 'flex', alignItems: 'center' }}>
                             {usr.fullName}
-                            {usr.status === 'verified' && <VerificationBadge size={14} />}
+                            {(usr.status || '') === 'verified' && <VerificationBadge size={14} />}
                           </div>
                           <div style={{ fontSize: '0.75rem', opacity: 0.45, marginTop: '2px' }}>{usr.email}</div>
                         </td>
@@ -809,8 +809,8 @@ export default function AdminDashboard() {
                         <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                           <div style={{ display: 'inline-flex', gap: '10px' }}>
                             <button
-                              onClick={() => handleToggleVerification(usr.id, usr.status)}
-                              title={usr.status === 'verified' ? 'Снять верификацию' : 'Верифицировать'}
+                              onClick={() => handleToggleVerification(usr.id, usr.status || '')}
+                              title={(usr.status || '') === 'verified' ? 'Снять верификацию' : 'Верифицировать'}
                               style={{
                                 width: '36px',
                                 height: '36px',
@@ -821,13 +821,12 @@ export default function AdminDashboard() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: 'pointer',
-                                filter: usr.status === 'verified' ? 'drop-shadow(0 0 6px #52c41a)' : 'none',
-                                opacity: usr.status === 'verified' ? 1 : 0.5,
+                                filter: (usr.status || '') === 'verified' ? 'drop-shadow(0 0 6px #52c41a)' : 'none',
+                                opacity: (usr.status || '') === 'verified' ? 1 : 0.5,
                                 transition: 'all 0.25s ease',
                                 outline: 'none'
                               }}
                               className="verify-btn"
-                              title="Verify User"
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="20 6 9 17 4 12"></polyline>
@@ -896,21 +895,21 @@ export default function AdminDashboard() {
                           <span style={{
                             fontSize: '0.65rem',
                             fontWeight: 800,
-                            color: usr.status === 'verified' ? 'var(--success)' : 'var(--error)',
-                            background: usr.status === 'verified' ? 'rgba(82, 196, 26, 0.08)' : 'rgba(255, 77, 79, 0.08)',
-                            border: `1px solid ${usr.status === 'verified' ? 'rgba(82, 196, 26, 0.3)' : 'rgba(255, 77, 79, 0.3)'}`,
+                            color: (usr.status || '') === 'verified' ? 'var(--success)' : 'var(--error)',
+                            background: (usr.status || '') === 'verified' ? 'rgba(82, 196, 26, 0.08)' : 'rgba(255, 77, 79, 0.08)',
+                            border: `1px solid ${(usr.status || '') === 'verified' ? 'rgba(82, 196, 26, 0.3)' : 'rgba(255, 77, 79, 0.3)'}`,
                             padding: '4px 10px',
                             borderRadius: '20px',
                             display: 'inline-block',
                             letterSpacing: '0.5px'
                           }}>
-                            {usr.status === 'verified' ? t.verified : t.unverified}
+                            {(usr.status || '') === 'verified' ? t.verified : t.unverified}
                           </span>
                         </td>
                         <td>
                           <div style={{ fontWeight: 650, display: 'flex', alignItems: 'center' }}>
                             {usr.fullName}
-                            {usr.status === 'verified' && <VerificationBadge size={14} />}
+                            {(usr.status || '') === 'verified' && <VerificationBadge size={14} />}
                           </div>
                           <div style={{ fontSize: '0.75rem', opacity: 0.45, marginTop: '2px' }}>{usr.email}</div>
                         </td>
@@ -930,8 +929,8 @@ export default function AdminDashboard() {
                         <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                           <div style={{ display: 'inline-flex', gap: '10px' }}>
                             <button
-                              onClick={() => handleToggleVerification(usr.id, usr.status)}
-                              title={usr.status === 'verified' ? 'Снять верификацию' : 'Верифицировать'}
+                              onClick={() => handleToggleVerification(usr.id, usr.status || '')}
+                              title={(usr.status || '') === 'verified' ? 'Снять верификацию' : 'Верифицировать'}
                               style={{
                                 width: '36px',
                                 height: '36px',
@@ -942,8 +941,8 @@ export default function AdminDashboard() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: 'pointer',
-                                filter: usr.status === 'verified' ? 'drop-shadow(0 0 6px #52c41a)' : 'none',
-                                opacity: usr.status === 'verified' ? 1 : 0.5,
+                                filter: (usr.status || '') === 'verified' ? 'drop-shadow(0 0 6px #52c41a)' : 'none',
+                                opacity: (usr.status || '') === 'verified' ? 1 : 0.5,
                                 transition: 'all 0.25s ease',
                                 outline: 'none'
                               }}

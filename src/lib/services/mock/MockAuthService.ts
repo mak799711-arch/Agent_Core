@@ -5,6 +5,11 @@ export interface MockUser extends UserProfile {
   password?: string;
 }
 
+
+function sanitizeName(name: string): string {
+  return name.replace(/[^a-zA-Zа-яА-Я0-9 _-]/g, '').trim();
+}
+
 export class MockAuthService implements IAuthService {
   private currentUser: UserProfile | null = null;
   private users: Map<string, MockUser> = new Map();

@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
 
     // 3. Вычисляем сумму награды
     let computedReward = offer.rewardAmount;
-    if (offer.rewardType === 'percentage' && offer.rewardPercent !== null) {
-      computedReward = billAmount * (offer.rewardPercent / 100);
+    if (offer.rewardType === 'percentage' && (offer.rewardPercent || 0) !== null) {
+      computedReward = billAmount * ((offer.rewardPercent || 0) / 100);
     }
     // Округляем до 2 знаков после запятой
     computedReward = Math.round(computedReward * 100) / 100;

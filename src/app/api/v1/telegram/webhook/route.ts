@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
         // Prepare offer reward text
         let rewardText = '';
         if (offer.rewardType === 'percentage') {
-          rewardText = `${offer.rewardPercent}%`;
+          rewardText = `${(offer.rewardPercent || 0)}%`;
         } else {
           rewardText = `${offer.rewardAmount} ${biz?.currency || 'USD'}`;
         }
@@ -204,8 +204,8 @@ async function processCompleteTransaction(chatId: number, code: string, billAmou
 
     // 3. Compute reward & Platform fee
     let computedReward = offer.rewardAmount;
-    if (offer.rewardType === 'percentage' && offer.rewardPercent !== null) {
-      computedReward = billAmount * (offer.rewardPercent / 100);
+    if (offer.rewardType === 'percentage' && (offer.rewardPercent || 0) !== null) {
+      computedReward = billAmount * ((offer.rewardPercent || 0) / 100);
     }
     computedReward = Math.round(computedReward * 100) / 100;
 
