@@ -72,6 +72,18 @@ export default function AgentMap({
         geolocate.trigger();
       });
       
+      // Hide default MapTiler/Mapbox POIs (shops, restaurants, etc.) so only our venues stand out
+      map.on('style.load', () => {
+        const style = map.getStyle();
+        if (style && style.layers) {
+          style.layers.forEach((layer) => {
+            if (layer.id.includes('poi') || layer.source_layer === 'poi') {
+              map.setLayoutProperty(layer.id, 'visibility', 'none');
+            }
+          });
+        }
+      });
+      
       mapInstance.current = map;
 
       // Fix for map resizing issues

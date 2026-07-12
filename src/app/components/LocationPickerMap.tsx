@@ -105,6 +105,18 @@ export default function LocationPickerMap({
       updateMarker(e.coords.longitude, e.coords.latitude);
     });
 
+    // Hide default POIs
+    map.on('style.load', () => {
+      const style = map.getStyle();
+      if (style && style.layers) {
+        style.layers.forEach((layer) => {
+          if (layer.id.includes('poi') || layer.source_layer === 'poi') {
+            map.setLayoutProperty(layer.id, 'visibility', 'none');
+          }
+        });
+      }
+    });
+
     mapInstance.current = map;
 
     setTimeout(() => map.resize(), 500);
