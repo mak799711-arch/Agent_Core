@@ -273,6 +273,7 @@ export default function BusinessDashboard() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [shortCode, setShortCode] = useState('');
   const [history, setHistory] = useState<Transaction[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [address, setAddress] = useState<string | null>(null);
@@ -552,7 +553,7 @@ export default function BusinessDashboard() {
       <header className="glass-header" style={{
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: '2.5rem',
         padding: 'var(--header-padding, 1rem)',
@@ -561,11 +562,34 @@ export default function BusinessDashboard() {
         marginTop: 'var(--header-margin-top, 0)',
         position: 'sticky',
         top: 0,
-        zIndex: 100,
-        gap: '1rem',
-        cursor: 'pointer'
-      }} onClick={() => router.push('/business/settings')}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+        zIndex: 90
+      }}>
+        {/* Hamburger Icon */}
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--foreground)',
+            cursor: 'pointer',
+            padding: '0.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        {/* User Info */}
+        <div 
+          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0, cursor: 'pointer' }}
+          onClick={() => router.push('/business/settings')}
+        >
           <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
             {user?.fullName}
             {user?.status === 'verified' && <VerificationBadge size={14} />}
@@ -577,6 +601,76 @@ export default function BusinessDashboard() {
           />
         </div>
       </header>
+
+      {/* Sidebar Overlay */}
+      <div 
+        onClick={() => setIsSidebarOpen(false)}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(2px)',
+          zIndex: 999,
+          opacity: isSidebarOpen ? 1 : 0,
+          pointerEvents: isSidebarOpen ? 'auto' : 'none',
+          transition: 'opacity 0.2s ease-in-out'
+        }}
+      />
+
+      {/* Sidebar Drawer */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        width: '280px',
+        background: 'var(--background)',
+        borderRight: '1px solid var(--surface-border)',
+        zIndex: 1000,
+        transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+        transition: 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: isSidebarOpen ? '4px 0 24px rgba(0,0,0,0.2)' : 'none'
+      }}>
+        <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Меню</h2>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            style={{ background: 'none', border: 'none', color: 'var(--foreground)', cursor: 'pointer', fontSize: '1.5rem' }}
+          >
+            ×
+          </button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem', gap: '0.5rem', flex: 1 }}>
+          <button 
+            onClick={() => { setIsSidebarOpen(false); router.push('/business'); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--surface-bg)', border: '1px solid var(--surface-border)', padding: '12px 16px', borderRadius: '12px', color: 'var(--foreground)', cursor: 'pointer', fontWeight: 600, textAlign: 'left' }}
+          >
+            📊 Dashboard
+          </button>
+          <button 
+            onClick={() => { setIsSidebarOpen(false); router.push('/business/settings'); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--surface-bg)', border: '1px solid var(--surface-border)', padding: '12px 16px', borderRadius: '12px', color: 'var(--foreground)', cursor: 'pointer', fontWeight: 600, textAlign: 'left' }}
+          >
+            ⚙️ Settings
+          </button>
+        </div>
+        <div style={{ padding: '1.5rem', borderTop: '1px solid var(--surface-border)' }}>
+          <button 
+            onClick={async () => {
+              await authRepository.signOut();
+              router.push('/login');
+            }}
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255, 77, 79, 0.1)', border: '1px solid rgba(255, 77, 79, 0.3)', padding: '12px 16px', borderRadius: '12px', color: '#ff4d4f', cursor: 'pointer', fontWeight: 600, width: '100%', textAlign: 'left' }}
+          >
+            🚪 Logout
+          </button>
+        </div>
+      </div>
 
       {/* Centered Single Column Layout */}
       <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem', position: 'relative', zIndex: 2 }}>
