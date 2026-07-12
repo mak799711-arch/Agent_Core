@@ -45,7 +45,7 @@ export default function PartnerDashboardV4() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"list" | "map">("map");
+  const [activeTab, setActiveTab] = useState<"list" | "map">("list");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
 
@@ -186,40 +186,7 @@ export default function PartnerDashboardV4() {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div
-        className="glass-panel"
-        style={{
-          padding: "1.5rem",
-          marginBottom: "2rem",
-          borderRadius: "16px",
-          border: "1px solid var(--surface-border)",
-        }}
-      >
-        <p style={{ opacity: 0.7, marginBottom: "0.5rem" }}>
-          {t.totalEarnings}
-        </p>
-        <h1 style={{ fontSize: "2.5rem", color: "var(--primary)", margin: 0 }}>
-          IDR 0
-        </h1>
-      </div>
-
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>
-        <button
-          onClick={() => setActiveTab("map")}
-          style={{
-            flex: 1,
-            padding: "10px",
-            borderRadius: "8px",
-            border: "none",
-            background:
-              activeTab === "map" ? "var(--primary)" : "rgba(255,255,255,0.1)",
-            color: activeTab === "map" ? "#000" : "white",
-            fontWeight: "bold",
-            cursor: "pointer",
-          }}
-        >
-          {t.mapView}
-        </button>
         <button
           onClick={() => setActiveTab("list")}
           style={{
@@ -236,12 +203,26 @@ export default function PartnerDashboardV4() {
         >
           {t.listView}
         </button>
+        <button
+          onClick={() => setActiveTab("map")}
+          style={{
+            flex: 1,
+            padding: "10px",
+            borderRadius: "8px",
+            border: "none",
+            background:
+              activeTab === "map" ? "var(--primary)" : "rgba(255,255,255,0.1)",
+            color: activeTab === "map" ? "#000" : "white",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+        >
+          {t.mapView}
+        </button>
       </div>
 
       <p style={{ opacity: 0.7, marginBottom: "1.5rem", fontSize: "0.9rem" }}>
-        {activeTab === "map"
-          ? "Explore active venues around you. Click a pin to copy your checkout link."
-          : "Generate a direct checkout link and send it to the tourist. You will receive commission automatically when they pay."}
+        {activeTab === "map" ? t.exploreMap : t.exploreList}
       </p>
 
       {activeTab === "map" ? (
