@@ -83,9 +83,17 @@ export class MockAuthService implements IAuthService {
         cardNumber: '5555 5555 5555 5555',
         currency: 'USD',
         language: 'en',
-        theme: 'dark'
+        theme: 'dark',
+        status: 'none'
       });
       needsSave = true;
+    } else {
+      // DEV MODE: Forcibly reset the pending attempt as requested by the user
+      const bus = this.users.get('business@agent.core');
+      if (bus && bus.status === 'pending') {
+        bus.status = 'none';
+        needsSave = true;
+      }
     }
 
     // Ensure Beta Partner Account (goes through 3-step onboarding)

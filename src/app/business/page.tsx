@@ -47,7 +47,18 @@ const translations = {
     balanceErrorCreate: 'Insufficient reserve balance to cover the reward. Please deposit funds first.',
     successPrefix: 'Referral confirmed!',
     depositSuccess: 'successfully added to your reserve balance.',
-    loading: 'Loading Business Portal...'
+    loading: 'Loading Business Portal...',
+    recentTransactions: 'Recent Transactions',
+    categories: {
+      restaurant: 'Restaurant',
+      nightlife: 'Nightlife',
+      real_estate: 'Real Estate & Villas',
+      beauty: 'Beauty & Spa',
+      fitness: 'Fitness & Sports',
+      retail: 'Retail',
+      activity: 'Activities',
+      services: 'Services'
+    }
   },
   ru: {
     venue: 'Менеджер заведения',
@@ -83,7 +94,18 @@ const translations = {
     balanceErrorCreate: 'Недостаточно средств на балансе резерва для создания предложения. Пожалуйста, пополните баланс.',
     successPrefix: 'Реферал подтвержден!',
     depositSuccess: 'успешно добавлено к вашему балансу резерва.',
-    loading: 'Загрузка портала бизнеса...'
+    loading: 'Загрузка портала бизнеса...',
+    recentTransactions: 'Последние транзакции',
+    categories: {
+      restaurant: 'Ресторан',
+      nightlife: 'Ночная жизнь',
+      real_estate: 'Недвижимость и Виллы',
+      beauty: 'Красота и Спа',
+      fitness: 'Фитнес и Спорт',
+      retail: 'Ритейл',
+      activity: 'Развлечения',
+      services: 'Услуги'
+    }
   },
   id: {
     venue: 'Manajer Tempat',
@@ -119,7 +141,18 @@ const translations = {
     balanceErrorCreate: 'Saldo cadangan tidak mencukupi untuk membuat penawaran ini. Silakan setor dana terlebih dahulu.',
     successPrefix: 'Rujukan dikonfirmasi!',
     depositSuccess: 'berhasil ditambahkan ke saldo cadangan Anda.',
-    loading: 'Memuat Panel Bisnis...'
+    loading: 'Memuat Panel Bisnis...',
+    recentTransactions: 'Transaksi Terakhir',
+    categories: {
+      restaurant: 'Restoran',
+      nightlife: 'Hiburan Malam',
+      real_estate: 'Real Estat & Vila',
+      beauty: 'Kecantikan & Spa',
+      fitness: 'Kebugaran & Olahraga',
+      retail: 'Eceran',
+      activity: 'Aktivitas',
+      services: 'Layanan'
+    }
   },
   zh: {
     venue: '商户经理',
@@ -155,7 +188,18 @@ const translations = {
     balanceErrorCreate: '准备金余额不足，无法创建优惠。请先充值。',
     successPrefix: '推荐核销成功！',
     depositSuccess: '已成功存入您的准备金余额。',
-    loading: '正在加载商户门户...'
+    loading: '正在加载商户门户...',
+    recentTransactions: '最近的交易',
+    categories: {
+      restaurant: '餐厅',
+      nightlife: '夜生活',
+      real_estate: '房地产与别墅',
+      beauty: '美容与水疗',
+      fitness: '健身与体育',
+      retail: '零售',
+      activity: '活动',
+      services: '服务'
+    }
   },
   es: {
     venue: 'Gerente del Lugar',
@@ -191,7 +235,18 @@ const translations = {
     balanceErrorCreate: 'Saldo de reserva insuficiente para crear la oferta. Deposite fondos primero.',
     successPrefix: '¡Referido confirmado!',
     depositSuccess: 'añadido con éxito a su saldo de reserva.',
-    loading: 'Cargando Portal de Negocios...'
+    loading: 'Cargando Portal de Negocios...',
+    recentTransactions: 'Transacciones Recientes',
+    categories: {
+      restaurant: 'Restaurante',
+      nightlife: 'Vida nocturna',
+      real_estate: 'Bienes raíces y villas',
+      beauty: 'Belleza y spa',
+      fitness: 'Fitness y deportes',
+      retail: 'Minorista',
+      activity: 'Actividades',
+      services: 'Servicios'
+    }
   },
   de: {
     venue: 'Veranstaltungsort-Manager',
@@ -227,7 +282,18 @@ const translations = {
     balanceErrorCreate: 'Ungenügendes Reserveguthaben für dieses Angebot. Bitte zuerst einzahlen.',
     successPrefix: 'Empfehlung bestätigt!',
     depositSuccess: 'erfolgreich Ihrem Reserveguthaben gutgeschrieben.',
-    loading: 'Business-Portal wird geladen...'
+    loading: 'Business-Portal wird geladen...',
+    recentTransactions: 'Letzte Transaktionen',
+    categories: {
+      restaurant: 'Restaurant',
+      nightlife: 'Nachtleben',
+      real_estate: 'Immobilien & Villen',
+      beauty: 'Schönheit & Spa',
+      fitness: 'Fitness & Sport',
+      retail: 'Einzelhandel',
+      activity: 'Aktivitäten',
+      services: 'Dienstleistungen'
+    }
   },
   fr: {
     venue: 'Gérant de l\'Établissement',
@@ -263,7 +329,18 @@ const translations = {
     balanceErrorCreate: 'Solde de réserve insuffisant pour créer l\'offre. Veuillez déposer des fonds.',
     successPrefix: 'Parrainage confirmé !',
     depositSuccess: 'ajouté avec succès à votre solde de réserve.',
-    loading: 'Chargement du Portail Entreprise...'
+    loading: 'Chargement du Portail Entreprise...',
+    recentTransactions: 'Transactions Récentes',
+    categories: {
+      restaurant: 'Restaurant',
+      nightlife: 'Vie nocturne',
+      real_estate: 'Immobilier & Villas',
+      beauty: 'Beauté & Spa',
+      fitness: 'Fitness & Sports',
+      retail: 'Commerce de détail',
+      activity: 'Activités',
+      services: 'Services'
+    }
   }
 };
 
@@ -419,10 +496,10 @@ export default function BusinessDashboard() {
     let avgBillVal: number | null = null;
 
     if (rewardType === 'fixed') {
-      computedReward = parseFloat(newOfferReward);
+      computedReward = parseFloat(newOfferReward.replace(/,/g, ''));
     } else {
-      const pct = parseFloat(newOfferPercent);
-      const bill = parseFloat(newOfferAvgBill);
+      const pct = parseFloat(newOfferPercent.replace(/,/g, ''));
+      const bill = parseFloat(newOfferAvgBill.replace(/,/g, ''));
       if (isNaN(pct) || pct <= 0 || isNaN(bill) || bill <= 0) {
         alert('Invalid percentage or average bill value');
         return;
@@ -814,9 +891,9 @@ export default function BusinessDashboard() {
                       flex: 1,
                       padding: '8px',
                       borderRadius: '6px',
-                      border: '1px solid',
-                      borderColor: rewardType === 'fixed' ? 'var(--accent)' : 'var(--surface-border)',
-                      background: rewardType === 'fixed' ? 'rgba(255, 0, 127, 0.1)' : 'transparent',
+                      border: '2px solid',
+                      borderColor: rewardType === 'fixed' ? '#FFFFFF' : 'transparent',
+                      background: rewardType === 'fixed' ? 'rgba(255,255,255,0.1)' : 'var(--input-bg)',
                       color: 'var(--foreground)',
                       cursor: 'pointer',
                       fontSize: '0.85rem'
@@ -831,9 +908,9 @@ export default function BusinessDashboard() {
                       flex: 1,
                       padding: '8px',
                       borderRadius: '6px',
-                      border: '1px solid',
-                      borderColor: rewardType === 'percentage' ? 'var(--accent)' : 'var(--surface-border)',
-                      background: rewardType === 'percentage' ? 'rgba(255, 0, 127, 0.1)' : 'transparent',
+                      border: '2px solid',
+                      borderColor: rewardType === 'percentage' ? '#FFFFFF' : 'transparent',
+                      background: rewardType === 'percentage' ? 'rgba(255,255,255,0.1)' : 'var(--input-bg)',
                       color: 'var(--foreground)',
                       cursor: 'pointer',
                       fontSize: '0.85rem'
@@ -848,9 +925,14 @@ export default function BusinessDashboard() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.rewardAmountLabel.replace('USD', user?.currency || 'USD')}</label>
                   <input
-                    type="number"
+                    type="text"
                     value={newOfferReward}
-                    onChange={(e) => setNewOfferReward(e.target.value)}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/[^\d.]/g, '');
+                      const parts = val.split('.');
+                      if (parts[0]) parts[0] = Number(parts[0]).toLocaleString('en-US');
+                      setNewOfferReward(parts.join('.'));
+                    }}
                     placeholder="5.00"
                     required
                     min="0.01"
@@ -864,9 +946,9 @@ export default function BusinessDashboard() {
                       outline: 'none'
                     }}
                   />
-                  {newOfferReward && !isNaN(Number(newOfferReward)) && (
+                  {newOfferReward && !isNaN(Number(newOfferReward.replace(/,/g, ''))) && (
                     <div style={{ fontSize: '0.75rem', color: 'var(--primary)', marginTop: '4px' }}>
-                      Preview: {formatCurrency(parseFloat(newOfferReward), user?.currency || 'USD')}
+                      Preview: {formatCurrency(parseFloat(newOfferReward.replace(/,/g, '')), user?.currency || 'USD')}
                     </div>
                   )}
                 </div>
@@ -875,9 +957,14 @@ export default function BusinessDashboard() {
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                     <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.avgBillLabel.replace('USD', user?.currency || 'USD')}</label>
                     <input
-                      type="number"
+                      type="text"
                       value={newOfferAvgBill}
-                      onChange={(e) => setNewOfferAvgBill(e.target.value)}
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/[^\d.]/g, '');
+                        const parts = val.split('.');
+                        if (parts[0]) parts[0] = Number(parts[0]).toLocaleString('en-US');
+                        setNewOfferAvgBill(parts.join('.'));
+                      }}
                       placeholder="100.00"
                       required
                       min="1"
@@ -891,9 +978,9 @@ export default function BusinessDashboard() {
                         outline: 'none'
                       }}
                     />
-                  {newOfferAvgBill && !isNaN(Number(newOfferAvgBill)) && (
+                  {newOfferAvgBill && !isNaN(Number(newOfferAvgBill.replace(/,/g, ''))) && (
                     <div style={{ fontSize: '0.75rem', color: 'var(--primary)', marginTop: '4px' }}>
-                      Preview: {formatCurrency(parseFloat(newOfferAvgBill), user?.currency || 'USD')}
+                      Preview: {formatCurrency(parseFloat(newOfferAvgBill.replace(/,/g, '')), user?.currency || 'USD')}
                     </div>
                   )}
                   </div>

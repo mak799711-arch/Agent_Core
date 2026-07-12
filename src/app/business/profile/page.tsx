@@ -49,8 +49,8 @@ export default function BusinessProfile() {
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !user) return;
     const files = Array.from(e.target.files);
-    if (photos.length + files.length > 10) {
-      alert('Maximum 10 photos allowed.');
+    if (photos.length + files.length > 5) {
+      alert('Максимум 5 фото.');
       return;
     }
     setUploadingPhoto(true);
@@ -121,17 +121,18 @@ export default function BusinessProfile() {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.6rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>Название заведения</label>
-                {user?.isVerified && (
-                  <span title="Верифицировано" style={{ color: 'var(--primary)', fontSize: '1rem' }}>✓</span>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>Название</label>
+                {(user?.isVerified || user?.status === 'verified') && (
+                  <span title="Верифицировано" style={{ color: 'var(--primary)', fontSize: '1.2rem', fontWeight: 'bold' }}>✅</span>
                 )}
               </div>
-              <textarea 
+              <input 
+                type="text"
                 className="input-field" 
                 value={bio} 
                 onChange={(e) => setBio(e.target.value)} 
-                placeholder="Название и краткое описание..."
-                style={{ width: '100%', minHeight: '80px', resize: 'vertical', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)', color: 'var(--foreground)', padding: '10px', borderRadius: '8px' }}
+                placeholder="Введите название заведения"
+                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)', color: 'var(--foreground)', padding: '12px', borderRadius: '8px', fontSize: '1rem' }}
               />
             </div>
           </div>
