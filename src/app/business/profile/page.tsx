@@ -19,14 +19,14 @@ const translations: Record<string, any> = {
     descLabel: "Description",
     descPlaceholder: "Briefly describe your venue...",
     verified: "Verified",
-    galleryTitle: "Gallery (up to 5 photos)",
+    galleryTitle: "Gallery (up to 4 photos)",
     addPhoto: "Add",
     locationTitle: "Location",
     mapPointLabel: "Map Point",
     mapHelper: "Click the geolocate button in the top right, use search, or just click anywhere on the map to set your venue's pin.",
     loading: "Loading...",
     deleteConfirm: "Delete this photo?",
-    maxPhotos: "Max 5 photos.",
+    maxPhotos: "Max 4 photos.",
     uploadError: "Upload error"
   },
   ru: {
@@ -35,14 +35,14 @@ const translations: Record<string, any> = {
     descLabel: "ОПИСАНИЕ",
     descPlaceholder: "Кратко опишите ваше заведение...",
     verified: "Подтверждено",
-    galleryTitle: "Галерея (до 5 фото)",
+    galleryTitle: "Галерея (до 4 фото)",
     addPhoto: "Добавить",
     locationTitle: "Локация",
     mapPointLabel: "Точка на карте",
-    mapHelper: "Нажмите кнопку геолокации в правом верхнем углу карты, воспользуйтесь поиском или просто кликните в любое место, чтобы установить пин вашего заведения.",
+    mapHelper: "Нажмите кнопку геолокации справа вверху, воспользуйтесь поиском, или просто кликните по карте, чтобы поставить пин.",
     loading: "Загрузка...",
     deleteConfirm: "Удалить это фото?",
-    maxPhotos: "Максимум 5 фото.",
+    maxPhotos: "Максимум 4 фото.",
     uploadError: "Ошибка загрузки"
   },
   id: {
@@ -51,14 +51,14 @@ const translations: Record<string, any> = {
     descLabel: "Deskripsi",
     descPlaceholder: "Deskripsikan tempat Anda secara singkat...",
     verified: "Terverifikasi",
-    galleryTitle: "Galeri (hingga 5 foto)",
+    galleryTitle: "Galeri (hingga 4 foto)",
     addPhoto: "Tambah",
     locationTitle: "Lokasi",
     mapPointLabel: "Titik Peta",
-    mapHelper: "Gunakan tombol geolokasi, pencarian, atau klik peta untuk mengatur pin Anda.",
+    mapHelper: "Klik tombol geolokasi di kanan atas, gunakan pencarian, atau klik di mana saja di peta untuk mengatur pin tempat Anda.",
     loading: "Memuat...",
     deleteConfirm: "Hapus foto ini?",
-    maxPhotos: "Maks 5 foto.",
+    maxPhotos: "Maksimal 4 foto.",
     uploadError: "Kesalahan unggahan"
   }
 };
@@ -144,7 +144,7 @@ export default function BusinessProfile() {
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !user) return;
     const files = Array.from(e.target.files);
-    if (photos.length + files.length > 5) {
+    if (photos.length + files.length > 4) {
       alert(t.maxPhotos);
       return;
     }
@@ -398,7 +398,7 @@ export default function BusinessProfile() {
               </div>
             ))}
 
-            {photos.length < 5 && (
+            {photos.length < 4 && (
               <label
                 style={{
                   width: "100%",
