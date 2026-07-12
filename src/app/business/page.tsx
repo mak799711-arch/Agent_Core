@@ -410,34 +410,6 @@ export default function BusinessDashboard() {
     }
   };
 
-  const handleOfferPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0 || !user) return;
-    const files = Array.from(e.target.files);
-    if (newOfferImages.length + files.length > 5) {
-      alert('Maximum 5 photos allowed per offer.');
-      return;
-    }
-    setUploadingOfferPhotos(true);
-    try {
-      const uploaded = [...newOfferImages];
-      for (const file of files) {
-        const url = await authService.uploadGalleryPhoto(user.id, file);
-        uploaded.push(url);
-      }
-      setNewOfferImages(uploaded);
-    } catch (err) {
-      alert('Error uploading photos');
-    } finally {
-      setUploadingOfferPhotos(false);
-    }
-  };
-
-  const handleDeleteOfferPhoto = (index: number) => {
-    const updated = [...newOfferImages];
-    updated.splice(index, 1);
-    setNewOfferImages(updated);
-  };
-
   const handleCreateOffer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -495,7 +467,7 @@ export default function BusinessDashboard() {
       setNewOfferAvgBill('');
       setNewOfferConditions('');
       setNewOfferCategory('restaurant');
-      setNewOfferImages([]);
+      
       setShowCreateModal(false);
       await refreshData(user.id);
     } catch (err) {
@@ -531,7 +503,17 @@ export default function BusinessDashboard() {
         <div style={{ textAlign: 'center' }}>
           <div style={{ border: '3px solid rgba(34, 211, 238, 0.1)', borderTop: '3px solid var(--primary)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' }} />
           <p style={{ color: 'var(--foreground)', fontWeight: 600 }}>{t?.loading || 'Loading...'}</p>
-          <style dangerouslySetInnerHTML={{__html: `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}} />
+          <style dangerouslySetInnerHTML={{__html: `
+        /* Hide number arrows */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        input[type="number"] {
+          -moz-appearance: textfield;
+        }
+` + `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}} />
         </div>
       </div>
     );
@@ -719,7 +701,7 @@ export default function BusinessDashboard() {
 
         {/* Transaction History */}
         <div className="panel" style={{ padding: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700 }}>Recent Transactions</h3>
+          <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700 }}>{t.recentTransactions}</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {history.slice(0, 10).map((tx) => (
               <div key={tx.id} style={{
@@ -794,52 +776,7 @@ export default function BusinessDashboard() {
             <h3 style={{ marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: 700 }}>{t.createTitle}</h3>
             
             <form onSubmit={handleCreateOffer} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-              {/* Multi-Image Upload (Up to 5) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Фотографии (до 5 шт., опционально)</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '8px' }}>
-                  {newOfferImages.map((img, index) => (
-                    <div key={index} style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--surface-border)' }}>
-                      <img src={img} alt={`Preview ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      <button 
-                        type="button"
-                        onClick={() => handleDeleteOfferPhoto(index)}
-                        style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(255,0,0,0.7)', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                  
-                  {newOfferImages.length < 5 && (
-                    <label style={{ width: '100%', aspectRatio: '1', borderRadius: '8px', border: '1px dashed var(--primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: 'var(--input-bg)', opacity: uploadingOfferPhotos ? 0.5 : 1 }}>
-                      <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleOfferPhotoUpload} disabled={uploadingOfferPhotos} />
-                      <span style={{ fontSize: '1.2rem', color: 'var(--primary)' }}>{uploadingOfferPhotos ? '⏳' : '+'}</span>
-                    </label>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.offerTitleLabel}</label>
-                <input
-                  type="text"
-                  value={newOfferTitle}
-                  onChange={(e) => setNewOfferTitle(e.target.value)}
-                  placeholder={t.offerTitlePlaceholder}
-                  required
-                  style={{
-                    background: 'var(--input-bg)',
-                    border: '1px solid var(--surface-border)',
-                    borderRadius: '8px',
-                    padding: '10px 14px',
-                    color: 'var(--foreground)',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              {/* Category Selector */}
+                            {/* Category Selector */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.categoryLabel}</label>
                 <select
@@ -851,17 +788,18 @@ export default function BusinessDashboard() {
                     color: 'var(--foreground)',
                     padding: '10px',
                     borderRadius: '6px',
-                    outline: 'none'
+                    outline: 'none',
+                    appearance: 'none',
                   }}
                 >
-                  <option value="restaurant" style={{ background: 'var(--background)' }}>Restaurants & Cafes 🍽️</option>
-                  <option value="nightlife" style={{ background: 'var(--background)' }}>Bars & Nightclubs 🍸</option>
-                  <option value="real_estate" style={{ background: 'var(--background)' }}>Real Estate & Villas 🏡</option>
-                  <option value="beauty" style={{ background: 'var(--background)' }}>Beauty & Spa 💅</option>
-                  <option value="fitness" style={{ background: 'var(--background)' }}>Gyms & Fitness 🏋️‍♂️</option>
-                  <option value="retail" style={{ background: 'var(--background)' }}>Retail & Fashion 🛍️</option>
-                  <option value="activity" style={{ background: 'var(--background)' }}>Tours & Activities 🏄</option>
-                  <option value="services" style={{ background: 'var(--background)' }}>Other Services 🛠️</option>
+                  <option value="restaurant" style={{ background: 'var(--background)' }}>{t.categories.restaurant}</option>
+                  <option value="nightlife" style={{ background: 'var(--background)' }}>{t.categories.nightlife}</option>
+                  <option value="real_estate" style={{ background: 'var(--background)' }}>{t.categories.real_estate}</option>
+                  <option value="beauty" style={{ background: 'var(--background)' }}>{t.categories.beauty}</option>
+                  <option value="fitness" style={{ background: 'var(--background)' }}>{t.categories.fitness}</option>
+                  <option value="retail" style={{ background: 'var(--background)' }}>{t.categories.retail}</option>
+                  <option value="activity" style={{ background: 'var(--background)' }}>{t.categories.activity}</option>
+                  <option value="services" style={{ background: 'var(--background)' }}>{t.categories.services}</option>
                 </select>
               </div>
 
@@ -926,6 +864,11 @@ export default function BusinessDashboard() {
                       outline: 'none'
                     }}
                   />
+                  {newOfferReward && !isNaN(Number(newOfferReward)) && (
+                    <div style={{ fontSize: '0.75rem', color: 'var(--primary)', marginTop: '4px' }}>
+                      Preview: {formatCurrency(parseFloat(newOfferReward), user?.currency || 'USD')}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -948,6 +891,11 @@ export default function BusinessDashboard() {
                         outline: 'none'
                       }}
                     />
+                  {newOfferAvgBill && !isNaN(Number(newOfferAvgBill)) && (
+                    <div style={{ fontSize: '0.75rem', color: 'var(--primary)', marginTop: '4px' }}>
+                      Preview: {formatCurrency(parseFloat(newOfferAvgBill), user?.currency || 'USD')}
+                    </div>
+                  )}
                   </div>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                     <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>{t.percentLabel}</label>

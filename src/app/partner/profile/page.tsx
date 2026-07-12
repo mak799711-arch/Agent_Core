@@ -43,14 +43,15 @@ export default function PartnerProfile() {
     }
   };
 
-  const handleBioBlur = async () => {
-    if (user && bio !== user.bio) {
-      try {
-        await authService.updateProfile({ bio });
+  const handleSave = async () => {
+    try {
+      await authService.updateProfile({ bio });
+      if (user) {
         setUser({ ...user, bio });
-      } catch (e) {
-        console.error("Failed to auto-save bio");
       }
+      alert('Изменения сохранены!');
+    } catch (e) {
+      alert('Ошибка при сохранении');
     }
   };
 
@@ -62,7 +63,15 @@ export default function PartnerProfile() {
         <a href="/partner" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '2rem', fontWeight: 700 }}>
           ← Назад
         </a>
-        <h2 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '2rem' }}>Профиль Агента</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 800 }}>Профиль Агента</h2>
+          <button 
+            onClick={handleSave}
+            style={{ padding: '8px 16px', background: 'var(--primary)', color: '#000', borderRadius: '8px', border: 'none', fontWeight: 700, cursor: 'pointer' }}
+          >
+            Сохранить
+          </button>
+        </div>
 
         <div className="panel" style={{ padding: '1.8rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', border: '1px solid var(--surface-border)', background: 'var(--glass-bg)', borderRadius: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
@@ -74,13 +83,17 @@ export default function PartnerProfile() {
               </label>
             </div>
             <div style={{ flex: 1 }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px', marginBottom: '0.6rem', display: 'block' }}>О себе (Bio)</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.6rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.7, letterSpacing: '0.5px' }}>О себе (Bio) / Имя</label>
+                {user?.isVerified && (
+                  <span title="Верифицировано" style={{ color: 'var(--primary)', fontSize: '1rem' }}>✓</span>
+                )}
+              </div>
               <textarea 
                 className="input-field" 
                 value={bio} 
                 onChange={(e) => setBio(e.target.value)} 
-                onBlur={handleBioBlur}
-                placeholder="Кратко о себе... (сохраняется автоматически)"
+                placeholder="Кратко о себе..."
                 style={{ width: '100%', minHeight: '80px', resize: 'vertical', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)', color: 'var(--foreground)', padding: '10px', borderRadius: '8px' }}
               />
             </div>
