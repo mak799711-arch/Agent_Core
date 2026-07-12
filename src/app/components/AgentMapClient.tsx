@@ -63,15 +63,23 @@ export default function AgentMapClient({
       <MapContainer
         center={[defaultLat, defaultLng]}
         zoom={11}
+        minZoom={9}
+        maxBounds={[
+          [-12.0, 110.0], // South-West bound (roughly Java/Bali/Lombok)
+          [-5.0, 120.0],  // North-East bound
+        ]}
+        maxBoundsViscosity={1.0}
         style={{
           width: "100%",
           height: "100%",
           minHeight: "500px",
           zIndex: 0,
+          background: "#1a1a1a", // Dark background instead of gray
         }}
       >
         <TileLayer
           url={tileUrl}
+          noWrap={true}
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         />
         <MapThemer theme={theme} />
