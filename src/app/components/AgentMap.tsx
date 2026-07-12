@@ -1,34 +1,10 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { useEffect, useRef } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { Offer } from "@/lib/interfaces/offers";
-
-// Dynamically import the leaflet implementation to disable SSR
-// (Leaflet relies on the 'window' object, which crashes Next.js SSR)
-const AgentMapClient = dynamic(() => import("./AgentMapClient"), {
-  ssr: false,
-  loading: () => (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        minHeight: "500px",
-        borderRadius: "16px",
-        background: "var(--surface)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "var(--foreground)",
-        border: "1px solid var(--surface-border)",
-      }}
-    >
-      <div style={{ textAlign: "center", opacity: 0.7 }}>
-        <div style={{ fontSize: "2rem", marginBottom: "10px" }}>🗺️</div>
-        <div>Loading map...</div>
-      </div>
-    </div>
-  ),
-});
+import { formatCurrency } from "@/lib/utils/currency";
 
 interface AgentMapProps {
   activeOffers: Offer[];
@@ -38,6 +14,148 @@ interface AgentMapProps {
   theme?: "light" | "dark";
 }
 
-export default function AgentMap(props: AgentMapProps) {
-  return <AgentMapClient {...props} />;
+export default function AgentMap({
+  activeOffers,
+  userCurrency,
+  onCopyLink,
+  copiedId,
+  theme = "dark",
+}: AgentMapProps) {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<maplibregl.Map | null>(null);
+  const markers = useRef<maplibregl.Marker[]>([]);
+
+  // The MapTiler key provided by the user
+  const mapTilerKey = "ICwSd7c82yVo427gx1ar";
+
+  useEffect(() => {
+    if (mapInstance.current) return;
+    if (!mapContainer.current) return;
+
+    const defaultLat = -8.65; // Bali
+    const defaultLng = 115.2167; // Bali
+
+    const styleUrl =
+      theme === "dark"
+        ? `https://api.maptiler.com/maps/dataviz-dark/style.json?key=${mapTilerKey}`
+        : `https://api.maptiler.com/maps/dataviz-light/style.json?key=${mapTilerKey}`;
+
+    try {
+      const map = new maplibregl.Map({
+        container: mapContainer.current,
+        style: styleUrl,
+        center: [defaultLng, defaultLat],
+        zoom: 11,
+        attributionControl: false,
+      });
+      
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
+      map.addControl(new maplibregl.AttributionControl({
+        compact: true,
+        customAttribution: "MapTiler"
+      }));
+
+      mapInstance.current = map;
+
+      // Fix for map resizing issues
+      setTimeout(() => {
+        map.resize();
+      }, 500);
+
+    } catch (err) {
+      console.error("Failed to initialize MapLibre:", err);
+    }
+
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (mapInstance.current) {
+      const styleUrl =
+        theme === "dark"
+          ? `https://api.maptiler.com/maps/dataviz-dark/style.json?key=${mapTilerKey}`
+          : `https://api.maptiler.com/maps/dataviz-light/style.json?key=${mapTilerKey}`;
+      mapInstance.current.setStyle(styleUrl);
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    if (!mapInstance.current) return;
+    const map = mapInstance.current;
+
+    // Clear existing markers
+    markers.current.forEach((m) => m.remove());
+    markers.current = [];
+
+    activeOffers.forEach((offer) => {
+      if (
+        offer.business &&
+        offer.business.latitude &&
+        offer.business.longitude
+      ) {
+        // Create custom DOM element for the marker to look like our orange pin
+        const el = document.createElement('div');
+        el.style.backgroundColor = '#ff5e00';
+        el.style.width = '20px';
+        el.style.height = '20px';
+        el.style.borderRadius = '50%';
+        el.style.border = '3px solid white';
+        el.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+        el.style.cursor = 'pointer';
+
+        const popupHtml = `
+          <div style="color: #000; min-width: 160px; font-family: sans-serif; padding: 5px;">
+            <h4 style="margin: 0 0 5px 0; font-size: 14px; font-weight: 800;">${offer.business.name}</h4>
+            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${offer.title}</p>
+            <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: 700; color: #ff5e00;">
+              Reward: ${formatCurrency(offer.rewardAmount, userCurrency)}
+            </p>
+            <button id="copy-btn-${offer.businessId}" style="background: ${copiedId === offer.businessId ? '#10b981' : '#ff5e00'}; color: white; border: none; padding: 8px 10px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold;">
+              ${copiedId === offer.businessId ? '✓ Copied' : 'Copy Checkout Link'}
+            </button>
+          </div>
+        `;
+
+        const popup = new maplibregl.Popup({ offset: 15, closeButton: false }).setHTML(popupHtml);
+
+        // Add event listener to the button after popup opens
+        popup.on('open', () => {
+          const btn = document.getElementById(`copy-btn-${offer.businessId}`);
+          if (btn) {
+            btn.onclick = () => {
+              onCopyLink(offer.businessId);
+            };
+          }
+        });
+
+        const marker = new maplibregl.Marker({ element: el })
+          .setLngLat([offer.business.longitude, offer.business.latitude])
+          .setPopup(popup)
+          .addTo(map);
+
+        markers.current.push(marker);
+      }
+    });
+  }, [activeOffers, copiedId, userCurrency, onCopyLink]);
+
+  return (
+    <div style={{ position: "relative", height: "100%" }}>
+      <div
+        ref={mapContainer}
+        style={{
+          width: "100%",
+          height: "100%",
+          minHeight: "500px",
+          borderRadius: "16px",
+          border: "1px solid var(--surface-border)",
+          zIndex: 0,
+        }}
+      ></div>
+    </div>
+  );
 }
