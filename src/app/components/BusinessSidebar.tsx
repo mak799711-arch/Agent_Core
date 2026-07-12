@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService, businessRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
-import VerificationBadge from '@/app/components/VerificationBadge';
 
 const translations = {
   en: {
@@ -15,14 +14,12 @@ const translations = {
     cardLabel: 'Payment',
     cardUnbound: 'No card',
     btnUnbind: 'Unbind',
-    btnBind: 'Add',
+    btnBind: 'Add Card',
     btnSave: 'Save',
-    success: 'Settings updated!',
     verificationTitle: 'Verification',
-    verificationLock: 'Locked',
-    btnApply: 'Request ✅',
     statusPending: 'Pending',
-    statusVerified: 'Verified'
+    statusVerified: 'Verified',
+    statusNone: 'Not verified'
   },
   ru: {
     title: 'Настройки',
@@ -34,12 +31,10 @@ const translations = {
     btnUnbind: 'Отвязать',
     btnBind: 'Добавить',
     btnSave: 'Сохранить',
-    success: 'Сохранено!',
     verificationTitle: 'Верификация',
-    verificationLock: 'Нужно 100+ сделок',
-    btnApply: 'Заявка ✅',
     statusPending: 'На рассмотрении',
-    statusVerified: 'Верифицирован'
+    statusVerified: 'Верифицирован',
+    statusNone: 'Не верифицирован'
   },
   id: {
     title: 'Pengaturan',
@@ -51,12 +46,10 @@ const translations = {
     btnUnbind: 'Lepaskan',
     btnBind: 'Tambah',
     btnSave: 'Simpan',
-    success: 'Disimpan!',
     verificationTitle: 'Verifikasi',
-    verificationLock: 'Butuh 100+ transaksi',
-    btnApply: 'Minta ✅',
     statusPending: 'Tertunda',
-    statusVerified: 'Terverifikasi'
+    statusVerified: 'Terverifikasi',
+    statusNone: 'Belum diverifikasi'
   }
 };
 
@@ -77,12 +70,7 @@ export default function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProp
   const [isBinding, setIsBinding] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Profile specific
   const [avatarUrl, setAvatarUrl] = useState('');
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-
-  // Verification states
-  const [dealsCount, setDealsCount] = useState(85);
   const [verificationStatus, setVerificationStatus] = useState<'none' | 'pending' | 'verified'>('none');
 
   const router = useRouter();
@@ -90,7 +78,6 @@ export default function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProp
 
   useEffect(() => {
     if (!isOpen) return;
-
     async function loadUser() {
       setLoading(true);
       const currentUser = await authService.getCurrentUser();
@@ -108,21 +95,9 @@ export default function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProp
         if (activeTheme !== 'dark' && activeTheme !== 'light') activeTheme = 'dark';
         setTheme(activeTheme);
 
-        const isVerified = currentUser.status === 'verified';
-        const isPending = currentUser.status === 'pending';
-        
-        const simulatedDeals = localStorage.getItem(`simulated_deals_${currentUser.id}`);
-        if (simulatedDeals) {
-          setDealsCount(parseInt(simulatedDeals));
-        }
-
-        if (isVerified) {
-          setVerificationStatus('verified');
-        } else if (isPending) {
-          setVerificationStatus('pending');
-        } else {
-          setVerificationStatus('none');
-        }
+        if (currentUser.status === 'verified') setVerificationStatus('verified');
+        else if (currentUser.status === 'pending') setVerificationStatus('pending');
+        else setVerificationStatus('none');
       }
       setLoading(false);
     }
@@ -130,11 +105,7 @@ export default function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProp
   }, [isOpen, router]);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = isOpen ? 'hidden' : 'unset';
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
@@ -142,23 +113,6 @@ export default function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProp
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
-  };
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0 || !user) return;
-    const file = e.target.files[0];
-    
-    setUploadingAvatar(true);
-    try {
-      const newAvatarUrl = await authService.uploadAvatar(user.id, file);
-      setAvatarUrl(newAvatarUrl);
-      await authService.updateProfile({ avatarUrl: newAvatarUrl });
-    } catch (err) {
-      alert('Error uploading avatar');
-      console.error(err);
-    } finally {
-      setUploadingAvatar(false);
-    }
   };
 
   const handleUnbindCard = async () => {
@@ -169,26 +123,12 @@ export default function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProp
   const handleBindCard = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanCard = newCardNumber.replace(/\D/g, '');
-    if (cleanCard.length < 16) {
-      alert(t.langLabel === 'Language' ? 'Invalid card number' : 'Некорректный номер карты');
-      return;
-    }
+    if (cleanCard.length < 16) return;
     const formattedCard = newCardNumber.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
     setCardNumber(formattedCard);
     setCardBound(true);
     setNewCardNumber('');
     setIsBinding(false);
-  };
-
-  const handleApplyVerification = async () => {
-    if (!user) return;
-    try {
-      await authService.updateProfile({ status: 'pending' });
-      setVerificationStatus('pending');
-      alert(lang === 'ru' ? 'Заявка отправлена!' : 'Request submitted!');
-    } catch (e) {
-      alert('Error submitting request');
-    }
   };
 
   const handleSave = async () => {
@@ -200,30 +140,14 @@ export default function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProp
         cardBound,
         cardNumber: cardBound ? cardNumber : null
       });
-      alert(t.success);
       onClose();
     } catch (err) {
       alert('Failed to save settings');
     }
   };
 
-  const handleLogout = async () => {
-    const confirmMessage = lang === 'ru' ? "Вы точно хотите выйти из аккаунта?" : "Are you sure you want to log out?";
-    if (!window.confirm(confirmMessage)) return;
-    try {
-      await authService.signOut();
-      router.push('/login');
-    } catch (err) {
-      console.error('Error logging out', err);
-    }
-  };
-
-  // UI Styles for compact rows
   const rowStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '1.25rem 1.5rem',
+    padding: '1.2rem 1.5rem',
     borderBottom: '1px solid var(--surface-border)'
   };
 
@@ -233,125 +157,122 @@ export default function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProp
         onClick={onClose}
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(3px)',
+          background: 'rgba(0, 0, 0, 0.2)',
           zIndex: 999, opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? 'auto' : 'none',
           transition: 'opacity 0.2s ease-in-out'
         }}
       />
 
       <div style={{
-        position: 'fixed', top: 0, left: 0, bottom: 0,
-        width: '320px', maxWidth: '85vw', 
+        position: 'fixed', top: 0, right: 0, bottom: 0, // Pushed to right maybe? Or keep left. Let's keep left since it's a menu. Wait, usually menus are on the left. The screenshot didn't show placement. Let's assume left.
+        left: 0,
+        width: '280px', // Narrower width as requested!
+        maxWidth: '85vw', 
         background: 'var(--background)',
         borderRight: '1px solid var(--surface-border)',
         zIndex: 1000,
         transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
         transition: 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)',
         display: 'flex', flexDirection: 'column',
-        boxShadow: isOpen ? '4px 0 24px rgba(0,0,0,0.2)' : 'none',
+        boxShadow: isOpen ? '4px 0 24px rgba(0,0,0,0.1)' : 'none',
         overflowY: 'auto', overflowX: 'hidden'
       }}>
-        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--background)', zIndex: 10 }}>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>{t.title}</h2>
+        <div style={{ padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 10 }}>
+          <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>{t.title}</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--foreground)', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
           {loading ? (
-             <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>Loading...</div>
+             <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>...</div>
           ) : (
             <>
-              {/* Profile Icon Only */}
-              <div style={{ ...rowStyle, justifyContent: 'center', padding: '2rem 1.5rem' }}>
-                <div style={{ position: 'relative' }}>
-                  <img src={avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} alt="Avatar" style={{ width: '90px', height: '90px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary)' }} />
-                  <label style={{
-                    position: 'absolute', bottom: -2, right: -2, background: 'var(--primary)', color: '#000',
-                    width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', opacity: uploadingAvatar ? 0.5 : 1
-                  }}>
-                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} disabled={uploadingAvatar} />
-                    <span style={{ fontSize: '16px' }}>{uploadingAvatar ? '⏳' : '📷'}</span>
-                  </label>
-                </div>
+              {/* Profile Icon as a link to profile page */}
+              <div style={{ ...rowStyle, display: 'flex', justifyContent: 'center', padding: '2rem 1.5rem' }}>
+                <img 
+                  onClick={() => { onClose(); router.push('/business/profile'); }}
+                  src={avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} 
+                  alt="Profile" 
+                  style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary)', cursor: 'pointer', transition: 'transform 0.2s' }} 
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                />
               </div>
 
-              {/* Theme Toggle */}
-              <div style={rowStyle}>
-                <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{t.themeLabel}</span>
+              {/* Theme Toggle (Horizontal) */}
+              <div style={{ ...rowStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t.themeLabel}</span>
                 <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                  <div style={{ position: 'relative', width: '48px', height: '26px', background: theme === 'dark' ? 'var(--primary)' : 'rgba(128,128,128,0.3)', borderRadius: '13px', transition: 'background 0.3s' }}>
-                    <div style={{ position: 'absolute', top: '2px', left: theme === 'dark' ? '24px' : '2px', width: '22px', height: '22px', background: '#fff', borderRadius: '50%', transition: 'left 0.3s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
+                  <div style={{ position: 'relative', width: '44px', height: '24px', background: theme === 'dark' ? 'var(--primary)' : 'rgba(128,128,128,0.3)', borderRadius: '12px', transition: 'background 0.3s' }}>
+                    <div style={{ position: 'absolute', top: '2px', left: theme === 'dark' ? '22px' : '2px', width: '20px', height: '20px', background: '#fff', borderRadius: '50%', transition: 'left 0.3s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
                   </div>
                   <input type="checkbox" style={{ display: 'none' }} checked={theme === 'dark'} onChange={() => handleThemeChange(theme === 'dark' ? 'light' : 'dark')} />
                 </label>
               </div>
 
-              {/* Language */}
-              <div style={rowStyle}>
-                <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{t.langLabel}</span>
-                <select className="input-field" value={lang} onChange={(e) => setLang(e.target.value as any)} style={{ padding: '6px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '120px', background: 'transparent', border: 'none', textAlign: 'right', fontWeight: 600, color: 'var(--primary)', cursor: 'pointer', outline: 'none', appearance: 'none' }}>
+              {/* Language (Vertical) */}
+              <div style={{ ...rowStyle, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t.langLabel}</span>
+                <select value={lang} onChange={(e) => setLang(e.target.value as any)} style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
                   <option value="en">English</option>
                   <option value="ru">Русский</option>
                   <option value="id">Indonesia</option>
                 </select>
               </div>
 
-              {/* Currency */}
-              <div style={rowStyle}>
-                <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{t.currLabel}</span>
-                <select className="input-field" value={currency} onChange={(e) => setCurrency(e.target.value as any)} style={{ padding: '6px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '120px', background: 'transparent', border: 'none', textAlign: 'right', fontWeight: 600, color: 'var(--primary)', cursor: 'pointer', outline: 'none', appearance: 'none' }}>
+              {/* Currency (Vertical) */}
+              <div style={{ ...rowStyle, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t.currLabel}</span>
+                <select value={currency} onChange={(e) => setCurrency(e.target.value as any)} style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
                   <option value="USD">USD ($)</option>
                   <option value="IDR">IDR (Rp)</option>
                   <option value="RUB">RUB (₽)</option>
                 </select>
               </div>
 
-              {/* Verification (Circle Icon) */}
-              <div style={{ ...rowStyle, justifyContent: 'flex-start', gap: '1rem' }}>
+              {/* Verification (Vertical) */}
+              <div style={{ ...rowStyle, display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ 
-                  width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0,
+                  width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
                   background: verificationStatus === 'verified' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 170, 0, 0.15)', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem',
                   border: `2px solid ${verificationStatus === 'verified' ? 'var(--success)' : 'var(--warning)'}`
                 }}>
                   {verificationStatus === 'verified' ? '✅' : '⏳'}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{t.verificationTitle}</div>
-                  <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '2px' }}>
-                    {verificationStatus === 'verified' ? t.statusVerified : verificationStatus === 'pending' ? t.statusPending : `${dealsCount}/100 deals`}
-                  </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t.verificationTitle}</span>
+                  <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+                    {verificationStatus === 'verified' ? t.statusVerified : verificationStatus === 'pending' ? t.statusPending : t.statusNone}
+                  </span>
                 </div>
-                {verificationStatus === 'none' && dealsCount >= 100 && (
-                  <button onClick={handleApplyVerification} className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>{t.btnApply}</button>
-                )}
               </div>
 
-              {/* Payment Card */}
-              <div style={{ ...rowStyle, justifyContent: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
-                <div style={{ fontSize: '2rem', width: '44px', textAlign: 'center' }}>💳</div>
-                <div style={{ flex: 1, minWidth: '120px' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{t.cardLabel}</div>
+              {/* Payment Card (Vertical) */}
+              <div style={{ ...rowStyle, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t.cardLabel}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ fontSize: '1.6rem' }}>💳</div>
+                  <div style={{ flex: 1 }}>
+                    {cardBound ? (
+                      <div style={{ fontSize: '0.9rem', fontFamily: 'monospace', letterSpacing: '1px' }}>{cardNumber}</div>
+                    ) : (
+                      <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>{t.cardUnbound}</div>
+                    )}
+                  </div>
                   {cardBound ? (
-                    <div style={{ fontSize: '0.95rem', fontFamily: 'monospace', letterSpacing: '1px', marginTop: '2px' }}>{cardNumber}</div>
+                    <button onClick={handleUnbindCard} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '0.8rem' }}>{t.btnUnbind}</button>
                   ) : (
-                    <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '2px' }}>{t.cardUnbound}</div>
+                    <button onClick={() => setIsBinding(!isBinding)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.8rem' }}>{t.btnBind}</button>
                   )}
                 </div>
-                {cardBound ? (
-                  <button onClick={handleUnbindCard} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>{t.btnUnbind}</button>
-                ) : (
-                  <button onClick={() => setIsBinding(!isBinding)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>{t.btnBind}</button>
-                )}
-                
                 {isBinding && !cardBound && (
-                  <div style={{ width: '100%', display: 'flex', gap: '8px', marginTop: '8px' }}>
-                    <input className="input-field" type="text" value={newCardNumber} onChange={(e) => {
+                  <div style={{ width: '100%', display: 'flex', gap: '8px', marginTop: '6px' }}>
+                    <input type="text" value={newCardNumber} onChange={(e) => {
                       const val = e.target.value.replace(/\D/g, '');
                       setNewCardNumber(val.replace(/(\d{4})(?=\d)/g, '$1 ').trim());
-                    }} placeholder="0000 0000 0000 0000" style={{ flex: 1, padding: '8px 12px', fontSize: '0.9rem' }} />
-                    <button onClick={handleBindCard} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.9rem' }}>OK</button>
+                    }} placeholder="0000 0000 0000 0000" style={{ flex: 1, padding: '6px 8px', fontSize: '0.85rem', background: 'var(--surface-bg)', border: '1px solid var(--surface-border)', color: 'var(--foreground)', borderRadius: '6px' }} />
+                    <button onClick={handleBindCard} className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.85rem', borderRadius: '6px' }}>OK</button>
                   </div>
                 )}
               </div>
@@ -360,13 +281,9 @@ export default function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProp
         </div>
 
         {/* Footer Actions */}
-        <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid var(--surface-border)', display: 'flex', gap: '1rem', background: 'var(--background)' }}>
-          <button onClick={handleSave} className="btn-primary" style={{ flex: 1, padding: '12px', borderRadius: '12px', fontSize: '0.95rem', fontWeight: 700 }}>
+        <div style={{ padding: '1.2rem 1.5rem', borderTop: '1px solid var(--surface-border)', display: 'flex', gap: '1rem', background: 'var(--background)' }}>
+          <button onClick={handleSave} className="btn-primary" style={{ flex: 1, padding: '10px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 600 }}>
             {t.btnSave}
-          </button>
-
-          <button onClick={handleLogout} style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(244, 63, 94, 0.1)', border: '1px solid rgba(244, 63, 94, 0.2)', color: 'var(--error)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}>
-            🚪
           </button>
         </div>
       </div>

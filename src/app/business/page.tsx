@@ -589,7 +589,7 @@ export default function BusinessDashboard() {
         {/* User Info */}
         <div 
           style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0, cursor: 'pointer' }}
-          onClick={() => setIsSidebarOpen(true)}
+          onClick={() => router.push('/business/profile')}
         >
           <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
             {user?.fullName}
