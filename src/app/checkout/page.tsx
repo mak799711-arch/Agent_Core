@@ -1,56 +1,58 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
-import QRCode from 'react-qr-code';
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
+import QRCode from "react-qr-code";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
-  const businessId = searchParams.get('b');
-  const agentId = searchParams.get('a');
+  const businessId = searchParams.get("b");
+  const agentId = searchParams.get("a");
 
-  const [amount, setAmount] = useState<string>('');
-  const [status, setStatus] = useState<'loading' | 'input' | 'qr' | 'processing' | 'success'>('loading');
-  const [currency, setCurrency] = useState<string>('IDR');
-  
+  const [amount, setAmount] = useState<string>("");
+  const [status, setStatus] = useState<
+    "loading" | "input" | "qr" | "processing" | "success"
+  >("loading");
+  const [currency, setCurrency] = useState<string>("IDR");
+
   useEffect(() => {
     async function fetchCurrency() {
       if (!businessId) {
-        setStatus('input');
+        setStatus("input");
         return;
       }
       try {
         const { data: business } = await supabase
-          .from('businesses')
-          .select('owner_id')
-          .eq('id', businessId)
+          .from("businesses")
+          .select("owner_id")
+          .eq("id", businessId)
           .single();
-          
+
         if (business?.owner_id) {
           const { data: user } = await supabase
-            .from('users')
-            .select('currency')
-            .eq('id', business.owner_id)
+            .from("users")
+            .select("currency")
+            .eq("id", business.owner_id)
             .single();
-            
+
           if (user?.currency) {
             setCurrency(user.currency);
           }
         }
       } catch (e) {
-        console.error('Error fetching currency:', e);
+        console.error("Error fetching currency:", e);
       }
-      setStatus('input');
+      setStatus("input");
     }
     fetchCurrency();
   }, [businessId]);
-  
+
   // В V4: скидка туристу (например, 5% из Global Margin)
   const TOURIST_DISCOUNT_PERCENT = 0.05;
-  
+
   // Парсим сырое значение (убираем все кроме цифр)
-  const rawAmount = parseFloat(amount.replace(/\D/g, '')) || 0;
+  const rawAmount = parseFloat(amount.replace(/\D/g, "")) || 0;
   const discount = rawAmount * TOURIST_DISCOUNT_PERCENT;
   const finalAmount = rawAmount - discount;
 
@@ -58,102 +60,149 @@ function CheckoutContent() {
 
   const handlePay = async () => {
     if (rawAmount <= 0) return;
-    setStatus('processing');
-    
+    setStatus("processing");
+
     try {
-      const res = await fetch('/api/v1/payments/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/v1/payments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: rawAmount,
           currency,
           businessId,
-          agentId
-        })
+          agentId,
+        }),
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      
+
       setPaymentId(data.paymentId);
-      setStatus('qr');
+      setStatus("qr");
     } catch (e) {
       console.error(e);
-      setStatus('input');
-      alert('Payment initialization failed');
+      setStatus("input");
+      alert("Payment initialization failed");
     }
   };
 
   const formatCurrencyValue = (num: number) => {
-    return new Intl.NumberFormat('ru-RU', {
-      maximumFractionDigits: currency === 'IDR' ? 0 : 2
+    return new Intl.NumberFormat("ru-RU", {
+      maximumFractionDigits: currency === "IDR" ? 0 : 2,
     }).format(num);
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--background)', color: 'var(--foreground)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '40px', height: '40px', border: '3px solid var(--surface)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-        <style dangerouslySetInnerHTML={{__html: `@keyframes spin { to { transform: rotate(360deg); } }`}} />
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "var(--background)",
+          color: "var(--foreground)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            width: "40px",
+            height: "40px",
+            border: "3px solid var(--surface)",
+            borderTopColor: "var(--primary)",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+          }}
+        />
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `@keyframes spin { to { transform: rotate(360deg); } }`,
+          }}
+        />
       </div>
     );
   }
 
-  if (status === 'qr') {
+  if (status === "qr") {
     // Тестовая нагрузка (payload) для QR-кода
     const qrPayload = `agentcore:pay?b=${businessId}&a=${agentId}&payment_id=${paymentId}&amount=${finalAmount}&currency=${currency}`;
-    
+
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'var(--background)',
-        color: 'var(--foreground)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem'
-      }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem', textAlign: 'center', letterSpacing: '1px' }}>SCAN TO PAY</h2>
-        
-        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', marginBottom: '2rem' }}>
-          <QRCode 
-            value={qrPayload} 
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "var(--background)",
+          color: "var(--foreground)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "2rem",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: 800,
+            marginBottom: "2rem",
+            textAlign: "center",
+            letterSpacing: "1px",
+          }}
+        >
+          SCAN TO PAY
+        </h2>
+
+        <div
+          style={{
+            background: "white",
+            padding: "1.5rem",
+            borderRadius: "16px",
+            marginBottom: "2rem",
+          }}
+        >
+          <QRCode
+            value={qrPayload}
             size={240}
             bgColor="#ffffff"
             fgColor="#0a0a0a"
           />
         </div>
 
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <p style={{ opacity: 0.7, marginBottom: '0.5rem', fontSize: '0.9rem' }}>Total Amount</p>
-          <h1 style={{ fontSize: '2.5rem', color: 'var(--primary)' }}>{formatCurrencyValue(finalAmount)} {currency}</h1>
+        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <p
+            style={{ opacity: 0.7, marginBottom: "0.5rem", fontSize: "0.9rem" }}
+          >
+            Total Amount
+          </p>
+          <h1 style={{ fontSize: "2.5rem", color: "var(--primary)" }}>
+            {formatCurrencyValue(finalAmount)} {currency}
+          </h1>
         </div>
 
         {/* Dummy кнопка для перехода к зеленому экрану (MVP) */}
-        <button 
+        <button
           onClick={async () => {
-            setStatus('processing');
+            setStatus("processing");
             try {
-              await fetch('/api/v1/payments/simulate-success', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId })
+              await fetch("/api/v1/payments/simulate-success", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paymentId }),
               });
             } catch (e) {
               console.error(e);
             }
-            setTimeout(() => setStatus('success'), 1500);
+            setTimeout(() => setStatus("success"), 1500);
           }}
           style={{
-            background: 'transparent',
-            border: '1px solid var(--surface-border)',
-            color: 'var(--foreground)',
+            background: "transparent",
+            border: "1px solid var(--surface-border)",
+            color: "var(--foreground)",
             opacity: 0.5,
-            padding: '1rem',
-            borderRadius: '8px',
-            fontSize: '0.9rem',
-            cursor: 'pointer'
+            padding: "1rem",
+            borderRadius: "8px",
+            fontSize: "0.9rem",
+            cursor: "pointer",
           }}
         >
           [DEV] Simulate Payment Success
@@ -162,151 +211,302 @@ function CheckoutContent() {
     );
   }
 
-  if (status === 'success') {
+  if (status === "success") {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'var(--success)', // Строгий зеленый экран успеха для кассира
-        color: 'white',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        textAlign: 'center'
-      }}>
-        <h1 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1rem', textTransform: 'uppercase' }}>PAID</h1>
-        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '2rem', borderRadius: '16px', width: '100%', maxWidth: '400px' }}>
-          <p style={{ fontSize: '1.2rem', opacity: 0.9, marginBottom: '0.5rem' }}>Amount Paid</p>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '2rem' }}>{formatCurrencyValue(finalAmount)} {currency}</h2>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '1rem', opacity: 0.8 }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "var(--success)", // Строгий зеленый экран успеха для кассира
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "2rem",
+          textAlign: "center",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "3rem",
+            fontWeight: 900,
+            marginBottom: "1rem",
+            textTransform: "uppercase",
+          }}
+        >
+          PAID
+        </h1>
+        <div
+          style={{
+            background: "rgba(0,0,0,0.2)",
+            padding: "2rem",
+            borderRadius: "16px",
+            width: "100%",
+            maxWidth: "400px",
+          }}
+        >
+          <p
+            style={{ fontSize: "1.2rem", opacity: 0.9, marginBottom: "0.5rem" }}
+          >
+            Amount Paid
+          </p>
+          <h2
+            style={{
+              fontSize: "2.5rem",
+              fontWeight: 800,
+              marginBottom: "2rem",
+            }}
+          >
+            {formatCurrencyValue(finalAmount)} {currency}
+          </h2>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              borderTop: "1px solid rgba(255,255,255,0.2)",
+              paddingTop: "1rem",
+              opacity: 0.8,
+            }}
+          >
             <span>Date:</span>
-            <strong>{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</strong>
+            <strong>
+              {new Date().toLocaleDateString()}{" "}
+              {new Date().toLocaleTimeString()}
+            </strong>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', opacity: 0.8 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "0.5rem",
+              opacity: 0.8,
+            }}
+          >
             <span>Ref ID:</span>
             <strong>#AC-{Math.floor(Math.random() * 1000000)}</strong>
           </div>
         </div>
-        <p style={{ marginTop: '2rem', fontSize: '1.2rem', fontWeight: 700 }}>SHOW THIS SCREEN TO STAFF</p>
+        <p style={{ marginTop: "2rem", fontSize: "1.2rem", fontWeight: 700 }}>
+          SHOW THIS SCREEN TO STAFF
+        </p>
       </div>
     );
   }
 
-  if (status === 'processing') {
+  if (status === "processing") {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'var(--background)',
-        color: 'var(--foreground)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{
-          width: '50px',
-          height: '50px',
-          border: '4px solid var(--surface)',
-          borderTopColor: 'var(--primary)',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }} />
-        <h2 style={{ marginTop: '2rem', fontSize: '1.5rem', fontWeight: 700 }}>Processing Payment...</h2>
-        <style dangerouslySetInnerHTML={{__html: `@keyframes spin { to { transform: rotate(360deg); } }`}} />
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "var(--background)",
+          color: "var(--foreground)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            width: "50px",
+            height: "50px",
+            border: "4px solid var(--surface)",
+            borderTopColor: "var(--primary)",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+          }}
+        />
+        <h2 style={{ marginTop: "2rem", fontSize: "1.5rem", fontWeight: 700 }}>
+          Processing Payment...
+        </h2>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `@keyframes spin { to { transform: rotate(360deg); } }`,
+          }}
+        />
       </div>
     );
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'var(--background)',
-      color: 'var(--foreground)',
-      padding: '2rem',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '2px', color: 'var(--primary)' }}>AGENT CORE</h1>
-        <p style={{ opacity: 0.6, fontSize: '0.9rem', marginTop: '0.5rem' }}>Secure Checkout</p>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--background)",
+        color: "var(--foreground)",
+        padding: "2rem",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <header style={{ marginBottom: "3rem", textAlign: "center" }}>
+        <h1
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: 800,
+            letterSpacing: "2px",
+            color: "var(--primary)",
+          }}
+        >
+          AGENT CORE
+        </h1>
+        <p style={{ opacity: 0.6, fontSize: "0.9rem", marginTop: "0.5rem" }}>
+          Secure Checkout
+        </p>
       </header>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', maxWidth: '400px', width: '100%', margin: '0 auto' }}>
-        
-        <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid var(--surface-border)' }}>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', textAlign: 'center' }}>Enter Bill Amount</h2>
-          
-          <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-            <input 
-              type="text" 
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          maxWidth: "400px",
+          width: "100%",
+          margin: "0 auto",
+        }}
+      >
+        <div
+          style={{
+            background: "var(--surface)",
+            padding: "2rem",
+            borderRadius: "12px",
+            marginBottom: "2rem",
+            border: "1px solid var(--surface-border)",
+          }}
+        >
+          <h2
+            style={{
+              fontSize: "1.2rem",
+              fontWeight: 700,
+              marginBottom: "1.5rem",
+              textAlign: "center",
+            }}
+          >
+            Enter Bill Amount
+          </h2>
+
+          <div style={{ position: "relative", marginBottom: "1.5rem" }}>
+            <input
+              type="text"
               inputMode="numeric"
               value={amount}
               onChange={(e) => {
                 // Только цифры, форматируем с пробелами
-                const val = e.target.value.replace(/\D/g, '');
+                const val = e.target.value.replace(/\D/g, "");
                 if (val) {
-                  setAmount(new Intl.NumberFormat('ru-RU').format(parseInt(val, 10)));
+                  setAmount(
+                    new Intl.NumberFormat("ru-RU").format(parseInt(val, 10)),
+                  );
                 } else {
-                  setAmount('');
+                  setAmount("");
                 }
               }}
               style={{
-                width: '100%',
-                background: 'var(--background)',
-                border: '2px solid var(--surface-border)',
-                borderRadius: '8px',
-                padding: '1rem 4.5rem 1rem 1rem', // right padding for currency
-                fontSize: '1.5rem',
+                width: "100%",
+                background: "var(--background)",
+                border: "2px solid var(--surface-border)",
+                borderRadius: "8px",
+                padding: "1rem 4.5rem 1rem 1rem", // right padding for currency
+                fontSize: "1.5rem",
                 fontWeight: 700,
-                color: 'var(--foreground)',
-                outline: 'none'
+                color: "var(--foreground)",
+                outline: "none",
               }}
               placeholder="0"
             />
-            <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1.2rem', fontWeight: 700, opacity: 0.5 }}>{currency}</span>
+            <span
+              style={{
+                position: "absolute",
+                right: "1rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                fontSize: "1.2rem",
+                fontWeight: 700,
+                opacity: 0.5,
+              }}
+            >
+              {currency}
+            </span>
           </div>
 
           {rawAmount > 0 && (
-            <div style={{ background: 'rgba(249, 115, 22, 0.1)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', opacity: 0.8 }}>
+            <div
+              style={{
+                background: "rgba(249, 115, 22, 0.1)",
+                padding: "1rem",
+                borderRadius: "8px",
+                border: "1px solid rgba(249, 115, 22, 0.3)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "0.5rem",
+                  opacity: 0.8,
+                }}
+              >
                 <span>Subtotal:</span>
-                <span>{formatCurrencyValue(rawAmount)} {currency}</span>
+                <span>
+                  {formatCurrencyValue(rawAmount)} {currency}
+                </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'var(--primary)', fontWeight: 700 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "0.5rem",
+                  color: "var(--primary)",
+                  fontWeight: 700,
+                }}
+              >
                 <span>AgentCore Discount (5%):</span>
-                <span>- {formatCurrencyValue(discount)} {currency}</span>
+                <span>
+                  - {formatCurrencyValue(discount)} {currency}
+                </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(249, 115, 22, 0.2)', fontSize: '1.2rem', fontWeight: 800 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: "1rem",
+                  paddingTop: "1rem",
+                  borderTop: "1px solid rgba(249, 115, 22, 0.2)",
+                  fontSize: "1.2rem",
+                  fontWeight: 800,
+                }}
+              >
                 <span>Total to Pay:</span>
-                <span>{formatCurrencyValue(finalAmount)} {currency}</span>
+                <span>
+                  {formatCurrencyValue(finalAmount)} {currency}
+                </span>
               </div>
             </div>
           )}
         </div>
 
-        <button 
+        <button
           onClick={handlePay}
           disabled={rawAmount <= 0}
           style={{
-            width: '100%',
-            background: rawAmount > 0 ? 'var(--primary)' : 'var(--surface-border)',
-            color: rawAmount > 0 ? '#000' : 'var(--foreground)',
+            width: "100%",
+            background:
+              rawAmount > 0 ? "var(--primary)" : "var(--surface-border)",
+            color: rawAmount > 0 ? "#000" : "var(--foreground)",
             opacity: rawAmount > 0 ? 1 : 0.5,
-            padding: '1.2rem',
-            fontSize: '1.2rem',
+            padding: "1.2rem",
+            fontSize: "1.2rem",
             fontWeight: 800,
-            border: 'none',
-            borderRadius: '8px',
-            cursor: rawAmount > 0 ? 'pointer' : 'not-allowed',
-            textTransform: 'uppercase',
-            letterSpacing: '1px'
+            border: "none",
+            borderRadius: "8px",
+            cursor: rawAmount > 0 ? "pointer" : "not-allowed",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
           }}
         >
           Pay Now
         </button>
-
       </div>
     </div>
   );
@@ -314,7 +514,19 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--background)', color: 'var(--foreground)' }}>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: "100vh",
+            background: "var(--background)",
+            color: "var(--foreground)",
+          }}
+        >
+          Loading...
+        </div>
+      }
+    >
       <CheckoutContent />
     </Suspense>
   );

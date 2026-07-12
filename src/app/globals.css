@@ -161,3 +161,4 @@ a {
   justify-content: center;
   padding: var(--layout-padding);
 }
+select option { background-color: var(--background) !important; color: var(--foreground) !important; }

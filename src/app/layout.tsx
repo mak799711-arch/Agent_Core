@@ -1,14 +1,14 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Agent Core | Referral Network',
-  description: 'Global Local Acquisition Network starting in Bali',
-  manifest: '/manifest.json',
+  title: "Agent Core | Referral Network",
+  description: "Global Local Acquisition Network starting in Bali",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
-    title: 'AgentCore Cashier',
+    statusBarStyle: "default",
+    title: "AgentCore Cashier",
   },
 };
 
