@@ -1,4 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "installCommand": "npm install --force"
+  "buildCommand": "next build --no-turbopack",
+  "installCommand": "npm install --force",
+  "framework": "nextjs"
 }
