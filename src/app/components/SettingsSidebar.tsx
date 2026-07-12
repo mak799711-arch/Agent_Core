@@ -741,7 +741,7 @@ export default function SettingsSidebar({
               cursor: "pointer",
             }}
           >
-            🚪 Logout
+            Logout
           </button>
         </div>
       </div>
