@@ -1,6 +1,6 @@
 {
   "name": "agent-core-app",
-  "version": "0.1.0",
+  "version": "17.17.17",
   "private": true,
   "scripts": {
     "dev": "next dev",

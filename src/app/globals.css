@@ -162,3 +162,13 @@ a {
   padding: var(--layout-padding);
 }
 select option { background-color: var(--background) !important; color: var(--foreground) !important; }
+
+/* Hide number input arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
