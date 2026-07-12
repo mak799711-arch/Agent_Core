@@ -49,12 +49,8 @@ export default function AgentMap({
         attributionControl: false,
       });
       
-      map.addControl(new maplibregl.NavigationControl(), "top-right");
-      map.addControl(new maplibregl.AttributionControl({
-        compact: true,
-        customAttribution: "MapTiler"
-      }));
-
+      // Controls removed for cleaner UI
+      
       mapInstance.current = map;
 
       // Fix for map resizing issues
