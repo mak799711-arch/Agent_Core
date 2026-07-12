@@ -9,8 +9,59 @@ import dynamic from "next/dynamic";
 
 const LocationPickerMap = dynamic(() => import("@/app/components/LocationPickerMap"), {
   ssr: false,
-  loading: () => <div style={{ height: "300px", background: "rgba(255,255,255,0.05)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>Загрузка карты...</div>
+  loading: () => <div style={{ height: "300px", background: "rgba(255,255,255,0.05)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>...</div>
 });
+
+const translations: Record<string, any> = {
+  en: {
+    back: "← Back",
+    title: "Venue Profile",
+    nameLabel: "Name",
+    namePlaceholder: "Enter venue name",
+    verified: "Verified",
+    galleryTitle: "Gallery (up to 5 photos)",
+    addPhoto: "Add",
+    locationTitle: "Location",
+    mapPointLabel: "Map Point",
+    mapHelper: "Click the geolocate button in the top right, use search, or just click anywhere on the map to set your venue's pin.",
+    loading: "Loading...",
+    deleteConfirm: "Delete this photo?",
+    maxPhotos: "Max 5 photos.",
+    uploadError: "Upload error"
+  },
+  ru: {
+    back: "← Назад",
+    title: "Профиль Заведения",
+    nameLabel: "Название",
+    namePlaceholder: "Введите название заведения",
+    verified: "Верифицировано",
+    galleryTitle: "Галерея (до 5 фото)",
+    addPhoto: "Добавить",
+    locationTitle: "Локация",
+    mapPointLabel: "Точка на карте",
+    mapHelper: "Нажмите кнопку геолокации в правом верхнем углу карты, воспользуйтесь поиском или просто кликните в любое место, чтобы установить пин вашего заведения.",
+    loading: "Загрузка...",
+    deleteConfirm: "Удалить это фото?",
+    maxPhotos: "Максимум 5 фото.",
+    uploadError: "Ошибка загрузки"
+  },
+  id: {
+    back: "← Kembali",
+    title: "Profil Tempat",
+    nameLabel: "Nama",
+    namePlaceholder: "Masukkan nama tempat",
+    verified: "Terverifikasi",
+    galleryTitle: "Galeri (hingga 5 foto)",
+    addPhoto: "Tambah",
+    locationTitle: "Lokasi",
+    mapPointLabel: "Titik Peta",
+    mapHelper: "Gunakan tombol geolokasi, pencarian, atau klik peta untuk mengatur pin Anda.",
+    loading: "Memuat...",
+    deleteConfirm: "Hapus foto ini?",
+    maxPhotos: "Maks 5 foto.",
+    uploadError: "Kesalahan unggahan"
+  }
+};
 
 export default function BusinessProfile() {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -25,6 +76,9 @@ export default function BusinessProfile() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  
+  const lang = user?.language || "en";
+  const t = translations[lang] || translations.en;
 
   useEffect(() => {
     async function loadUser() {
@@ -81,7 +135,7 @@ export default function BusinessProfile() {
       setAvatarUrl(newAvatarUrl);
       await authService.updateProfile({ avatarUrl: newAvatarUrl });
     } catch (err) {
-      alert("Error uploading avatar");
+      alert(t.uploadError);
     } finally {
       setUploadingAvatar(false);
     }
@@ -91,7 +145,7 @@ export default function BusinessProfile() {
     if (!e.target.files || e.target.files.length === 0 || !user) return;
     const files = Array.from(e.target.files);
     if (photos.length + files.length > 5) {
-      alert("Максимум 5 фото.");
+      alert(t.maxPhotos);
       return;
     }
     setUploadingPhoto(true);
@@ -107,14 +161,14 @@ export default function BusinessProfile() {
       setPhotos(newPhotos);
       await authService.updateProfile({ photos: newPhotos });
     } catch (err) {
-      alert("Error uploading photos");
+      alert(t.uploadError);
     } finally {
       setUploadingPhoto(false);
     }
   };
 
   const handleDeletePhoto = async (index: number) => {
-    if (!window.confirm("Удалить это фото?")) return;
+    if (!window.confirm(t.deleteConfirm)) return;
     const newPhotos = [...photos];
     newPhotos.splice(index, 1);
     setPhotos(newPhotos);
@@ -123,7 +177,7 @@ export default function BusinessProfile() {
 
   if (loading)
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>Loading...</div>
+      <div style={{ padding: "2rem", textAlign: "center" }}>{t?.loading || "Loading..."}</div>
     );
 
   return (
@@ -148,7 +202,7 @@ export default function BusinessProfile() {
             fontWeight: 700,
           }}
         >
-          ← Назад
+          {t.back}
         </a>
         <div
           style={{
@@ -159,7 +213,7 @@ export default function BusinessProfile() {
           }}
         >
           <h2 style={{ fontSize: "2.2rem", fontWeight: 800 }}>
-            Профиль Заведения
+            {t.title}
           </h2>
         </div>
 
@@ -241,11 +295,11 @@ export default function BusinessProfile() {
                     letterSpacing: "0.5px",
                   }}
                 >
-                  Название
+                  {t.nameLabel}
                 </label>
                 {(user?.isVerified || user?.status === "verified") && (
                   <span
-                    title="Верифицировано"
+                    title={t.verified}
                     style={{
                       color: "var(--primary)",
                       fontSize: "1.2rem",
@@ -261,7 +315,7 @@ export default function BusinessProfile() {
                 className="input-field"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Введите название заведения"
+                placeholder={t.namePlaceholder}
                 style={{
                   width: "100%",
                   background: "rgba(255,255,255,0.05)",
@@ -287,7 +341,7 @@ export default function BusinessProfile() {
             marginBottom: "1rem",
           }}
         >
-          Галерея (до 5 фото)
+          {t.galleryTitle}
         </h3>
         <div
           className="panel"
@@ -380,7 +434,7 @@ export default function BusinessProfile() {
                     fontWeight: 600,
                   }}
                 >
-                  Добавить
+                  {t.addPhoto}
                 </span>
               </label>
             )}
@@ -395,7 +449,7 @@ export default function BusinessProfile() {
             marginBottom: "1rem",
           }}
         >
-          Локация
+          {t.locationTitle}
         </h3>
         <div
           className="panel"
@@ -408,7 +462,7 @@ export default function BusinessProfile() {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.8rem" }}>
             <label style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", opacity: 0.7, letterSpacing: "0.5px" }}>
-              Точка на карте
+              {t.mapPointLabel}
             </label>
           </div>
           
@@ -419,7 +473,7 @@ export default function BusinessProfile() {
             theme={user?.theme === "light" ? "light" : "dark"}
           />
           <p style={{ fontSize: "0.8rem", opacity: 0.6, marginTop: "8px", lineHeight: 1.4 }}>
-            Нажмите кнопку геолокации в правом верхнем углу карты, воспользуйтесь поиском или просто кликните в любое место, чтобы установить пин вашего заведения.
+            {t.mapHelper}
           </p>
         </div>
       </div>
