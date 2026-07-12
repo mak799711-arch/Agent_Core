@@ -275,25 +275,7 @@ export default function BusinessProfile() {
             </div>
           </div>
 
-          <div style={{ marginTop: "1rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.8rem" }}>
-              <label style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", opacity: 0.7, letterSpacing: "0.5px" }}>
-                Локация на карте
-              </label>
-              <span style={{ fontSize: "0.75rem", color: "var(--primary)", opacity: 0.8 }}>
-                {lat && lng ? `Установлено: ${lat.toFixed(4)}, ${lng.toFixed(4)}` : "Не установлена"}
-              </span>
             </div>
-            
-            <LocationPickerMap 
-              initialLat={lat} 
-              initialLng={lng} 
-              onLocationSelect={handleLocationSelect}
-              theme={user?.theme === "light" ? "light" : "dark"}
-            />
-            <p style={{ fontSize: "0.8rem", opacity: 0.6, marginTop: "8px", lineHeight: 1.4 }}>
-              Нажмите кнопку геолокации в правом верхнем углу карты или просто кликните в любое место, чтобы установить пин вашего заведения.
-            </p>
           </div>
         </div>
 
@@ -403,6 +385,45 @@ export default function BusinessProfile() {
               </label>
             )}
           </div>
+        </div>
+
+        <h3
+          style={{
+            fontSize: "1.4rem",
+            fontWeight: 800,
+            marginTop: "2.5rem",
+            marginBottom: "1rem",
+          }}
+        >
+          Локация
+        </h3>
+        <div
+          className="panel"
+          style={{
+            padding: "1.5rem",
+            border: "1px solid var(--surface-border)",
+            background: "var(--glass-bg)",
+            borderRadius: "20px",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.8rem" }}>
+            <label style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", opacity: 0.7, letterSpacing: "0.5px" }}>
+              Точка на карте
+            </label>
+            <span style={{ fontSize: "0.75rem", color: "var(--primary)", opacity: 0.8 }}>
+              {lat && lng ? `Установлено: ${lat.toFixed(4)}, ${lng.toFixed(4)}` : "Не установлена"}
+            </span>
+          </div>
+          
+          <LocationPickerMap 
+            initialLat={lat} 
+            initialLng={lng} 
+            onLocationSelect={handleLocationSelect}
+            theme={user?.theme === "light" ? "light" : "dark"}
+          />
+          <p style={{ fontSize: "0.8rem", opacity: 0.6, marginTop: "8px", lineHeight: 1.4 }}>
+            Нажмите кнопку геолокации в правом верхнем углу карты, воспользуйтесь поиском или просто кликните в любое место, чтобы установить пин вашего заведения.
+          </p>
         </div>
       </div>
     </div>
