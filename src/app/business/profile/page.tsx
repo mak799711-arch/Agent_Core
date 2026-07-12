@@ -31,6 +31,16 @@ export default function BusinessProfile() {
     loadUser();
   }, [router]);
 
+  // Auto-save bio (name/description) with a 1-second debounce
+  useEffect(() => {
+    if (!user || bio === (user.bio || "")) return;
+    const timer = setTimeout(() => {
+      authService.updateProfile({ bio }).catch(console.error);
+      setUser({ ...user, bio });
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [bio, user]);
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !user) return;
     const file = e.target.files[0];
@@ -80,18 +90,6 @@ export default function BusinessProfile() {
     await authService.updateProfile({ photos: newPhotos });
   };
 
-  const handleSave = async () => {
-    try {
-      await authService.updateProfile({ bio });
-      if (user) {
-        setUser({ ...user, bio });
-      }
-      alert("Изменения сохранены!");
-    } catch (e) {
-      alert("Ошибка при сохранении");
-    }
-  };
-
   if (loading)
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>Loading...</div>
@@ -132,7 +130,6 @@ export default function BusinessProfile() {
           <h2 style={{ fontSize: "2.2rem", fontWeight: 800 }}>
             Профиль Заведения
           </h2>
-
         </div>
 
         <div
