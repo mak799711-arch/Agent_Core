@@ -242,21 +242,24 @@ export default function SettingsSidebar({
     }
   };
 
-  const handleThemeChange = (newTheme: "dark" | "light") => {
+  const handleThemeChange = async (newTheme: "dark" | "light") => {
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
-    autoSave({ theme: newTheme });
+    await autoSave({ theme: newTheme });
+    window.location.reload();
   };
 
-  const handleLangChange = (newLang: any) => {
+  const handleLangChange = async (newLang: any) => {
     setLang(newLang);
-    autoSave({ language: newLang });
+    await autoSave({ language: newLang });
+    window.location.reload();
   };
 
-  const handleCurrencyChange = (newCurr: any) => {
+  const handleCurrencyChange = async (newCurr: any) => {
     setCurrency(newCurr);
-    autoSave({ currency: newCurr });
+    await autoSave({ currency: newCurr });
+    window.location.reload();
   };
 
   const handleUnbindCard = async () => {
