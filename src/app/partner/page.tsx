@@ -8,7 +8,12 @@ import { useState, useEffect } from "react";
 import { authService, offerRepository } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
 import { Offer } from "@/lib/interfaces/offers";
-import AgentMap from "@/app/components/AgentMap";
+import dynamic from "next/dynamic";
+
+const AgentMap = dynamic(() => import("@/app/components/AgentMap"), {
+  ssr: false,
+  loading: () => <div style={{ height: "500px", background: "rgba(255,255,255,0.05)", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center" }}>Загрузка карты...</div>
+});
 
 const translations: Record<string, any> = {
   en: {

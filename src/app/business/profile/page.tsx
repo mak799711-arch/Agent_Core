@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import { authService, businessRepository } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
 import { Business } from "@/lib/interfaces/business";
-import LocationPickerMap from "@/app/components/LocationPickerMap";
+import dynamic from "next/dynamic";
+
+const LocationPickerMap = dynamic(() => import("@/app/components/LocationPickerMap"), {
+  ssr: false,
+  loading: () => <div style={{ height: "300px", background: "rgba(255,255,255,0.05)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>Загрузка карты...</div>
+});
 
 export default function BusinessProfile() {
   const [user, setUser] = useState<UserProfile | null>(null);
