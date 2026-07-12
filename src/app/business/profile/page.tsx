@@ -410,9 +410,6 @@ export default function BusinessProfile() {
             <label style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", opacity: 0.7, letterSpacing: "0.5px" }}>
               Точка на карте
             </label>
-            <span style={{ fontSize: "0.75rem", color: "var(--primary)", opacity: 0.8 }}>
-              {lat && lng ? `Установлено: ${lat.toFixed(4)}, ${lng.toFixed(4)}` : "Не установлена"}
-            </span>
           </div>
           
           <LocationPickerMap 

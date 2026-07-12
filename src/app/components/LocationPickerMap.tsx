@@ -55,7 +55,6 @@ export default function LocationPickerMap({
       showAccuracyCircle: false,
     });
     map.addControl(geolocate, "top-right");
-    map.addControl(new maplibregl.NavigationControl(), "bottom-right");
 
     const createMarkerEl = () => {
       const el = document.createElement("div");
@@ -115,7 +114,8 @@ export default function LocationPickerMap({
     
     setIsSearching(true);
     try {
-      const res = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(searchQuery)}.json?key=${mapTilerKey}`);
+      // bbox for Bali, Indonesia to prevent showing US/Spain results
+      const res = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(searchQuery)}.json?key=${mapTilerKey}&bbox=114.4,-8.9,115.7,-8.0`);
       const data = await res.json();
       setSearchResults(data.features || []);
     } catch (err) {
@@ -191,6 +191,21 @@ export default function LocationPickerMap({
       </div>
       
       <div ref={mapContainer} style={{ width: "100%", height: "100%" }}></div>
+      <style jsx global>{`
+        .maplibregl-ctrl-group {
+          background: rgba(30, 30, 30, 0.8) !important;
+          backdrop-filter: blur(5px);
+          border: 1px solid var(--surface-border) !important;
+          border-radius: 8px !important;
+        }
+        .maplibregl-ctrl-group button {
+          width: 36px !important;
+          height: 36px !important;
+        }
+        .maplibregl-ctrl-icon {
+          filter: invert(0.8) sepia(1) saturate(5) hue-rotate(350deg) brightness(1.2); /* Make it roughly orange */
+        }
+      `}</style>
     </div>
   );
 }
