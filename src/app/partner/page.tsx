@@ -19,6 +19,7 @@ const translations: Record<string, any> = {
       "Explore active venues around you. Click a pin to copy your checkout link.",
     exploreList:
       "Generate a direct checkout link and send it to the tourist. You will receive commission automatically when they pay.",
+    loading: "Loading Partner Portal...",
   },
   ru: {
     totalEarnings: "Общий заработок",
@@ -28,6 +29,7 @@ const translations: Record<string, any> = {
       "Изучайте активные заведения вокруг. Нажмите на пин, чтобы скопировать вашу ссылку.",
     exploreList:
       "Сгенерируйте прямую ссылку на оплату и отправьте туристу. Вы автоматически получите комиссию при оплате.",
+    loading: "Загрузка...",
   },
   id: {
     totalEarnings: "Total Pendapatan",
@@ -37,6 +39,7 @@ const translations: Record<string, any> = {
       "Jelajahi tempat aktif di sekitar Anda. Klik pin untuk menyalin tautan checkout.",
     exploreList:
       "Hasilkan tautan pembayaran langsung dan kirimkan ke turis. Anda akan menerima komisi secara otomatis saat mereka membayar.",
+    loading: "Memuat...",
   },
 };
 
@@ -92,12 +95,50 @@ export default function PartnerDashboardV4() {
   const lang = user?.language || "en";
   const t = translations[lang] || translations.en;
 
-  if (loading)
+  if (loading) {
     return (
-      <div style={{ padding: "2rem", color: "white" }}>
-        Loading V4 Partner Portal...
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--bg-gradient)",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div
+            className="spinner"
+            style={{
+              width: "48px",
+              height: "48px",
+              border: "4px solid var(--surface-border)",
+              borderTopColor: "var(--primary)",
+              borderRadius: "50%",
+              marginBottom: "1rem",
+              margin: "0 auto 1rem auto",
+            }}
+          />
+          <p style={{ color: "var(--foreground)", fontWeight: 600 }}>
+            {t.loading || "Loading..."}
+          </p>
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+                @keyframes spin {
+                  to { transform: rotate(360deg); }
+                }
+                .spinner {
+                  animation: spin 1s linear infinite;
+                }
+              `,
+            }}
+          />
+        </div>
       </div>
     );
+  }
 
   return (
     <div
