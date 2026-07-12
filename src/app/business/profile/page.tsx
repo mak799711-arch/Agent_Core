@@ -329,8 +329,6 @@ export default function BusinessProfile() {
             </div>
           </div>
 
-            </div>
-          </div>
         </div>
 
         <h3
