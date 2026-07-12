@@ -2,14 +2,20 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { authService } from "@/lib/services";
+import { authService, businessRepository } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
+import { Business } from "@/lib/interfaces/business";
+import LocationPickerMap from "@/app/components/LocationPickerMap";
 
 export default function BusinessProfile() {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [business, setBusiness] = useState<Business | null>(null);
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+  
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -25,6 +31,14 @@ export default function BusinessProfile() {
         setBio(currentUser.bio || "");
         setAvatarUrl(currentUser.avatarUrl || "");
         setPhotos(currentUser.photos || []);
+        
+        // Load business data for coordinates
+        const biz = await businessRepository.getBusinessByOwnerId(currentUser.id);
+        if (biz) {
+          setBusiness(biz);
+          setLat(biz.latitude || null);
+          setLng(biz.longitude || null);
+        }
       }
       setLoading(false);
     }
@@ -40,6 +54,18 @@ export default function BusinessProfile() {
     }, 1000);
     return () => clearTimeout(timer);
   }, [bio, user]);
+
+  const handleLocationSelect = useCallback((newLat: number, newLng: number) => {
+    setLat(newLat);
+    setLng(newLng);
+    
+    if (business) {
+      businessRepository.updateBusiness(business.id, {
+        latitude: newLat,
+        longitude: newLng
+      }).catch(console.error);
+    }
+  }, [business]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !user) return;
@@ -242,6 +268,27 @@ export default function BusinessProfile() {
                 }}
               />
             </div>
+          </div>
+
+          <div style={{ marginTop: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.8rem" }}>
+              <label style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", opacity: 0.7, letterSpacing: "0.5px" }}>
+                Локация на карте
+              </label>
+              <span style={{ fontSize: "0.75rem", color: "var(--primary)", opacity: 0.8 }}>
+                {lat && lng ? `Установлено: ${lat.toFixed(4)}, ${lng.toFixed(4)}` : "Не установлена"}
+              </span>
+            </div>
+            
+            <LocationPickerMap 
+              initialLat={lat} 
+              initialLng={lng} 
+              onLocationSelect={handleLocationSelect}
+              theme={user?.theme === "light" ? "light" : "dark"}
+            />
+            <p style={{ fontSize: "0.8rem", opacity: 0.6, marginTop: "8px", lineHeight: 1.4 }}>
+              Нажмите кнопку геолокации в правом верхнем углу карты или просто кликните в любое место, чтобы установить пин вашего заведения.
+            </p>
           </div>
         </div>
 
