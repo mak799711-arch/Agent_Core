@@ -268,7 +268,18 @@ export class MockAuthService implements IAuthService {
     this.saveUsersToStorage();
     if (this.currentUser && this.currentUser.id === id) {
       this.currentUser.isBlocked = isBlocked;
+      this.saveSession(this.currentUser.email);
     }
+  }
+
+  async uploadAvatar(userId: string, file: File): Promise<string> {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}-${Math.random()}`;
+  }
+
+  async uploadGalleryPhoto(userId: string, file: File): Promise<string> {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return `https://picsum.photos/seed/${userId}-${Math.random()}/400/400`;
   }
 
   async adminUpdateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {

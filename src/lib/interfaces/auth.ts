@@ -3,6 +3,7 @@ export interface UserProfile {
   role: 'partner' | 'business' | 'admin';
   fullName: string | null;
   avatarUrl: string | null;
+  photos?: string[]; // Gallery for business
   bio?: string | null;
   createdAt: string;
   
@@ -32,4 +33,6 @@ export interface IAuthService {
   adminUpdateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<void>;
   getAllUsers(): Promise<UserProfile[]>;
   blockUser(id: string, isBlocked: boolean): Promise<void>;
+  uploadAvatar(userId: string, file: File): Promise<string>;
+  uploadGalleryPhoto(userId: string, file: File): Promise<string>;
 }

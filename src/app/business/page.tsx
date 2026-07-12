@@ -10,7 +10,7 @@ import VerificationBadge from '@/app/components/VerificationBadge';
 import { Transaction } from '@/lib/interfaces/wallet';
 import { formatUserName } from '@/lib/utils/format';
 import MapPicker from '@/app/components/MapPicker';
-import BusinessSidebar from '@/app/components/BusinessSidebar';
+import SettingsSidebar from '@/app/components/SettingsSidebar';
 
 const translations = {
   en: {
@@ -603,7 +603,7 @@ export default function BusinessDashboard() {
         </div>
       </header>
 
-      <BusinessSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <SettingsSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       {/* Centered Single Column Layout */}
       <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem', position: 'relative', zIndex: 2 }}>

@@ -193,6 +193,8 @@ export class SupabaseAuthService implements IAuthService {
     if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
     if (updates.isBlocked !== undefined) dbUpdates.is_blocked = updates.isBlocked;
 
+    if (updates.photos !== undefined) dbUpdates.photos = updates.photos;
+
     const { error } = await supabase
       .from('profiles')
       .update(dbUpdates)
@@ -262,6 +264,7 @@ export class SupabaseAuthService implements IAuthService {
       role: p.role as 'partner' | 'business' | 'admin',
       fullName: p.full_name,
       avatarUrl: p.avatar_url,
+      photos: p.photos,
       cardBound: p.card_bound,
       cardNumber: p.card_number,
       currency: p.currency,
@@ -291,6 +294,26 @@ export class SupabaseAuthService implements IAuthService {
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}-${Math.random()}.${fileExt}`;
     const filePath = `avatars/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  }
+
+  async uploadGalleryPhoto(userId: string, file: File): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}-gallery-${Math.random()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`; // reusing avatars bucket for simplicity
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')

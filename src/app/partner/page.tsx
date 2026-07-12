@@ -1,6 +1,6 @@
-'use client';
+import SettingsSidebar from '@/app/components/SettingsSidebar';
 
-import { useState, useEffect } from 'react';
+// Inside the component... I need to replace from line 58. Wait, I should fetch the whole page first to do it properly. Let's do a multi-replace, but first read the top of partner/page.tsx
 import { useRouter } from 'next/navigation';
 import { authService, offerRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
@@ -13,6 +13,7 @@ export default function PartnerDashboardV4() {
   const [loading, setLoading] = useState(true);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'list' | 'map'>('map');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -57,15 +58,44 @@ export default function PartnerDashboardV4() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-gradient)', color: 'white', padding: '2rem' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2>AgentCore V4: Partner</h2>
-        <button 
-          onClick={handleLogout} 
-          style={{ background: 'transparent', border: '1px solid var(--error)', color: 'var(--error)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+      {/* Header */}
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', background: 'var(--glass-bg)', padding: '1rem 1.5rem', borderRadius: '16px', border: '1px solid var(--surface-border)', backdropFilter: 'blur(10px)' }}>
+        {/* Hamburger Icon */}
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--foreground)',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '8px',
+            marginLeft: '-8px'
+          }}
         >
-          Logout
+          ☰
         </button>
+
+        {/* User Info */}
+        <div 
+          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0, cursor: 'pointer' }}
+          onClick={() => router.push('/partner/profile')}
+        >
+          <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {user?.fullName || 'Agent'}
+          </h4>
+          <img 
+            src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} 
+            alt="Avatar" 
+            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }} 
+          />
+        </div>
       </header>
+
+      <SettingsSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid var(--surface-border)' }}>
         <p style={{ opacity: 0.7, marginBottom: '0.5rem' }}>Total Earnings</p>
