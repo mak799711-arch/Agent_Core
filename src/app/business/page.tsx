@@ -11,7 +11,7 @@ import {
 } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
 import { Offer } from "@/lib/interfaces/offers";
-import { formatCurrency } from "@/lib/utils/currency";
+import { formatCurrency, convertToUSD } from "@/lib/utils/currency";
 import VerificationBadge from "@/app/components/VerificationBadge";
 import { Transaction } from "@/lib/interfaces/wallet";
 import { formatUserName } from "@/lib/utils/format";
@@ -548,17 +548,17 @@ export default function BusinessDashboard() {
     let avgBillVal: number | null = null;
 
     if (rewardType === "fixed") {
-      computedReward = parseFloat(newOfferReward.replace(/,/g, ""));
+      computedReward = convertToUSD(parseFloat(newOfferReward.replace(/,/g, "")), user.currency || "USD");
     } else {
       const pct = parseFloat(newOfferPercent.replace(/,/g, ""));
-      const bill = parseFloat(newOfferAvgBill.replace(/,/g, ""));
-      if (isNaN(pct) || pct <= 0 || isNaN(bill) || bill <= 0) {
+      const billLocal = parseFloat(newOfferAvgBill.replace(/,/g, ""));
+      if (isNaN(pct) || pct <= 0 || isNaN(billLocal) || billLocal <= 0) {
         alert("Invalid percentage or average bill value");
         return;
       }
-      computedReward = (bill * pct) / 100;
+      computedReward = convertToUSD((billLocal * pct) / 100, user.currency || "USD");
       percentVal = pct;
-      avgBillVal = bill;
+      avgBillVal = convertToUSD(billLocal, user.currency || "USD");
     }
 
     if (isNaN(computedReward) || computedReward <= 0) {
@@ -1358,22 +1358,6 @@ export default function BusinessDashboard() {
                       outline: "none",
                     }}
                   />
-                  {newOfferReward &&
-                    !isNaN(Number(newOfferReward.replace(/,/g, ""))) && (
-                      <div
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--primary)",
-                          marginTop: "4px",
-                        }}
-                      >
-                        Preview:{" "}
-                        {formatCurrency(
-                          parseFloat(newOfferReward.replace(/,/g, "")),
-                          user?.currency || "USD",
-                        )}
-                      </div>
-                    )}
                 </div>
               ) : (
                 <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -1411,22 +1395,6 @@ export default function BusinessDashboard() {
                         outline: "none",
                       }}
                     />
-                    {newOfferAvgBill &&
-                      !isNaN(Number(newOfferAvgBill.replace(/,/g, ""))) && (
-                        <div
-                          style={{
-                            fontSize: "0.75rem",
-                            color: "var(--primary)",
-                            marginTop: "4px",
-                          }}
-                        >
-                          Preview:{" "}
-                          {formatCurrency(
-                            parseFloat(newOfferAvgBill.replace(/,/g, "")),
-                            user?.currency || "USD",
-                          )}
-                        </div>
-                      )}
                   </div>
                   <div
                     style={{

@@ -36,3 +36,9 @@ export function formatCurrency(amountInUSD: number, currency: string): string {
   // Format with 2 decimal places for cents-based currencies
   return `${symbol}${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
+
+export function convertToUSD(amountInLocal: number, currency: string): number {
+  const currencyUpper = (currency || 'USD').toUpperCase();
+  const rate = RATES[currencyUpper] || 1.0;
+  return amountInLocal / rate;
+}
