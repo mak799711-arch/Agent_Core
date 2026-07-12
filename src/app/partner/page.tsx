@@ -104,7 +104,7 @@ export default function PartnerDashboardV4() {
       style={{
         minHeight: "100vh",
         background: "var(--bg-gradient)",
-        color: "white",
+        color: "var(--foreground)",
         padding: "2rem",
       }}
     >
@@ -195,8 +195,8 @@ export default function PartnerDashboardV4() {
             borderRadius: "8px",
             border: "none",
             background:
-              activeTab === "list" ? "var(--primary)" : "rgba(255,255,255,0.1)",
-            color: activeTab === "list" ? "#000" : "white",
+              activeTab === "list" ? "var(--primary)" : "var(--surface)",
+            color: activeTab === "list" ? "#000" : "var(--foreground)",
             fontWeight: "bold",
             cursor: "pointer",
           }}
@@ -211,8 +211,8 @@ export default function PartnerDashboardV4() {
             borderRadius: "8px",
             border: "none",
             background:
-              activeTab === "map" ? "var(--primary)" : "rgba(255,255,255,0.1)",
-            color: activeTab === "map" ? "#000" : "white",
+              activeTab === "map" ? "var(--primary)" : "var(--surface)",
+            color: activeTab === "map" ? "#000" : "var(--foreground)",
             fontWeight: "bold",
             cursor: "pointer",
           }}
