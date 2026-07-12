@@ -9,17 +9,27 @@ interface LocationPickerMapProps {
   initialLng?: number | null;
   onLocationSelect: (lat: number, lng: number) => void;
   theme?: "light" | "dark";
+  lang?: string;
 }
+
+const mapTranslations: Record<string, any> = {
+  en: { placeholder: "Search address (e.g., La Brisa Bali)...", searchBtn: "Search", searching: "..." },
+  ru: { placeholder: "Поиск адреса (например, La Brisa Bali)...", searchBtn: "Найти", searching: "..." },
+  id: { placeholder: "Cari alamat (mis., La Brisa Bali)...", searchBtn: "Cari", searching: "..." }
+};
 
 export default function LocationPickerMap({
   initialLat,
   initialLng,
   onLocationSelect,
   theme = "dark",
+  lang = "en",
 }: LocationPickerMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<maplibregl.Map | null>(null);
   const markerInstance = useRef<maplibregl.Marker | null>(null);
+  
+  const t = mapTranslations[lang] || mapTranslations.en;
   
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -164,13 +174,13 @@ export default function LocationPickerMap({
         <form onSubmit={handleSearch} style={{ display: "flex", width: "100%", background: "var(--surface)", borderRadius: "8px", boxShadow: "0 2px 10px rgba(0,0,0,0.3)", overflow: "hidden", border: "1px solid var(--surface-border)" }}>
           <input 
             type="text" 
-            placeholder="Поиск адреса (например, La Brisa Bali)..." 
+            placeholder={t.placeholder} 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ flex: 1, padding: "10px 14px", border: "none", background: "transparent", color: "var(--foreground)", fontSize: "0.9rem", outline: "none" }}
           />
           <button type="submit" disabled={isSearching} style={{ background: "var(--primary)", color: "#000", border: "none", padding: "0 16px", fontWeight: "bold", cursor: "pointer", opacity: isSearching ? 0.7 : 1 }}>
-            {isSearching ? "..." : "Найти"}
+            {isSearching ? t.searching : t.searchBtn}
           </button>
         </form>
         
