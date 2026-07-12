@@ -35,10 +35,11 @@ export default function AgentMap({
     const defaultLat = -8.65; // Bali
     const defaultLng = 115.2167; // Bali
 
+    // Changed to streets-v2 for a colorful map instead of colorless dataviz
     const styleUrl =
       theme === "dark"
-        ? `https://api.maptiler.com/maps/dataviz-dark/style.json?key=${mapTilerKey}`
-        : `https://api.maptiler.com/maps/dataviz-light/style.json?key=${mapTilerKey}`;
+        ? `https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${mapTilerKey}`
+        : `https://api.maptiler.com/maps/streets-v2/style.json?key=${mapTilerKey}`;
 
     try {
       const map = new maplibregl.Map({
@@ -46,10 +47,30 @@ export default function AgentMap({
         style: styleUrl,
         center: [defaultLng, defaultLat],
         zoom: 11,
+        minZoom: 9, // Prevent zooming out to the whole world
+        maxZoom: 18, // Prevent zooming in too close
+        maxBounds: [
+          [110.0, -12.0], // South-West bound (Longitude, Latitude)
+          [120.0, -5.0],  // North-East bound (Longitude, Latitude)
+        ],
         attributionControl: false,
       });
       
-      // Controls removed for cleaner UI
+      // Add geolocation control to track user
+      const geolocate = new maplibregl.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true
+        },
+        trackUserLocation: true,
+        showUserHeading: true,
+        showAccuracyCircle: false, // We hide the blue circle to keep it clean, or we style it orange
+      });
+      map.addControl(geolocate);
+
+      // Trigger geolocation once the map loads
+      map.on('load', () => {
+        geolocate.trigger();
+      });
       
       mapInstance.current = map;
 
@@ -74,8 +95,8 @@ export default function AgentMap({
     if (mapInstance.current) {
       const styleUrl =
         theme === "dark"
-          ? `https://api.maptiler.com/maps/dataviz-dark/style.json?key=${mapTilerKey}`
-          : `https://api.maptiler.com/maps/dataviz-light/style.json?key=${mapTilerKey}`;
+          ? `https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${mapTilerKey}`
+          : `https://api.maptiler.com/maps/streets-v2/style.json?key=${mapTilerKey}`;
       mapInstance.current.setStyle(styleUrl);
     }
   }, [theme]);
@@ -141,6 +162,18 @@ export default function AgentMap({
 
   return (
     <div style={{ position: "relative", height: "100%" }}>
+      <style>{`
+        /* Make the geolocation dot orange */
+        .maplibregl-user-location-dot {
+          background-color: #ff5e00 !important;
+        }
+        .maplibregl-user-location-dot::before {
+          background-color: #ff5e00 !important;
+        }
+        .maplibregl-user-location-accuracy-circle {
+          background-color: rgba(255, 94, 0, 0.15) !important;
+        }
+      `}</style>
       <div
         ref={mapContainer}
         style={{
