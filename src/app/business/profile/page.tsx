@@ -465,12 +465,13 @@ export default function BusinessProfile() {
           </div>
           
           <LocationPickerMap 
-            initialLat={lat} 
-            initialLng={lng} 
-            onLocationSelect={handleLocationSelect}
-            theme={user?.theme === "light" ? "light" : "dark"}
-            lang={lang}
-          />
+              initialLat={lat} 
+              initialLng={lng} 
+              onLocationSelect={handleLocationSelect}
+              previewAvatar={avatarUrl}
+              theme={user?.theme === "light" ? "light" : "dark"}
+              lang={lang}
+            />
           <p style={{ fontSize: "0.8rem", opacity: 0.6, marginTop: "8px", lineHeight: 1.4 }}>
             {t.mapHelper}
           </p>

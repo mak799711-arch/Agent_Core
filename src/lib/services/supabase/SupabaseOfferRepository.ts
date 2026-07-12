@@ -12,10 +12,45 @@ export class SupabaseOfferRepository implements IOfferRepository {
       query = query.eq('business_id', options.businessId);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data: offersData, error } = await query.order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data.map(this.mapToOffer);
+    
+    if (!offersData || offersData.length === 0) return [];
+    
+    // Fetch businesses for these offers since there is no FK constraint
+    const businessIds = [...new Set(offersData.map((o: any) => o.business_id))];
+    const { data: usersData, error: usersError } = await supabase
+      .from('users')
+      .select('*')
+      .in('id', businessIds);
+      
+    if (usersError) {
+      console.error("Error fetching businesses for offers:", usersError);
+    }
+    
+    const usersMap = new Map();
+    if (usersData) {
+      usersData.forEach((u: any) => {
+        usersMap.set(u.id, {
+          id: u.id,
+          role: u.role,
+          fullName: u.full_name,
+          avatarUrl: u.avatar_url,
+          photos: u.photos,
+          bio: u.bio,
+          latitude: u.latitude,
+          longitude: u.longitude,
+        });
+      });
+    }
+
+    return offersData.map((data: any) => {
+      const offer = this.mapToOffer(data);
+      // @ts-ignore - attaching business property dynamically
+      offer.business = usersMap.get(data.business_id) || null;
+      return offer;
+    });
   }
 
   async getOfferById(id: string): Promise<Offer | null> {

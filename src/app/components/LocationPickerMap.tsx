@@ -8,6 +8,8 @@ interface LocationPickerMapProps {
   initialLat?: number | null;
   initialLng?: number | null;
   onLocationSelect: (lat: number, lng: number) => void;
+  previewAvatar?: string | null;
+  onPreviewClick?: () => void;
   theme?: "light" | "dark";
   lang?: string;
 }
@@ -22,6 +24,8 @@ export default function LocationPickerMap({
   initialLat,
   initialLng,
   onLocationSelect,
+  previewAvatar,
+  onPreviewClick,
   theme = "dark",
   lang = "en",
 }: LocationPickerMapProps) {
@@ -68,12 +72,28 @@ export default function LocationPickerMap({
 
     const createMarkerEl = () => {
       const el = document.createElement("div");
-      el.style.backgroundColor = "#ff5e00";
-      el.style.width = "24px";
-      el.style.height = "24px";
+      el.style.width = "40px";
+      el.style.height = "40px";
       el.style.borderRadius = "50%";
-      el.style.border = "3px solid white";
+      el.style.border = "3px solid #ff5e00";
       el.style.boxShadow = "0 2px 10px rgba(0,0,0,0.5)";
+      el.style.cursor = "pointer";
+      el.style.overflow = "hidden";
+      el.style.backgroundColor = "#333";
+      
+      if (previewAvatar) {
+        el.innerHTML = `<img src="${previewAvatar}" style="width: 100%; height: 100%; object-fit: cover;" />`;
+      } else {
+        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🏪</div>`;
+      }
+      
+      if (onPreviewClick) {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          onPreviewClick();
+        });
+      }
+      
       return el;
     };
 
@@ -153,13 +173,7 @@ export default function LocationPickerMap({
       mapInstance.current.flyTo({ center: [lng, lat], zoom: 16 });
       
       if (!markerInstance.current) {
-        const el = document.createElement("div");
-        el.style.backgroundColor = "#ff5e00";
-        el.style.width = "24px";
-        el.style.height = "24px";
-        el.style.borderRadius = "50%";
-        el.style.border = "3px solid white";
-        el.style.boxShadow = "0 2px 10px rgba(0,0,0,0.5)";
+        const el = createMarkerEl();
         
         markerInstance.current = new maplibregl.Marker({ element: el, draggable: true })
           .setLngLat([lng, lat])

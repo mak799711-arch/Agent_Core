@@ -9,16 +9,14 @@ import { formatCurrency } from "@/lib/utils/currency";
 interface AgentMapProps {
   activeOffers: Offer[];
   userCurrency: string;
-  onCopyLink: (businessId: string) => void;
-  copiedId: string | null;
+  onMarkerClick: (business: any, offers: Offer[]) => void;
   theme?: "light" | "dark";
 }
 
 export default function AgentMap({
   activeOffers,
   userCurrency,
-  onCopyLink,
-  copiedId,
+  onMarkerClick,
   theme = "dark",
 }: AgentMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -121,56 +119,54 @@ export default function AgentMap({
     markers.current.forEach((m) => m.remove());
     markers.current = [];
 
-    activeOffers.forEach((offer) => {
-      if (
-        offer.business &&
-        offer.business.latitude &&
-        offer.business.longitude
-      ) {
-        // Create custom DOM element for the marker to look like our orange pin
-        const el = document.createElement('div');
-        el.style.backgroundColor = '#ff5e00';
-        el.style.width = '20px';
-        el.style.height = '20px';
-        el.style.borderRadius = '50%';
-        el.style.border = '3px solid white';
-        el.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-        el.style.cursor = 'pointer';
-
-        const popupHtml = `
-          <div style="color: #000; min-width: 160px; font-family: sans-serif; padding: 5px;">
-            <h4 style="margin: 0 0 5px 0; font-size: 14px; font-weight: 800;">${offer.business.name}</h4>
-            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${offer.title}</p>
-            <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: 700; color: #ff5e00;">
-              Reward: ${formatCurrency(offer.rewardAmount, userCurrency)}
-            </p>
-            <button id="copy-btn-${offer.businessId}" style="background: ${copiedId === offer.businessId ? '#10b981' : '#ff5e00'}; color: white; border: none; padding: 8px 10px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold;">
-              ${copiedId === offer.businessId ? '✓ Copied' : 'Copy Checkout Link'}
-            </button>
-          </div>
-        `;
-
-        const popup = new maplibregl.Popup({ offset: 15, closeButton: false }).setHTML(popupHtml);
-
-        // Add event listener to the button after popup opens
-        popup.on('open', () => {
-          const btn = document.getElementById(`copy-btn-${offer.businessId}`);
-          if (btn) {
-            btn.onclick = () => {
-              onCopyLink(offer.businessId);
-            };
-          }
-        });
-
-        const marker = new maplibregl.Marker({ element: el })
-          .setLngLat([offer.business.longitude, offer.business.latitude])
-          .setPopup(popup)
-          .addTo(map);
-
-        markers.current.push(marker);
+    // Group offers by business
+    const businessMap = new Map<string, { business: any; offers: Offer[] }>();
+    
+    activeOffers.forEach((offer: any) => {
+      if (offer.business && offer.business.latitude && offer.business.longitude) {
+        const bId = offer.business.id || offer.businessId;
+        if (!businessMap.has(bId)) {
+          businessMap.set(bId, { business: offer.business, offers: [] });
+        }
+        businessMap.get(bId)!.offers.push(offer);
       }
     });
-  }, [activeOffers, copiedId, userCurrency, onCopyLink]);
+
+    businessMap.forEach(({ business, offers }) => {
+      // Create custom DOM element for the marker to look like an avatar
+      const el = document.createElement('div');
+      el.style.width = '40px';
+      el.style.height = '40px';
+      el.style.borderRadius = '50%';
+      el.style.border = '3px solid #ff5e00';
+      el.style.boxShadow = '0 2px 10px rgba(0,0,0,0.5)';
+      el.style.cursor = 'pointer';
+      el.style.overflow = 'hidden';
+      el.style.backgroundColor = '#333';
+      el.style.transition = 'transform 0.2s ease';
+      
+      // Hover effect
+      el.onmouseenter = () => { el.style.transform = 'scale(1.1)'; };
+      el.onmouseleave = () => { el.style.transform = 'scale(1)'; };
+
+      if (business.avatarUrl) {
+        el.innerHTML = `<img src="${business.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;" />`;
+      } else {
+        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🏪</div>`;
+      }
+
+      // Add click listener
+      el.addEventListener('click', () => {
+        onMarkerClick(business, offers);
+      });
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([business.longitude, business.latitude])
+        .addTo(map);
+
+      markers.current.push(marker);
+    });
+  }, [activeOffers, onMarkerClick]);
 
   return (
     <div style={{ position: "relative", height: "100%" }}>

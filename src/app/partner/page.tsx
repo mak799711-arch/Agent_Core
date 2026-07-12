@@ -9,6 +9,7 @@ import { authService, offerRepository } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
 import { Offer } from "@/lib/interfaces/offers";
 import dynamic from "next/dynamic";
+import BusinessProfileModal from "@/app/components/BusinessProfileModal";
 
 const AgentMap = dynamic(() => import("@/app/components/AgentMap"), {
   ssr: false,
@@ -55,6 +56,7 @@ export default function PartnerDashboardV4() {
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"list" | "map">("list");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedBusiness, setSelectedBusiness] = useState<{ business: any; offers: Offer[] } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -230,7 +232,19 @@ export default function PartnerDashboardV4() {
       <SettingsSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        user={user}
+        onLogout={handleLogout}
       />
+      
+      {selectedBusiness && (
+        <BusinessProfileModal
+          business={selectedBusiness.business}
+          offers={selectedBusiness.offers}
+          onClose={() => setSelectedBusiness(null)}
+          onCopyLink={handleCopyLink}
+          copiedId={copiedLink}
+        />
+      )}
 
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>
         <button
@@ -275,8 +289,7 @@ export default function PartnerDashboardV4() {
         <AgentMap
           activeOffers={offers}
           userCurrency={user?.currency || "IDR"}
-          onCopyLink={handleCopyLink}
-          copiedId={copiedLink}
+          onMarkerClick={(business, businessOffers) => setSelectedBusiness({ business, offers: businessOffers })}
           theme={user?.theme === "light" ? "light" : "dark"}
         />
       ) : (
