@@ -47,7 +47,7 @@ const translations = {
     successPrefix: 'Referral confirmed!',
     depositSuccess: 'successfully added to your reserve balance.',
     loading: 'Loading Business Portal...',
-    recentTransactions: 'Recent Transactions',
+    recentTransactions: 'Последние транзакции',
     categories: {
       restaurant: 'Restaurant',
       nightlife: 'Nightlife',
