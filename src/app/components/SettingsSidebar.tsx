@@ -185,6 +185,7 @@ export default function SettingsSidebar({
   const [newCardNumber, setNewCardNumber] = useState("");
   const [isBinding, setIsBinding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [needsReload, setNeedsReload] = useState(false);
 
   const [avatarUrl, setAvatarUrl] = useState("");
   const [verificationStatus, setVerificationStatus] = useState<
@@ -247,19 +248,19 @@ export default function SettingsSidebar({
     localStorage.setItem("theme", newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
     await autoSave({ theme: newTheme });
-    window.location.reload();
+    setNeedsReload(true);
   };
 
   const handleLangChange = async (newLang: any) => {
     setLang(newLang);
     await autoSave({ language: newLang });
-    window.location.reload();
+    setNeedsReload(true);
   };
 
   const handleCurrencyChange = async (newCurr: any) => {
     setCurrency(newCurr);
     await autoSave({ currency: newCurr });
-    window.location.reload();
+    setNeedsReload(true);
   };
 
   const handleUnbindCard = async () => {
@@ -299,6 +300,14 @@ export default function SettingsSidebar({
     }
   };
 
+  const handleClose = () => {
+    if (needsReload) {
+      window.location.reload();
+    } else {
+      onClose();
+    }
+  };
+
   const rowStyle = {
     padding: "1.2rem 1.5rem",
     borderBottom: "1px solid var(--surface-border)",
@@ -307,7 +316,7 @@ export default function SettingsSidebar({
   return (
     <>
       <div
-        onClick={onClose}
+        onClick={handleClose}
         style={{
           position: "fixed",
           top: 0,
@@ -357,7 +366,7 @@ export default function SettingsSidebar({
             {t.title}
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             style={{
               background: "none",
               border: "none",
