@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService } from '@/lib/services';
+import { authService, businessRepository } from '@/lib/services';
 import { UserProfile } from '@/lib/interfaces/auth';
 import VerificationBadge from '@/app/components/VerificationBadge';
 
@@ -122,6 +122,12 @@ export default function BusinessSettings() {
   const [bio, setBio] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
+  // Venue specific
+  const [businessId, setBusinessId] = useState<string | null>(null);
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
+
   // Verification states
   const [dealsCount, setDealsCount] = useState(85);
   const [verificationStatus, setVerificationStatus] = useState<'none' | 'pending' | 'verified'>('none');
@@ -159,6 +165,15 @@ export default function BusinessSettings() {
         // Load verification status from profile
         const isVerified = currentUser.status === 'verified';
         const isPending = currentUser.status === 'pending';
+
+        // Load business venue data
+        const bus = await businessRepository.getBusinessByOwnerId(currentUser.id);
+        if (bus) {
+          setBusinessId(bus.id);
+          setLat(bus.latitude);
+          setLng(bus.longitude);
+          setAddress(bus.address);
+        }
         
         // Temporarily keep simulated deals in UI state (not DB) since it's just a UI mock for now
         const simulatedDeals = localStorage.getItem(`simulated_deals_${currentUser.id}`);
@@ -265,6 +280,15 @@ export default function BusinessSettings() {
       if (user) {
         localStorage.setItem(`loyverse_token_${user.id}`, loyverseToken);
       }
+      
+      if (businessId) {
+        await businessRepository.updateBusiness(businessId, { 
+          latitude: lat, 
+          longitude: lng, 
+          address: address || '' 
+        });
+      }
+
       alert(t.success);
       router.push('/business');
     } catch (err) {
@@ -473,17 +497,19 @@ export default function BusinessSettings() {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {dealsCount < 100 ? (
                     <button
-                      onClick={handleSimulateDeals}
+                      disabled
                       className="btn-primary"
                       style={{
                         padding: '10px 18px',
                         fontSize: '0.85rem',
-                        background: 'rgba(34, 211, 238, 0.08)',
-                        border: '1px solid var(--primary)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid var(--surface-border)',
+                        color: '#666',
+                        cursor: 'not-allowed',
                         boxShadow: 'none'
                       }}
                     >
-                      ⚡ {t.btnSimulate}
+                      🔒 {t.btnApply} (Locked)
                     </button>
                   ) : (
                     <button

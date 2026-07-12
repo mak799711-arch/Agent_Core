@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  agentcore:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: agentcore-app:latest
+    container_name: agentcore
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    # Optional: if you have a local reverse proxy on NAS (like Nginx Proxy Manager),
+    # you can map it through networks.

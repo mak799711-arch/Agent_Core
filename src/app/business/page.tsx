@@ -9,6 +9,7 @@ import { formatCurrency } from '@/lib/utils/currency';
 import VerificationBadge from '@/app/components/VerificationBadge';
 import { Transaction } from '@/lib/interfaces/wallet';
 import { formatUserName } from '@/lib/utils/format';
+import MapPicker from '@/app/components/MapPicker';
 
 const translations = {
   en: {
@@ -272,6 +273,9 @@ export default function BusinessDashboard() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [shortCode, setShortCode] = useState('');
   const [history, setHistory] = useState<Transaction[]>([]);
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
   
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -305,6 +309,9 @@ export default function BusinessDashboard() {
       });
     }
     setBusinessId(bus.id);
+    setLat(bus.latitude);
+    setLng(bus.longitude);
+    setAddress(bus.address);
 
     const bal = await walletRepository.getBalance(userId);
     setBalance(bal);
@@ -573,49 +580,8 @@ export default function BusinessDashboard() {
 
       {/* Centered Single Column Layout */}
       <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem', position: 'relative', zIndex: 2 }}>
-          <div className="panel" style={{ padding: 'var(--panel-padding)', borderRadius: '20px' }}>
-          <h3 style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.2px' }}>{t.attributeTitle}</h3>
-          
-          {statusMessage && (
-            <div style={{
-              background: statusMessage.type === 'success' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(244, 63, 94, 0.08)',
-              border: `1px solid ${statusMessage.type === 'success' ? 'var(--success)' : 'var(--error)'}`,
-              color: statusMessage.type === 'success' ? 'var(--success)' : 'var(--error)',
-              padding: '10px 14px',
-              borderRadius: '10px',
-              fontSize: '0.85rem',
-              marginBottom: '1.2rem',
-              fontWeight: 600
-            }}>
-              {statusMessage.text}
-            </div>
-          )}
 
-          <form onSubmit={handleConfirmReferral} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <input
-              type="text"
-              className="input-field"
-              value={shortCode}
-              onChange={(e) => setShortCode(e.target.value)}
-              placeholder="000000"
-              required
-              maxLength={6}
-              style={{
-                flex: '1 1 200px',
-                fontSize: '1.2rem',
-                letterSpacing: '4px',
-                textAlign: 'center',
-                fontWeight: 700
-              }}
-            />
-            <button type="submit" className="btn-primary" style={{ flex: '1 1 120px', padding: '12px 28px', borderRadius: '10px' }}>
-              {t.verifyBtn}
-            </button>
-          </form>
-        </div>
-
-
-        {/* Offers List */}
+            {/* Offers List */}
         <div className="panel" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 style={{ margin: 0 }}>{t.offersTitle}</h3>
