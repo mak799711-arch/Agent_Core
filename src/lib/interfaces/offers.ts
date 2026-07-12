@@ -12,6 +12,7 @@ export interface Offer {
   conditions: string | null;
   isActive: boolean;
   imageUrl?: string;
+  imageUrls?: string[]; // Array of up to 5 photos
   createdAt: string;
 }
 

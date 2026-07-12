@@ -288,7 +288,8 @@ export default function BusinessDashboard() {
   const [newOfferPercent, setNewOfferPercent] = useState('');
   const [newOfferAvgBill, setNewOfferAvgBill] = useState('');
   const [newOfferConditions, setNewOfferConditions] = useState('');
-  const [newOfferImage, setNewOfferImage] = useState<string | null>(null);
+  const [newOfferImages, setNewOfferImages] = useState<string[]>([]);
+  const [uploadingOfferPhotos, setUploadingOfferPhotos] = useState(false);
 
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -409,6 +410,34 @@ export default function BusinessDashboard() {
     }
   };
 
+  const handleOfferPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !user) return;
+    const files = Array.from(e.target.files);
+    if (newOfferImages.length + files.length > 5) {
+      alert('Maximum 5 photos allowed per offer.');
+      return;
+    }
+    setUploadingOfferPhotos(true);
+    try {
+      const uploaded = [...newOfferImages];
+      for (const file of files) {
+        const url = await authService.uploadGalleryPhoto(user.id, file);
+        uploaded.push(url);
+      }
+      setNewOfferImages(uploaded);
+    } catch (err) {
+      alert('Error uploading photos');
+    } finally {
+      setUploadingOfferPhotos(false);
+    }
+  };
+
+  const handleDeleteOfferPhoto = (index: number) => {
+    const updated = [...newOfferImages];
+    updated.splice(index, 1);
+    setNewOfferImages(updated);
+  };
+
   const handleCreateOffer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -456,7 +485,8 @@ export default function BusinessDashboard() {
         averageBill: avgBillVal,
         category: newOfferCategory,
         conditions: newOfferConditions || null,
-        imageUrl: newOfferImage || undefined
+        imageUrl: newOfferImages.length > 0 ? newOfferImages[0] : undefined,
+        imageUrls: newOfferImages.length > 0 ? newOfferImages : undefined,
       });
 
       setNewOfferTitle('');
@@ -465,7 +495,7 @@ export default function BusinessDashboard() {
       setNewOfferAvgBill('');
       setNewOfferConditions('');
       setNewOfferCategory('restaurant');
-      setNewOfferImage(null);
+      setNewOfferImages([]);
       setShowCreateModal(false);
       await refreshData(user.id);
     } catch (err) {
@@ -764,30 +794,30 @@ export default function BusinessDashboard() {
             <h3 style={{ marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: 700 }}>{t.createTitle}</h3>
             
             <form onSubmit={handleCreateOffer} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-              {/* Image Upload */}
+              {/* Multi-Image Upload (Up to 5) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Offer Image (Optional)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      const url = URL.createObjectURL(e.target.files[0]);
-                      setNewOfferImage(url);
-                    }
-                  }}
-                  style={{
-                    background: 'var(--input-bg)',
-                    border: '1px solid var(--surface-border)',
-                    borderRadius: '8px',
-                    padding: '8px 10px',
-                    color: 'var(--foreground)',
-                    fontSize: '0.85rem'
-                  }}
-                />
-                {newOfferImage && (
-                  <img src={newOfferImage} alt="Preview" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', marginTop: '4px' }} />
-                )}
+                <label style={{ fontSize: '0.8rem', opacity: 0.8 }}>Фотографии (до 5 шт., опционально)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '8px' }}>
+                  {newOfferImages.map((img, index) => (
+                    <div key={index} style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--surface-border)' }}>
+                      <img src={img} alt={`Preview ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button 
+                        type="button"
+                        onClick={() => handleDeleteOfferPhoto(index)}
+                        style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(255,0,0,0.7)', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  
+                  {newOfferImages.length < 5 && (
+                    <label style={{ width: '100%', aspectRatio: '1', borderRadius: '8px', border: '1px dashed var(--primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: 'var(--input-bg)', opacity: uploadingOfferPhotos ? 0.5 : 1 }}>
+                      <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleOfferPhotoUpload} disabled={uploadingOfferPhotos} />
+                      <span style={{ fontSize: '1.2rem', color: 'var(--primary)' }}>{uploadingOfferPhotos ? '⏳' : '+'}</span>
+                    </label>
+                  )}
+                </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>

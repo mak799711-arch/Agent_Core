@@ -14,6 +14,7 @@ export class MockOfferRepository implements IOfferRepository {
       conditions: 'Reward is $5 per customer.',
       isActive: true,
       imageUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=600',
+      imageUrls: ['https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=600'],
       createdAt: new Date().toISOString()
     },
     {

@@ -46,6 +46,7 @@ export class SupabaseOfferRepository implements IOfferRepository {
       category: offer.category,
       conditions: offer.conditions,
       image_url: offer.imageUrl,
+      image_urls: offer.imageUrls,
     };
 
     const { data, error } = await supabase
@@ -71,6 +72,7 @@ export class SupabaseOfferRepository implements IOfferRepository {
     if (updates.conditions !== undefined) dbUpdates.conditions = updates.conditions;
     if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
     if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
+    if (updates.imageUrls !== undefined) dbUpdates.image_urls = updates.imageUrls;
 
     const { data, error } = await supabase
       .from('offers')
@@ -98,6 +100,7 @@ export class SupabaseOfferRepository implements IOfferRepository {
       conditions: data.conditions,
       isActive: data.is_active,
       imageUrl: data.image_url || undefined,
+      imageUrls: data.image_urls || undefined,
       createdAt: data.created_at,
     };
   }
