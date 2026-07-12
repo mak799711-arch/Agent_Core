@@ -331,7 +331,6 @@ export default function OnboardingPage() {
                 onChange={(e) => setLang(e.target.value as any)}
                 className="input-field"
               >
-                <option value="en">English</option>\n
                 <option value="en">English</option>
                 <option value="ru">Русский</option>
                 <option value="id">Bahasa Indonesia</option>
@@ -342,8 +341,8 @@ export default function OnboardingPage() {
                 <option value="ja">日本語 (Japanese)</option>
                 <option value="ar">العربية (Arabic)</option>
                 <option value="pt">Português (Portuguese)</option>
-                <option value="hi">हिन्दी (Hindi)</option>\n
-              </select>
+                <option value="hi">हिन्दी (Hindi)</option>
+</select>
             </div>
 
             {/* Currency Selector */}
@@ -354,7 +353,6 @@ export default function OnboardingPage() {
                 onChange={(e) => setCurrency(e.target.value as any)}
                 className="input-field"
               >
-                <option value="USD">USD ($)</option>\n
                 <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
                 <option value="GBP">GBP (£)</option>
@@ -364,8 +362,8 @@ export default function OnboardingPage() {
                 <option value="JPY">JPY (¥)</option>
                 <option value="AED">AED (د.إ)</option>
                 <option value="INR">INR (₹)</option>
-                <option value="BRL">BRL (R$)</option>\n
-              </select>
+                <option value="BRL">BRL (R$)</option>
+</select>
             </div>
 
             <button

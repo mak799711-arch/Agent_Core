@@ -33,6 +33,7 @@ const translations = {
     statusActive: "ACTIVE",
     statusPaused: "PAUSED (Low Balance)",
     noOffers: "No offers created yet",
+    noTransactions: "No transactions recorded yet",
     createTitle: "Create New Offer",
     offerTitleLabel: "Offer Title",
     offerTitlePlaceholder: "e.g. Special Promotion",
@@ -83,6 +84,7 @@ const translations = {
     statusActive: "АКТИВЕН",
     statusPaused: "ПАУЗА (Низкий баланс)",
     noOffers: "Офферы еще не созданы",
+    noTransactions: "Транзакции пока отсутствуют",
     createTitle: "Создать новое предложение",
     offerTitleLabel: "Название предложения",
     offerTitlePlaceholder: "например, Специальное предложение",
@@ -133,6 +135,7 @@ const translations = {
     statusActive: "AKTIF",
     statusPaused: "DITANGGUHKAN (Saldo Rendah)",
     noOffers: "Belum ada penawaran yang dibuat",
+    noTransactions: "Belum ada transaksi yang tercatat",
     createTitle: "Buat Penawaran Baru",
     offerTitleLabel: "Judul Penawaran",
     offerTitlePlaceholder: "mis. Promosi Spesial",
@@ -183,6 +186,7 @@ const translations = {
     statusActive: "活跃",
     statusPaused: "已暂停 (余额不足)",
     noOffers: "暂无优惠活动",
+    noTransactions: "暂无交易记录",
     createTitle: "创建新优惠",
     offerTitleLabel: "优惠标题",
     offerTitlePlaceholder: "例如：特别促销",
@@ -231,6 +235,7 @@ const translations = {
     statusActive: "ACTIVO",
     statusPaused: "PAUSADO (Saldo Bajo)",
     noOffers: "Aún no hay ofertas creadas",
+    noTransactions: "Aún no hay transacciones registradas",
     createTitle: "Crear Nueva Oferta",
     offerTitleLabel: "Título de la Oferta",
     offerTitlePlaceholder: "ej. Promoción Especial",
@@ -281,6 +286,7 @@ const translations = {
     statusActive: "AKTIV",
     statusPaused: "PAUSIERT (Wenig Guthaben)",
     noOffers: "Noch keine Angebote erstellt",
+    noTransactions: "Noch keine Transaktionen aufgezeichnet",
     createTitle: "Neues Angebot erstellen",
     offerTitleLabel: "Angebotstitel",
     offerTitlePlaceholder: "z. B. Sonderaktion",
@@ -331,6 +337,7 @@ const translations = {
     statusActive: "ACTIF",
     statusPaused: "PAUSÉ (Solde Bas)",
     noOffers: "Aucune offre créée",
+    noTransactions: "Aucune transaction enregistrée pour le moment",
     createTitle: "Créer une Offre",
     offerTitleLabel: "Titre de l'Offre",
     offerTitlePlaceholder: "ex. Promotion Spéciale",
@@ -1129,7 +1136,7 @@ export default function BusinessDashboard() {
                   padding: "1rem 0",
                 }}
               >
-                No transactions recorded yet
+                {t.noTransactions || "No transactions recorded yet"}
               </p>
             )}
           </div>

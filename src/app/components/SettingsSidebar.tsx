@@ -48,6 +48,118 @@ const translations = {
     statusVerified: "Terverifikasi",
     statusNone: "Belum diverifikasi",
   },
+  zh: {
+    title: "设置",
+    themeLabel: "主题",
+    langLabel: "语言",
+    currLabel: "货币",
+    cardLabel: "支付",
+    cardUnbound: "未绑定",
+    btnUnbind: "解绑",
+    btnBind: "添加",
+    verificationTitle: "验证",
+    statusPending: "待处理",
+    statusVerified: "已验证",
+    statusNone: "未验证",
+  },
+  es: {
+    title: "Ajustes",
+    themeLabel: "Tema",
+    langLabel: "Idioma",
+    currLabel: "Moneda",
+    cardLabel: "Pago",
+    cardUnbound: "Sin tarjeta",
+    btnUnbind: "Desvincular",
+    btnBind: "Añadir",
+    verificationTitle: "Verificación",
+    statusPending: "Pendiente",
+    statusVerified: "Verificado",
+    statusNone: "No verificado",
+  },
+  de: {
+    title: "Einstellungen",
+    themeLabel: "Design",
+    langLabel: "Sprache",
+    currLabel: "Währung",
+    cardLabel: "Zahlung",
+    cardUnbound: "Keine Karte",
+    btnUnbind: "Trennen",
+    btnBind: "Hinzufügen",
+    verificationTitle: "Verifizierung",
+    statusPending: "Ausstehend",
+    statusVerified: "Verifiziert",
+    statusNone: "Nicht verifiziert",
+  },
+  fr: {
+    title: "Paramètres",
+    themeLabel: "Thème",
+    langLabel: "Langue",
+    currLabel: "Devise",
+    cardLabel: "Paiement",
+    cardUnbound: "Aucune carte",
+    btnUnbind: "Délier",
+    btnBind: "Ajouter",
+    verificationTitle: "Vérification",
+    statusPending: "En attente",
+    statusVerified: "Vérifié",
+    statusNone: "Non vérifié",
+  },
+  ja: {
+    title: "設定",
+    themeLabel: "テーマ",
+    langLabel: "言語",
+    currLabel: "通貨",
+    cardLabel: "支払い",
+    cardUnbound: "カードなし",
+    btnUnbind: "解除",
+    btnBind: "追加",
+    verificationTitle: "検証",
+    statusPending: "保留中",
+    statusVerified: "検証済み",
+    statusNone: "未検証",
+  },
+  ar: {
+    title: "الإعدادات",
+    themeLabel: "سمة",
+    langLabel: "لغة",
+    currLabel: "عملة",
+    cardLabel: "دفع",
+    cardUnbound: "لا توجد بطاقة",
+    btnUnbind: "إلغاء الربط",
+    btnBind: "إضافة",
+    verificationTitle: "التحقق",
+    statusPending: "قيد الانتظار",
+    statusVerified: "تم التحقق",
+    statusNone: "لم يتم التحقق",
+  },
+  pt: {
+    title: "Configurações",
+    themeLabel: "Tema",
+    langLabel: "Idioma",
+    currLabel: "Moeda",
+    cardLabel: "Pagamento",
+    cardUnbound: "Sem cartão",
+    btnUnbind: "Desvincular",
+    btnBind: "Adicionar",
+    verificationTitle: "Verificação",
+    statusPending: "Pendente",
+    statusVerified: "Verificado",
+    statusNone: "Não verificado",
+  },
+  hi: {
+    title: "सेटिंग्स",
+    themeLabel: "थीम",
+    langLabel: "भाषा",
+    currLabel: "मुद्रा",
+    cardLabel: "भुगतान",
+    cardUnbound: "कोई कार्ड नहीं",
+    btnUnbind: "अनलिंक करें",
+    btnBind: "जोड़ें",
+    verificationTitle: "सत्यापन",
+    statusPending: "लंबित",
+    statusVerified: "सत्यापित",
+    statusNone: "असत्यापित",
+  },
 };
 
 interface SettingsSidebarProps {
@@ -381,7 +493,6 @@ export default function SettingsSidebar({
                     outline: "none",
                   }}
                 >
-                  <option value="en">English</option>\n
                   <option value="en">English</option>
                   <option value="ru">Русский</option>
                   <option value="id">Bahasa Indonesia</option>
@@ -392,7 +503,7 @@ export default function SettingsSidebar({
                   <option value="ja">日本語 (Japanese)</option>
                   <option value="ar">العربية (Arabic)</option>
                   <option value="pt">Português (Portuguese)</option>
-                  <option value="hi">हिन्दी (Hindi)</option>\n
+                  <option value="hi">हिन्दी (Hindi)</option>
                 </select>
               </div>
 
@@ -424,7 +535,6 @@ export default function SettingsSidebar({
                     outline: "none",
                   }}
                 >
-                  <option value="USD">USD ($)</option>\n
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
                   <option value="GBP">GBP (£)</option>
@@ -434,7 +544,7 @@ export default function SettingsSidebar({
                   <option value="JPY">JPY (¥)</option>
                   <option value="AED">AED (د.إ)</option>
                   <option value="INR">INR (₹)</option>
-                  <option value="BRL">BRL (R$)</option>\n
+                  <option value="BRL">BRL (R$)</option>
                 </select>
               </div>
 

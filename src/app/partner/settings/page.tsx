@@ -540,7 +540,6 @@ export default function PartnerSettings() {
                 onChange={(e) => setLang(e.target.value as any)}
                 style={{ width: "100%" }}
               >
-                <option value="en">English</option>\n
                 <option value="en">English</option>
                 <option value="ru">Русский</option>
                 <option value="id">Bahasa Indonesia</option>
@@ -551,8 +550,8 @@ export default function PartnerSettings() {
                 <option value="ja">日本語 (Japanese)</option>
                 <option value="ar">العربية (Arabic)</option>
                 <option value="pt">Português (Portuguese)</option>
-                <option value="hi">हिन्दी (Hindi)</option>\n
-              </select>
+                <option value="hi">हिन्दी (Hindi)</option>
+</select>
             </div>
 
             <div
@@ -579,7 +578,6 @@ export default function PartnerSettings() {
                 onChange={(e) => setCurrency(e.target.value as any)}
                 style={{ width: "100%" }}
               >
-                <option value="USD">USD ($)</option>\n
                 <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
                 <option value="GBP">GBP (£)</option>
@@ -589,8 +587,8 @@ export default function PartnerSettings() {
                 <option value="JPY">JPY (¥)</option>
                 <option value="AED">AED (د.إ)</option>
                 <option value="INR">INR (₹)</option>
-                <option value="BRL">BRL (R$)</option>\n
-              </select>
+                <option value="BRL">BRL (R$)</option>
+</select>
             </div>
           </div>
 
