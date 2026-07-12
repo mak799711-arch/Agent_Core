@@ -9,7 +9,6 @@ import { formatCurrency } from '@/lib/utils/currency';
 import VerificationBadge from '@/app/components/VerificationBadge';
 import { Transaction } from '@/lib/interfaces/wallet';
 import { formatUserName } from '@/lib/utils/format';
-import MapPicker from '@/app/components/MapPicker';
 import SettingsSidebar from '@/app/components/SettingsSidebar';
 
 const translations = {
@@ -365,9 +364,6 @@ export default function BusinessDashboard() {
   const [newOfferPercent, setNewOfferPercent] = useState('');
   const [newOfferAvgBill, setNewOfferAvgBill] = useState('');
   const [newOfferConditions, setNewOfferConditions] = useState('');
-  const [newOfferImages, setNewOfferImages] = useState<string[]>([]);
-  const [uploadingOfferPhotos, setUploadingOfferPhotos] = useState(false);
-
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -534,8 +530,6 @@ export default function BusinessDashboard() {
         averageBill: avgBillVal,
         category: newOfferCategory,
         conditions: newOfferConditions || null,
-        imageUrl: newOfferImages.length > 0 ? newOfferImages[0] : undefined,
-        imageUrls: newOfferImages.length > 0 ? newOfferImages : undefined,
       });
 
       setNewOfferTitle('');
