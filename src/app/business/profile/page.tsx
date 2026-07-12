@@ -16,8 +16,8 @@ const translations: Record<string, any> = {
   en: {
     back: "← Back",
     title: "Venue Profile",
-    nameLabel: "Name",
-    namePlaceholder: "Enter venue name",
+    descLabel: "Description",
+    descPlaceholder: "Briefly describe your venue...",
     verified: "Verified",
     galleryTitle: "Gallery (up to 5 photos)",
     addPhoto: "Add",
@@ -32,9 +32,9 @@ const translations: Record<string, any> = {
   ru: {
     back: "← Назад",
     title: "Профиль Заведения",
-    nameLabel: "Название",
-    namePlaceholder: "Введите название заведения",
-    verified: "Верифицировано",
+    descLabel: "ОПИСАНИЕ",
+    descPlaceholder: "Кратко опишите ваше заведение...",
+    verified: "Подтверждено",
     galleryTitle: "Галерея (до 5 фото)",
     addPhoto: "Добавить",
     locationTitle: "Локация",
@@ -48,8 +48,8 @@ const translations: Record<string, any> = {
   id: {
     back: "← Kembali",
     title: "Profil Tempat",
-    nameLabel: "Nama",
-    namePlaceholder: "Masukkan nama tempat",
+    descLabel: "Deskripsi",
+    descPlaceholder: "Deskripsikan tempat Anda secara singkat...",
     verified: "Terverifikasi",
     galleryTitle: "Galeri (hingga 5 foto)",
     addPhoto: "Tambah",
@@ -295,7 +295,7 @@ export default function BusinessProfile() {
                     letterSpacing: "0.5px",
                   }}
                 >
-                  {t.nameLabel}
+                  {t.descLabel}
                 </label>
                 {(user?.isVerified || user?.status === "verified") && (
                   <span
@@ -315,7 +315,7 @@ export default function BusinessProfile() {
                 className="input-field"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder={t.namePlaceholder}
+                placeholder={t.descPlaceholder}
                 style={{
                   width: "100%",
                   background: "rgba(255,255,255,0.05)",
