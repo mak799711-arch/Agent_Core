@@ -1189,6 +1189,34 @@ export default function BusinessDashboard() {
                 gap: "1.2rem",
               }}
             >
+              {/* Offer Title */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.4rem",
+                }}
+              >
+                <label style={{ fontSize: "0.8rem", opacity: 0.8 }}>
+                  {t.offerTitleLabel || "Offer Title"}
+                </label>
+                <input
+                  type="text"
+                  value={newOfferTitle}
+                  onChange={(e) => setNewOfferTitle(e.target.value)}
+                  placeholder={t.offerTitlePlaceholder || "e.g. Special Promotion"}
+                  required
+                  style={{
+                    background: "var(--input-bg)",
+                    border: "1px solid var(--surface-border)",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    color: "var(--foreground)",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
               {/* Category Selector */}
               <div
                 style={{
