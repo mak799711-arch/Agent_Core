@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Offer } from "@/lib/interfaces/offers";
@@ -24,6 +24,7 @@ export default function AgentMap({
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<maplibregl.Map | null>(null);
   const markers = useRef<maplibregl.Marker[]>([]);
+  const [isLocating, setIsLocating] = useState(true);
 
   // The MapTiler key provided by the user
   const mapTilerKey = "ICwSd7c82yVo427gx1ar";
@@ -74,7 +75,13 @@ export default function AgentMap({
       // Trigger geolocation once the map loads
       map.on('load', () => {
         geolocate.trigger();
+        
+        // Safety timeout: if geolocation takes more than 6 seconds or hangs, reveal the map anyway
+        setTimeout(() => setIsLocating(false), 6000);
       });
+
+      geolocate.on('geolocate', () => setIsLocating(false));
+      geolocate.on('error', () => setIsLocating(false)); // fallback gracefully
       
       // Hide default MapTiler/Mapbox POIs (shops, restaurants, etc.) so only our venues stand out
       map.on('style.load', () => {
@@ -98,21 +105,15 @@ export default function AgentMap({
       });
       resizeObserver.observe(mapContainer.current);
 
-    } catch (err) {
-      console.error("Failed to initialize MapLibre:", err);
-    }
-
-    return () => {
-      if (mapContainer.current) {
-        // We can't easily disconnect the observer here without storing it in a ref, but MapLibre remove handles cleanup mostly.
-      }
-      if (mapInstance.current) {
-        mapInstance.current.remove();
+      return () => {
+        resizeObserver.disconnect();
+        map.remove();
         mapInstance.current = null;
       }
     };
   }, []);
 
+  // Dynamically update theme style without reloading map
   useEffect(() => {
     if (mapInstance.current) {
       const styleUrl =
@@ -120,6 +121,18 @@ export default function AgentMap({
           ? `https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${mapTilerKey}`
           : `https://api.maptiler.com/maps/streets-v2/style.json?key=${mapTilerKey}`;
       mapInstance.current.setStyle(styleUrl);
+      
+      // We need to re-apply the POI hiding after the new style loads
+      mapInstance.current.once('style.load', () => {
+        const style = mapInstance.current?.getStyle();
+        if (style && style.layers) {
+          style.layers.forEach((layer) => {
+            if (layer.id.includes('poi') || layer.source_layer === 'poi') {
+              mapInstance.current?.setLayoutProperty(layer.id, 'visibility', 'none');
+            }
+          });
+        }
+      });
     }
   }, [theme]);
 
@@ -212,6 +225,45 @@ export default function AgentMap({
           zIndex: 0,
         }}
       ></div>
+
+      {isLocating && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: theme === "dark" ? "#1a1a1c" : "#f9fafb",
+            zIndex: 10,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "16px",
+          }}
+        >
+          <div
+            style={{
+              width: "40px",
+              height: "40px",
+              border: "3px solid rgba(255, 94, 0, 0.3)",
+              borderTopColor: "#ff5e00",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+              marginBottom: "1rem",
+            }}
+          />
+          <style>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+          <p style={{ fontWeight: 600, color: "var(--foreground)", opacity: 0.8 }}>
+            Finding your location...
+          </p>
+        </div>
+      )}
     </div>
   );
 }

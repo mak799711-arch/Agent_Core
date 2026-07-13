@@ -259,7 +259,7 @@ export default function SettingsSidebar({
     localStorage.setItem("theme", newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
     await autoSave({ theme: newTheme });
-    setNeedsReload(true);
+    // Removed setNeedsReload(true) since AgentMap now updates dynamically!
   };
 
   const handleLangChange = async (newLang: any) => {
