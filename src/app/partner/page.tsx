@@ -112,7 +112,7 @@ export default function PartnerDashboardV4() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"list" | "map">("list");
+  const [activeTab, setActiveTab] = useState<"list" | "map">("map");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState<{ business: any; offers: Offer[] } | null>(null);
   const router = useRouter();
