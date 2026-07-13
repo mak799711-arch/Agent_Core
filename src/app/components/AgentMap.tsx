@@ -206,6 +206,7 @@ export default function AgentMap({
           minHeight: "500px",
           borderRadius: "16px",
           border: "1px solid var(--surface-border)",
+          backgroundColor: theme === "dark" ? "#1a1a1c" : "#f0f0f0",
           zIndex: 0,
         }}
       ></div>

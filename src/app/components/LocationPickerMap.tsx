@@ -352,7 +352,7 @@ export default function LocationPickerMap({
   };
 
   return (
-    <div style={{ position: "relative", height: "300px", width: "100%", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--surface-border)" }}>
+    <div style={{ position: "relative", height: "300px", width: "100%", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--surface-border)", backgroundColor: theme === "dark" ? "#1a1a1c" : "#f0f0f0" }}>
       {/* Search Overlay */}
       <div style={{ position: "absolute", top: "10px", left: "10px", right: "50px", zIndex: 10 }}>
         <form onSubmit={handleSearch} style={{ display: "flex", width: "100%", background: "var(--surface)", borderRadius: "8px", boxShadow: "0 2px 10px rgba(0,0,0,0.3)", overflow: "hidden", border: "1px solid var(--surface-border)" }}>
