@@ -9,10 +9,12 @@ export interface Business {
   reserveBalance: number;
   isVerified: boolean;
   createdAt: string;
+  avatarUrl?: string;
 }
 
 export interface IBusinessRepository {
   getBusinessByOwnerId(ownerId: string): Promise<Business | null>;
+  getAllBusinesses(): Promise<Business[]>;
   createBusiness(data: Omit<Business, 'id' | 'createdAt' | 'reserveBalance' | 'isVerified'>): Promise<Business>;
   updateBusiness(id: string, updates: Partial<Omit<Business, 'id' | 'ownerId' | 'createdAt'>>): Promise<Business>;
 }

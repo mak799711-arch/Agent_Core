@@ -8,6 +8,7 @@ import { formatCurrency } from "@/lib/utils/currency";
 
 interface AgentMapProps {
   activeOffers: Offer[];
+  allBusinesses?: any[];
   userCurrency: string;
   onMarkerClick: (business: any, offers: Offer[]) => void;
   theme?: "light" | "dark";
@@ -15,6 +16,7 @@ interface AgentMapProps {
 
 export default function AgentMap({
   activeOffers,
+  allBusinesses = [],
   userCurrency,
   onMarkerClick,
   theme = "dark",
@@ -122,6 +124,14 @@ export default function AgentMap({
     // Group offers by business
     const businessMap = new Map<string, { business: any; offers: Offer[] }>();
     
+    // First add all businesses that have coordinates, initializing with empty offers
+    allBusinesses.forEach((b: any) => {
+      if (b.latitude && b.longitude) {
+        businessMap.set(b.id, { business: b, offers: [] });
+      }
+    });
+
+    // Then group active offers into their businesses (and add business if missing somehow)
     activeOffers.forEach((offer: any) => {
       if (offer.business && offer.business.latitude && offer.business.longitude) {
         const bId = offer.business.id || offer.businessId;
@@ -138,7 +148,7 @@ export default function AgentMap({
       el.style.width = '40px';
       el.style.height = '40px';
       el.style.borderRadius = '50%';
-      el.style.border = '3px solid #ff5e00';
+      el.style.border = offers.length > 0 ? '3px solid #ff5e00' : '3px solid #666'; // Gray out if no offers
       el.style.boxShadow = '0 2px 10px rgba(0,0,0,0.5)';
       el.style.cursor = 'pointer';
       el.style.overflow = 'hidden';

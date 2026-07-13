@@ -115,6 +115,7 @@ export default function PartnerDashboardV4() {
   const [activeTab, setActiveTab] = useState<"list" | "map">("map");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState<{ business: any; offers: Offer[] } | null>(null);
+  const [allBusinesses, setAllBusinesses] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -132,6 +133,10 @@ export default function PartnerDashboardV4() {
           onlyActive: true,
         });
         setOffers(activeOffers);
+
+        // Get all businesses for map
+        const businesses = await businessRepository.getAllBusinesses();
+        setAllBusinesses(businesses);
 
         setLoading(false);
       } catch (err) {
@@ -346,6 +351,7 @@ export default function PartnerDashboardV4() {
       {activeTab === "map" ? (
         <AgentMap
           activeOffers={offers}
+          allBusinesses={allBusinesses}
           userCurrency={user?.currency || "IDR"}
           onMarkerClick={(business, businessOffers) => setSelectedBusiness({ business, offers: businessOffers })}
           theme={user?.theme === "light" ? "light" : "dark"}

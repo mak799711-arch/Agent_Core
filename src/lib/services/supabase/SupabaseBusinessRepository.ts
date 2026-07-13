@@ -17,6 +17,32 @@ export class SupabaseBusinessRepository implements IBusinessRepository {
     return this.mapToBusiness(data);
   }
 
+  async getAllBusinesses(): Promise<Business[]> {
+    const { data: businessesData, error: bizError } = await supabase
+      .from('businesses')
+      .select('*');
+
+    if (bizError) throw bizError;
+    if (!businessesData || businessesData.length === 0) return [];
+
+    const ownerIds = [...new Set(businessesData.map(b => b.owner_id))];
+    const { data: usersData, error: usersError } = await supabase
+      .from('users')
+      .select('id, avatar_url')
+      .in('id', ownerIds);
+
+    const userMap = new Map();
+    if (usersData && !usersError) {
+      usersData.forEach(u => userMap.set(u.id, u.avatar_url));
+    }
+
+    return businessesData.map(d => {
+      const biz = this.mapToBusiness(d);
+      biz.avatarUrl = userMap.get(d.owner_id);
+      return biz;
+    });
+  }
+
   async createBusiness(data: Omit<Business, 'id' | 'createdAt' | 'reserveBalance' | 'isVerified'>): Promise<Business> {
     const dbData = {
       owner_id: data.ownerId,
