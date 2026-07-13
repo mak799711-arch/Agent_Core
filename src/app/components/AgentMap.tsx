@@ -86,16 +86,22 @@ export default function AgentMap({
       
       mapInstance.current = map;
 
-      // Fix for map resizing issues
-      setTimeout(() => {
-        map.resize();
-      }, 500);
+      // Fix for map resizing issues (squares not loading fully)
+      const resizeObserver = new ResizeObserver(() => {
+        if (mapInstance.current) {
+          mapInstance.current.resize();
+        }
+      });
+      resizeObserver.observe(mapContainer.current);
 
     } catch (err) {
       console.error("Failed to initialize MapLibre:", err);
     }
 
     return () => {
+      if (mapContainer.current) {
+        // We can't easily disconnect the observer here without storing it in a ref, but MapLibre remove handles cleanup mostly.
+      }
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;

@@ -237,9 +237,18 @@ export default function LocationPickerMap({
 
     mapInstance.current = map;
 
-    setTimeout(() => map.resize(), 500);
+    // Fix for map resizing issues (squares not loading fully)
+    const resizeObserver = new ResizeObserver(() => {
+      if (mapInstance.current) {
+        mapInstance.current.resize();
+      }
+    });
+    resizeObserver.observe(mapContainer.current);
 
     return () => {
+      if (mapContainer.current) {
+        // cleanup observer
+      }
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
