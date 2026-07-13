@@ -54,6 +54,10 @@ export default function AgentMap({
           [120.0, -5.0],  // North-East bound (Longitude, Latitude)
         ],
         attributionControl: false,
+        pitchWithRotate: false,
+        dragRotate: false,
+        touchZoomRotate: false,
+        keyboard: false,
       });
       
       // Add geolocation control to track user

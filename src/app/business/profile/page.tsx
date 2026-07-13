@@ -226,6 +226,9 @@ export default function BusinessProfile() {
           setLat(biz.latitude || null);
           setLng(biz.longitude || null);
         }
+        if (currentUser.theme) {
+          document.documentElement.setAttribute('data-theme', currentUser.theme);
+        }
       }
       setLoading(false);
     }

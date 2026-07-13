@@ -154,8 +154,13 @@ export default function LocationPickerMap({
       style: styleUrl,
       center: [defaultLng, defaultLat],
       zoom: initialLat ? 15 : 11,
-      minZoom: 2,
+      minZoom: 9,
+      maxZoom: 18,
       attributionControl: false,
+      pitchWithRotate: false,
+      dragRotate: false,
+      touchZoomRotate: false,
+      keyboard: false,
     });
 
     const geolocate = new maplibregl.GeolocateControl({

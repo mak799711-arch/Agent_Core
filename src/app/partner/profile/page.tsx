@@ -115,6 +115,9 @@ export default function PartnerProfile() {
         setUser(currentUser);
         setBio(currentUser.bio || "");
         setAvatarUrl(currentUser.avatarUrl || "");
+        if (currentUser.theme) {
+          document.documentElement.setAttribute('data-theme', currentUser.theme);
+        }
       }
       setLoading(false);
     }
