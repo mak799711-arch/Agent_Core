@@ -15,9 +15,9 @@ interface LocationPickerMapProps {
 }
 
 const mapTranslations: Record<string, any> = {
-  en: { placeholder: "Search address (e.g., La Brisa Bali)...", searchBtn: "Search", searching: "..." },
-  ru: { placeholder: "Поиск адреса (например, La Brisa Bali)...", searchBtn: "Найти", searching: "..." },
-  id: { placeholder: "Cari alamat (mis., La Brisa Bali)...", searchBtn: "Cari", searching: "..." }
+  en: { placeholder: "Search address...", searchBtn: "Search", searching: "..." },
+  ru: { placeholder: "Поиск адреса...", searchBtn: "Найти", searching: "..." },
+  id: { placeholder: "Cari alamat...", searchBtn: "Cari", searching: "..." }
 };
 
 export default function LocationPickerMap({
@@ -147,7 +147,46 @@ export default function LocationPickerMap({
         mapInstance.current = null;
       }
     };
-  }, [initialLat, initialLng]);
+  }, []); // Empty dependency array to prevent map destruction
+
+  // Sync marker with external prop changes (if needed, mostly for initial load)
+  useEffect(() => {
+    if (!mapInstance.current || !initialLat || !initialLng) return;
+    
+    if (!markerInstance.current) {
+      const el = document.createElement("div");
+      el.style.width = "40px";
+      el.style.height = "40px";
+      el.style.borderRadius = "50%";
+      el.style.border = "3px solid #ff5e00";
+      el.style.boxShadow = "0 2px 10px rgba(0,0,0,0.5)";
+      el.style.cursor = "pointer";
+      el.style.overflow = "hidden";
+      el.style.backgroundColor = "#333";
+      
+      if (previewAvatar) {
+        el.innerHTML = `<img src="${previewAvatar}" style="width: 100%; height: 100%; object-fit: cover;" />`;
+      } else {
+        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🏪</div>`;
+      }
+      
+      if (onPreviewClick) {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          onPreviewClick();
+        });
+      }
+      
+      markerInstance.current = new maplibregl.Marker({ element: el, draggable: true })
+        .setLngLat([initialLng, initialLat])
+        .addTo(mapInstance.current);
+        
+      markerInstance.current.on('dragend', () => {
+        const lngLat = markerInstance.current!.getLngLat();
+        onLocationSelect(lngLat.lat, lngLat.lng);
+      });
+    }
+  }, [initialLat, initialLng, previewAvatar, onPreviewClick]);
 
   // Handle custom search
   const handleSearch = async (e: React.FormEvent) => {

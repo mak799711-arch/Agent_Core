@@ -5,6 +5,33 @@ import { useRouter } from "next/navigation";
 import { authService } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
 
+const translations: Record<string, any> = {
+  en: {
+    back: "← Back",
+    title: "Agent Profile",
+    bioLabel: "Bio / Name",
+    bioPlaceholder: "Briefly about yourself...",
+    verified: "Verified",
+    loading: "Loading..."
+  },
+  ru: {
+    back: "← Назад",
+    title: "Профиль Агента",
+    bioLabel: "О себе (Bio) / Имя",
+    bioPlaceholder: "Кратко о себе...",
+    verified: "Верифицировано",
+    loading: "Загрузка..."
+  },
+  id: {
+    back: "← Kembali",
+    title: "Profil Agen",
+    bioLabel: "Bio / Nama",
+    bioPlaceholder: "Singkat tentang diri Anda...",
+    verified: "Terverifikasi",
+    loading: "Memuat..."
+  }
+};
+
 export default function PartnerProfile() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [bio, setBio] = useState("");
@@ -12,6 +39,8 @@ export default function PartnerProfile() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const lang = user?.language || "en";
+  const t = translations[lang] || translations.en;
 
   useEffect(() => {
     async function loadUser() {
@@ -55,7 +84,7 @@ export default function PartnerProfile() {
 
   if (loading)
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>Loading...</div>
+      <div style={{ padding: "2rem", textAlign: "center" }}>{t.loading}</div>
     );
 
   return (
@@ -80,7 +109,7 @@ export default function PartnerProfile() {
             fontWeight: 700,
           }}
         >
-          ← Назад
+          {t.back}
         </a>
         <div
           style={{
@@ -91,7 +120,7 @@ export default function PartnerProfile() {
           }}
         >
           <h2 style={{ fontSize: "2.2rem", fontWeight: 800 }}>
-            Профиль Агента
+            {t.title}
           </h2>
         </div>
 
@@ -173,11 +202,11 @@ export default function PartnerProfile() {
                     letterSpacing: "0.5px",
                   }}
                 >
-                  О себе (Bio) / Имя
+                  {t.bioLabel}
                 </label>
                 {user?.isVerified && (
                   <span
-                    title="Верифицировано"
+                    title={t.verified}
                     style={{ color: "var(--primary)", fontSize: "1rem" }}
                   >
                     ✓
@@ -188,7 +217,7 @@ export default function PartnerProfile() {
                 className="input-field"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Кратко о себе..."
+                placeholder={t.bioPlaceholder}
                 style={{
                   width: "100%",
                   minHeight: "80px",

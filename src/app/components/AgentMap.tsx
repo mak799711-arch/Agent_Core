@@ -152,7 +152,8 @@ export default function AgentMap({
       if (business.avatarUrl) {
         el.innerHTML = `<img src="${business.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;" />`;
       } else {
-        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🏪</div>`;
+        const fallbackId = business.id || business.ownerId || Math.random().toString();
+        el.innerHTML = `<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${fallbackId}" style="width: 100%; height: 100%; object-fit: cover;" />`;
       }
 
       // Add click listener

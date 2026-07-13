@@ -19,6 +19,7 @@ const translations = {
     statusPending: "Pending",
     statusVerified: "Verified",
     statusNone: "Not verified",
+    logout: "Log Out",
   },
   ru: {
     title: "Настройки",
@@ -33,6 +34,7 @@ const translations = {
     statusPending: "На рассмотрении",
     statusVerified: "Верифицирован",
     statusNone: "Не верифицирован",
+    logout: "Выйти",
   },
   id: {
     title: "Pengaturan",
@@ -47,6 +49,7 @@ const translations = {
     statusPending: "Tertunda",
     statusVerified: "Terverifikasi",
     statusNone: "Belum diverifikasi",
+    logout: "Keluar",
   },
   zh: {
     title: "设置",
@@ -61,6 +64,7 @@ const translations = {
     statusPending: "待处理",
     statusVerified: "已验证",
     statusNone: "未验证",
+    logout: "登出",
   },
   es: {
     title: "Ajustes",
@@ -75,6 +79,7 @@ const translations = {
     statusPending: "Pendiente",
     statusVerified: "Verificado",
     statusNone: "No verificado",
+    logout: "Cerrar sesión",
   },
   de: {
     title: "Einstellungen",
@@ -89,6 +94,7 @@ const translations = {
     statusPending: "Ausstehend",
     statusVerified: "Verifiziert",
     statusNone: "Nicht verifiziert",
+    logout: "Abmelden",
   },
   fr: {
     title: "Paramètres",
@@ -103,6 +109,7 @@ const translations = {
     statusPending: "En attente",
     statusVerified: "Vérifié",
     statusNone: "Non vérifié",
+    logout: "Déconnexion",
   },
   ja: {
     title: "設定",
@@ -117,6 +124,7 @@ const translations = {
     statusPending: "保留中",
     statusVerified: "検証済み",
     statusNone: "未検証",
+    logout: "ログアウト",
   },
   ar: {
     title: "الإعدادات",
@@ -131,6 +139,7 @@ const translations = {
     statusPending: "قيد الانتظار",
     statusVerified: "تم التحقق",
     statusNone: "لم يتم التحقق",
+    logout: "تسجيل الخروج",
   },
   pt: {
     title: "Configurações",
@@ -145,6 +154,7 @@ const translations = {
     statusPending: "Pendente",
     statusVerified: "Verificado",
     statusNone: "Não verificado",
+    logout: "Sair",
   },
   hi: {
     title: "सेटिंग्स",
@@ -159,6 +169,7 @@ const translations = {
     statusPending: "लंबित",
     statusVerified: "सत्यापित",
     statusNone: "असत्यापित",
+    logout: "लॉग आउट",
   },
 };
 
@@ -741,7 +752,7 @@ export default function SettingsSidebar({
               cursor: "pointer",
             }}
           >
-            Logout
+            {t.logout || "Logout"}
           </button>
         </div>
       </div>
