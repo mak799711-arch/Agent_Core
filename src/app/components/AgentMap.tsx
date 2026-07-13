@@ -177,7 +177,7 @@ export default function AgentMap({
 
       markers.current.push(marker);
     });
-  }, [activeOffers, onMarkerClick]);
+  }, [activeOffers, allBusinesses, onMarkerClick]);
 
   return (
     <div style={{ position: "relative", height: "100%" }}>
