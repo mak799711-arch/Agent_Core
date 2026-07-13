@@ -15,9 +15,9 @@ interface LocationPickerMapProps {
 }
 
 const mapTranslations: Record<string, any> = {
-  en: { placeholder: "Search address...", searchBtn: "Search", searching: "..." },
-  ru: { placeholder: "Поиск адреса...", searchBtn: "Найти", searching: "..." },
-  id: { placeholder: "Cari alamat...", searchBtn: "Cari", searching: "..." }
+  en: { placeholder: "Search address...", searchBtn: "Search", searching: "...", locked: "Locked", unlock: "Unlock to edit", lock: "Lock location" },
+  ru: { placeholder: "Поиск адреса...", searchBtn: "Найти", searching: "...", locked: "Заблокировано", unlock: "Разблокировать", lock: "Заблокировать" },
+  id: { placeholder: "Cari alamat...", searchBtn: "Cari", searching: "...", locked: "Terkunci", unlock: "Buka kunci", lock: "Kunci lokasi" }
 };
 
 export default function LocationPickerMap({
@@ -38,6 +38,17 @@ export default function LocationPickerMap({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  
+  // Prevent accidental movement
+  const [isLocked, setIsLocked] = useState(!!(initialLat && initialLng));
+  const isLockedRef = useRef(isLocked);
+  
+  useEffect(() => {
+    isLockedRef.current = isLocked;
+    if (markerInstance.current) {
+      markerInstance.current.setDraggable(!isLocked);
+    }
+  }, [isLocked]);
 
   const mapTilerKey = "ICwSd7c82yVo427gx1ar";
 
@@ -99,7 +110,7 @@ export default function LocationPickerMap({
 
     const updateMarker = (lng: number, lat: number) => {
       if (!markerInstance.current) {
-        markerInstance.current = new maplibregl.Marker({ element: createMarkerEl(), draggable: true })
+        markerInstance.current = new maplibregl.Marker({ element: createMarkerEl(), draggable: !isLockedRef.current })
           .setLngLat([lng, lat])
           .addTo(map);
           
@@ -118,10 +129,12 @@ export default function LocationPickerMap({
     }
 
     map.on("click", (e) => {
+      if (isLockedRef.current) return;
       updateMarker(e.lngLat.lng, e.lngLat.lat);
     });
 
     geolocate.on("geolocate", (e: any) => {
+      setIsLocked(false);
       updateMarker(e.coords.longitude, e.coords.latitude);
     });
 
@@ -177,7 +190,7 @@ export default function LocationPickerMap({
         });
       }
       
-      markerInstance.current = new maplibregl.Marker({ element: el, draggable: true })
+      markerInstance.current = new maplibregl.Marker({ element: el, draggable: !isLockedRef.current })
         .setLngLat([initialLng, initialLat])
         .addTo(mapInstance.current);
         
@@ -209,10 +222,17 @@ export default function LocationPickerMap({
   const selectResult = (feature: any) => {
     const [lng, lat] = feature.center;
     if (mapInstance.current) {
+      setIsLocked(false);
       mapInstance.current.flyTo({ center: [lng, lat], zoom: 16 });
       
       if (!markerInstance.current) {
-        const el = createMarkerEl();
+        const el = document.createElement("div"); // Simple fallback, usually it's already created
+        el.style.width = "40px";
+        el.style.height = "40px";
+        el.style.borderRadius = "50%";
+        el.style.border = "3px solid #ff5e00";
+        el.style.backgroundColor = "#333";
+        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🏪</div>`;
         
         markerInstance.current = new maplibregl.Marker({ element: el, draggable: true })
           .setLngLat([lng, lat])
@@ -263,6 +283,30 @@ export default function LocationPickerMap({
             ))}
           </div>
         )}
+      </div>
+
+      {/* Lock/Unlock Button */}
+      <div style={{ position: "absolute", bottom: "15px", left: "15px", zIndex: 10 }}>
+        <button 
+          onClick={(e) => { e.preventDefault(); setIsLocked(!isLocked); }}
+          style={{ 
+            background: isLocked ? "rgba(30, 30, 30, 0.9)" : "var(--primary)",
+            color: isLocked ? "var(--foreground)" : "#000",
+            border: isLocked ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid var(--primary)",
+            padding: "8px 12px",
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
+            transition: "all 0.2s"
+          }}
+        >
+          <span>{isLocked ? "🔒" : "🔓"}</span>
+          <span style={{ fontSize: "0.85rem" }}>{isLocked ? t.unlock : t.lock}</span>
+        </button>
       </div>
       
       <div ref={mapContainer} style={{ width: "100%", height: "100%" }}></div>
