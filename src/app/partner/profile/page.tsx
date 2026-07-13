@@ -29,8 +29,72 @@ const translations: Record<string, any> = {
     bioPlaceholder: "Singkat tentang diri Anda...",
     verified: "Terverifikasi",
     loading: "Memuat..."
+  },
+  zh: {
+    back: "← 返回",
+    title: "代理资料",
+    bioLabel: "简介 / 姓名",
+    bioPlaceholder: "简单介绍一下自己...",
+    verified: "已验证",
+    loading: "加载中..."
+  },
+  es: {
+    back: "← Volver",
+    title: "Perfil del Agente",
+    bioLabel: "Biografía / Nombre",
+    bioPlaceholder: "Brevemente sobre ti...",
+    verified: "Verificado",
+    loading: "Cargando..."
+  },
+  de: {
+    back: "← Zurück",
+    title: "Maklerprofil",
+    bioLabel: "Biografie / Name",
+    bioPlaceholder: "Kurz über dich...",
+    verified: "Verifiziert",
+    loading: "Wird geladen..."
+  },
+  fr: {
+    back: "← Retour",
+    title: "Profil de l'Agent",
+    bioLabel: "Bio / Nom",
+    bioPlaceholder: "Brièvement sur vous-même...",
+    verified: "Vérifié",
+    loading: "Chargement..."
+  },
+  ja: {
+    back: "← 戻る",
+    title: "エージェントプロフィール",
+    bioLabel: "自己紹介 / 名前",
+    bioPlaceholder: "自分について簡単に...",
+    verified: "確認済み",
+    loading: "読み込み中..."
+  },
+  ar: {
+    back: "← رجوع",
+    title: "ملف تعريف الوكيل",
+    bioLabel: "سيرة ذاتية / اسم",
+    bioPlaceholder: "نبذة عنك...",
+    verified: "تم التحقق",
+    loading: "جارٍ التحميل..."
+  },
+  pt: {
+    back: "← Voltar",
+    title: "Perfil do Agente",
+    bioLabel: "Biografia / Nome",
+    bioPlaceholder: "Brevemente sobre si...",
+    verified: "Verificado",
+    loading: "Carregando..."
+  },
+  hi: {
+    back: "← वापस",
+    title: "एजेंट प्रोफ़ाइल",
+    bioLabel: "बायो / नाम",
+    bioPlaceholder: "संक्षेप में अपने बारे में...",
+    verified: "सत्यापित",
+    loading: "लोड हो रहा है..."
   }
-};
+};;
 
 export default function PartnerProfile() {
   const [user, setUser] = useState<UserProfile | null>(null);

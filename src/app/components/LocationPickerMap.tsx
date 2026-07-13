@@ -39,8 +39,8 @@ export default function LocationPickerMap({
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
-  // Prevent accidental movement
-  const [isLocked, setIsLocked] = useState(!!(initialLat && initialLng));
+  // Prevent accidental movement (always locked by default to prevent stray clicks)
+  const [isLocked, setIsLocked] = useState(true);
   const isLockedRef = useRef(isLocked);
   
   useEffect(() => {
