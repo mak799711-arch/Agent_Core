@@ -21,7 +21,7 @@ export class SupabaseOfferRepository implements IOfferRepository {
     // Fetch businesses for these offers since there is no FK constraint
     const businessIds = [...new Set(offersData.map((o: any) => o.business_id))];
     const { data: usersData, error: usersError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .in('id', businessIds);
       

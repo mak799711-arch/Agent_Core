@@ -27,7 +27,7 @@ export class SupabaseBusinessRepository implements IBusinessRepository {
 
     const ownerIds = [...new Set(businessesData.map(b => b.owner_id))];
     const { data: usersData, error: usersError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, avatar_url')
       .in('id', ownerIds);
 
