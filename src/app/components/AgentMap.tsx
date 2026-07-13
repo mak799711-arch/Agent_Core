@@ -159,11 +159,6 @@ export default function AgentMap({
       el.style.cursor = 'pointer';
       el.style.overflow = 'hidden';
       el.style.backgroundColor = '#333';
-      el.style.transition = 'transform 0.2s ease';
-      
-      // Hover effect
-      el.onmouseenter = () => { el.style.transform = 'scale(1.1)'; };
-      el.onmouseleave = () => { el.style.transform = 'scale(1)'; };
 
       if (business.avatarUrl) {
         el.innerHTML = `<img src="${business.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;" />`;
