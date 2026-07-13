@@ -150,8 +150,8 @@ export default function AdminDashboard() {
   const [searchSessionCode, setSearchSessionCode] = useState("");
   const [searchPromoterId, setSearchPromoterId] = useState("");
 
-  const lang = user?.language === "ru" ? "ru" : "en";
-  const t = translations[lang];
+  const lang = user?.language || "en";
+  const t = (translations as any)[lang] || translations.en;
 
   const loadPlatformData = async () => {
     try {

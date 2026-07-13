@@ -412,7 +412,7 @@ export default function BusinessDashboard() {
   const router = useRouter();
 
   const lang = user?.language || "en";
-  const t = translations[lang];
+  const t = (translations as any)[lang] || translations.en;
 
   const refreshData = async (userId: string) => {
     let bus = await businessRepository.getBusinessByOwnerId(userId);
