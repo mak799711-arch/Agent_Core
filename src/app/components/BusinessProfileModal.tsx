@@ -5,7 +5,7 @@ import { UserProfile } from "@/lib/interfaces/auth";
 import { Offer } from "@/lib/interfaces/offers";
 
 interface BusinessProfileModalProps {
-  business: UserProfile;
+  business: any;
   offers: Offer[];
   onClose: () => void;
   onCopyLink?: (offerId: string) => void;
@@ -126,9 +126,30 @@ export default function BusinessProfileModal({
             )}
           </div>
           <div>
-            <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "700" }}>
-              {business.fullName || "Unnamed Venue"}
-            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "700" }}>
+                {business.fullName || business.name || "Unnamed Venue"}
+              </h2>
+              {business.isVerified && (
+                <div
+                  title="Verified"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    background: "rgba(16, 185, 129, 0.15)",
+                    color: "var(--success, #10B981)",
+                    fontSize: "14px",
+                    border: "1px solid var(--success, #10B981)",
+                  }}
+                >
+                  ✓
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -169,9 +190,9 @@ export default function BusinessProfileModal({
         )}
 
         {/* Bio */}
-        {business.bio && (
+        {(business.bio || business.description) && (
           <div style={{ marginBottom: "24px", color: "rgba(255,255,255,0.8)", lineHeight: "1.5", fontSize: "15px", whiteSpace: "pre-wrap" }}>
-            {business.bio}
+            {business.bio || business.description}
           </div>
         )}
 

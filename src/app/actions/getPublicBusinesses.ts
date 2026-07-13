@@ -24,25 +24,31 @@ export async function getPublicBusinesses(): Promise<Business[]> {
 
   const { data: profiles, error: pError } = await supabaseAdmin
     .from('profiles')
-    .select('id, avatar_url')
+    .select('id, avatar_url, full_name, bio, photos, status')
     .in('id', ownerIds);
 
   const userMap = new Map();
   if (profiles && !pError) {
-    profiles.forEach(p => userMap.set(p.id, p.avatar_url));
+    profiles.forEach(p => userMap.set(p.id, p));
   }
 
-  return businesses.map(b => ({
-    id: b.id,
-    ownerId: b.owner_id,
-    name: b.name,
-    description: b.description,
-    address: b.address,
-    latitude: b.latitude,
-    longitude: b.longitude,
-    reserveBalance: Number(b.reserve_balance),
-    isVerified: b.is_verified,
-    createdAt: b.created_at,
-    avatarUrl: userMap.get(b.owner_id)
-  }));
+  return businesses.map(b => {
+    const profile = userMap.get(b.owner_id);
+    return {
+      id: b.id,
+      ownerId: b.owner_id,
+      name: b.name || profile?.full_name,
+      description: b.description || profile?.bio,
+      address: b.address,
+      latitude: b.latitude,
+      longitude: b.longitude,
+      reserveBalance: Number(b.reserve_balance),
+      isVerified: b.is_verified || profile?.status === 'verified',
+      createdAt: b.created_at,
+      avatarUrl: profile?.avatar_url,
+      photos: profile?.photos || [],
+      fullName: profile?.full_name,
+      bio: profile?.bio,
+    };
+  });
 }
