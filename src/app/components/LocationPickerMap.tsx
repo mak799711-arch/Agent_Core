@@ -376,7 +376,7 @@ export default function LocationPickerMap({
           onClick={(e) => { e.preventDefault(); setIsLocked(!isLocked); }}
           style={{ 
             background: isLocked ? "rgba(30, 30, 30, 0.9)" : "var(--primary)",
-            color: isLocked ? "var(--foreground)" : "#000",
+            color: isLocked ? "#ffffff" : "#000",
             border: isLocked ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid var(--primary)",
             padding: "8px 12px",
             borderRadius: "8px",
