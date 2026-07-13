@@ -1,79 +1,105 @@
 import { IOfferRepository, Offer } from '../../interfaces/offers';
 
 export class MockOfferRepository implements IOfferRepository {
-  private offers: Offer[] = [
-    {
-      id: 'offer-1',
-      businessId: 'mock-business-uuid',
-      title: 'La Brisa Promo',
-      rewardAmount: 5.00,
-      rewardType: 'fixed',
-      rewardPercent: null,
-      averageBill: null,
-      category: 'restaurant',
-      conditions: 'Reward is $5 per customer.',
-      isActive: true,
-      imageUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=600',
-      imageUrls: ['https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=600'],
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'offer-2',
-      businessId: 'mock-business-uuid',
-      title: 'Potato Head VIP Entry',
-      rewardAmount: 12.50,
-      rewardType: 'fixed',
-      rewardPercent: null,
-      averageBill: null,
-      category: 'nightlife',
-      conditions: 'Reward is $12.5 per referral group.',
-      isActive: true,
-      imageUrl: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&q=80&w=600',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'offer-3',
-      businessId: 'mock-business-uuid',
-      title: 'Savaya Table Booking',
-      rewardAmount: 50.00,
-      rewardType: 'percentage',
-      rewardPercent: 10,
-      averageBill: 500.00,
-      category: 'nightlife',
-      conditions: '10% of total table spend. Estimated reward: $50.',
-      isActive: true,
-      imageUrl: 'https://images.unsplash.com/photo-1574096079513-d8259312b78a?auto=format&fit=crop&q=80&w=600',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'offer-4',
-      businessId: 'mock-business-uuid',
-      title: 'Canggu Villa Booking',
-      rewardAmount: 100.00,
-      rewardType: 'fixed',
-      rewardPercent: null,
-      averageBill: null,
-      category: 'real_estate',
-      conditions: 'Reward is $100 for verified 3+ nights stay.',
-      isActive: true,
-      imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=600',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'offer-5',
-      businessId: 'mock-business-uuid',
-      title: 'Surf Lessons Canggu',
-      rewardAmount: 8.00,
-      rewardType: 'fixed',
-      rewardPercent: null,
-      averageBill: null,
-      category: 'activity',
-      conditions: 'Reward is $8 per referral booking.',
-      isActive: true,
-      imageUrl: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&q=80&w=600',
-      createdAt: new Date().toISOString()
+  private offers: Offer[] = [];
+
+  constructor() {
+    const defaultOffers: Offer[] = [
+      {
+        id: 'offer-1',
+        businessId: 'mock-business-uuid',
+        title: 'La Brisa Promo',
+        rewardAmount: 5.00,
+        rewardType: 'fixed',
+        rewardPercent: null,
+        averageBill: null,
+        category: 'restaurant',
+        conditions: 'Reward is $5 per customer.',
+        isActive: true,
+        imageUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=600',
+        imageUrls: ['https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=600'],
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'offer-2',
+        businessId: 'mock-business-uuid',
+        title: 'Potato Head VIP Entry',
+        rewardAmount: 12.50,
+        rewardType: 'fixed',
+        rewardPercent: null,
+        averageBill: null,
+        category: 'nightlife',
+        conditions: 'Reward is $12.5 per referral group.',
+        isActive: true,
+        imageUrl: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&q=80&w=600',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'offer-3',
+        businessId: 'mock-business-uuid',
+        title: 'Savaya Table Booking',
+        rewardAmount: 50.00,
+        rewardType: 'percentage',
+        rewardPercent: 10,
+        averageBill: 500.00,
+        category: 'nightlife',
+        conditions: '10% of total table spend. Estimated reward: $50.',
+        isActive: true,
+        imageUrl: 'https://images.unsplash.com/photo-1574096079513-d8259312b78a?auto=format&fit=crop&q=80&w=600',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'offer-4',
+        businessId: 'mock-business-uuid',
+        title: 'Canggu Villa Booking',
+        rewardAmount: 100.00,
+        rewardType: 'fixed',
+        rewardPercent: null,
+        averageBill: null,
+        category: 'real_estate',
+        conditions: 'Reward is $100 for verified 3+ nights stay.',
+        isActive: true,
+        imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=600',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'offer-5',
+        businessId: 'mock-business-uuid',
+        title: 'Surf Lessons Canggu',
+        rewardAmount: 8.00,
+        rewardType: 'fixed',
+        rewardPercent: null,
+        averageBill: null,
+        category: 'activity',
+        conditions: 'Reward is $8 per referral booking.',
+        isActive: true,
+        imageUrl: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&q=80&w=600',
+        createdAt: new Date().toISOString()
+      }
+    ];
+
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('mock_offers');
+        if (stored) {
+          this.offers = JSON.parse(stored);
+        } else {
+          this.offers = defaultOffers;
+          this.saveToStorage();
+        }
+      } catch (e) {
+        this.offers = defaultOffers;
+      }
+    } else {
+      this.offers = defaultOffers;
     }
-  ];
+  }
+
+  private saveToStorage() {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mock_offers', JSON.stringify(this.offers));
+    }
+  }
 
   async getOffers(options?: { onlyActive?: boolean; businessId?: string }): Promise<Offer[]> {
     let result = [...this.offers];
@@ -98,6 +124,7 @@ export class MockOfferRepository implements IOfferRepository {
       createdAt: new Date().toISOString()
     };
     this.offers.push(newOffer);
+    this.saveToStorage();
     return newOffer;
   }
 
@@ -105,6 +132,7 @@ export class MockOfferRepository implements IOfferRepository {
     const idx = this.offers.findIndex(o => o.id === id);
     if (idx === -1) throw new Error('Offer not found');
     this.offers[idx] = { ...this.offers[idx], ...updates };
+    this.saveToStorage();
     return this.offers[idx];
   }
 }

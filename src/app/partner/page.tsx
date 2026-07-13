@@ -224,7 +224,7 @@ export default function PartnerDashboardV4() {
           background: "var(--glass-bg)",
           padding: "1rem 1.5rem",
           borderRadius: "16px",
-          border: "1px solid var(--surface-border)",
+          border: "none",
           backdropFilter: "blur(10px)",
         }}
       >
