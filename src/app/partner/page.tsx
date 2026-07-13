@@ -16,38 +16,96 @@ const AgentMap = dynamic(() => import("@/app/components/AgentMap"), {
   loading: () => <div style={{ height: "500px", background: "rgba(255,255,255,0.05)", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center" }}>Загрузка карты...</div>
 });
 
-const translations: Record<string, any> = {
+const translations = {
   en: {
     totalEarnings: "Total Earnings",
     mapView: "Map View",
     listView: "List View",
-    exploreMap:
-      "Explore active venues around you. Click a pin to copy your checkout link.",
-    exploreList:
-      "Generate a direct checkout link and send it to the tourist. You will receive commission automatically when they pay.",
-    loading: "Loading Partner Portal...",
+    exploreMap: "Explore active venues around you. Click a pin to copy your checkout link.",
+    exploreList: "Generate a direct checkout link and send it to the tourist. You will receive commission automatically when they pay.",
+    loading: "Loading Partner Portal..."
   },
   ru: {
     totalEarnings: "Общий заработок",
-    mapView: "Ближайшие предложения",
-    listView: "Доска заданий",
-    exploreMap:
-      "Изучайте активные заведения вокруг. Нажмите на пин, чтобы скопировать вашу ссылку.",
-    exploreList:
-      "Сгенерируйте прямую ссылку на оплату и отправьте туристу. Вы автоматически получите комиссию при оплате.",
-    loading: "Загрузка...",
+    mapView: "Карта",
+    listView: "Список",
+    exploreMap: "Исследуйте активные заведения вокруг. Нажмите на пин, чтобы скопировать ссылку.",
+    exploreList: "Сгенерируйте ссылку и отправьте туристу. Вы получите комиссию автоматически после оплаты.",
+    loading: "Загрузка портала партнера..."
   },
   id: {
     totalEarnings: "Total Pendapatan",
-    mapView: "Tawaran Terdekat",
-    listView: "Papan Tugas",
-    exploreMap:
-      "Jelajahi tempat aktif di sekitar Anda. Klik pin untuk menyalin tautan checkout.",
-    exploreList:
-      "Hasilkan tautan pembayaran langsung dan kirimkan ke turis. Anda akan menerima komisi secara otomatis saat mereka membayar.",
-    loading: "Memuat...",
+    mapView: "Tampilan Peta",
+    listView: "Tampilan Daftar",
+    exploreMap: "Jelajahi tempat aktif di sekitar Anda. Klik pin untuk menyalin tautan.",
+    exploreList: "Hasilkan tautan pembayaran langsung dan kirimkan ke turis. Anda akan menerima komisi otomatis.",
+    loading: "Memuat Portal Mitra..."
   },
-};
+  zh: {
+    totalEarnings: "总收入",
+    mapView: "地图视图",
+    listView: "列表视图",
+    exploreMap: "探索您周围的活跃场所。点击大头针复制您的结账链接。",
+    exploreList: "生成直接结账链接并发送给游客。他们付款后您将自动收到佣金。",
+    loading: "正在加载合作伙伴门户..."
+  },
+  es: {
+    totalEarnings: "Ganancias Totales",
+    mapView: "Vista de Mapa",
+    listView: "Vista de Lista",
+    exploreMap: "Explore lugares activos a su alrededor. Haga clic en un pin para copiar su enlace de pago.",
+    exploreList: "Genere un enlace directo y envíelo al turista. Recibirá una comisión automáticamente cuando paguen.",
+    loading: "Cargando Portal de Socios..."
+  },
+  de: {
+    totalEarnings: "Gesamteinnahmen",
+    mapView: "Kartenansicht",
+    listView: "Listenansicht",
+    exploreMap: "Erkunden Sie aktive Veranstaltungsorte in Ihrer Nähe. Klicken Sie auf einen Pin, um den Link zu kopieren.",
+    exploreList: "Erstellen Sie einen direkten Checkout-Link und senden Sie ihn an den Touristen. Sie erhalten automatisch eine Provision, wenn diese bezahlen.",
+    loading: "Lade Partnerportal..."
+  },
+  fr: {
+    totalEarnings: "Gains Totaux",
+    mapView: "Vue Carte",
+    listView: "Vue Liste",
+    exploreMap: "Explorez les lieux actifs autour de vous. Cliquez sur une épingle pour copier votre lien de paiement.",
+    exploreList: "Générez un lien de paiement direct et envoyez-le au touriste. Vous recevrez une commission automatiquement lorsqu'ils paieront.",
+    loading: "Chargement du Portail Partenaire..."
+  },
+  ja: {
+    totalEarnings: "総収益",
+    mapView: "マップビュー",
+    listView: "リストビュー",
+    exploreMap: "あなたの周りのアクティブな会場を探索します。ピンをクリックしてリンクをコピーしてください。",
+    exploreList: "直接のチェックアウトリンクを生成して観光客に送信します。彼らが支払うと自動的にコミッションを受け取ります。",
+    loading: "パートナーポータルを読み込み中..."
+  },
+  ar: {
+    totalEarnings: "إجمالي الأرباح",
+    mapView: "عرض الخريطة",
+    listView: "عرض القائمة",
+    exploreMap: "استكشف الأماكن النشطة من حولك. انقر فوق دبوس لنسخ رابط الدفع الخاص بك.",
+    exploreList: "قم بإنشاء رابط دفع مباشر وأرسله إلى السائح. سوف تتلقى عمولة تلقائيًا عند الدفع.",
+    loading: "جارٍ تحميل بوابة الشركاء..."
+  },
+  pt: {
+    totalEarnings: "Ganhos Totais",
+    mapView: "Vista de Mapa",
+    listView: "Vista de Lista",
+    exploreMap: "Explore locais ativos ao seu redor. Clique num pino para copiar o seu link de pagamento.",
+    exploreList: "Gere um link de pagamento direto e envie para o turista. Receberá uma comissão automaticamente quando eles pagarem.",
+    loading: "A carregar Portal do Parceiro..."
+  },
+  hi: {
+    totalEarnings: "कुल कमाई",
+    mapView: "मानचित्र दृश्य",
+    listView: "सूची दृश्य",
+    exploreMap: "अपने आस-पास सक्रिय स्थानों का अन्वेषण करें। अपने चेकआउट लिंक को कॉपी करने के लिए एक पिन पर क्लिक करें।",
+    exploreList: "एक सीधा चेकआउट लिंक उत्पन्न करें और पर्यटक को भेजें। जब वे भुगतान करेंगे तो आपको स्वचालित रूप से कमीशन प्राप्त होगा।",
+    loading: "पार्टनर पोर्टल लोड हो रहा है..."
+  }
+};;
 
 export default function PartnerDashboardV4() {
   const [user, setUser] = useState<UserProfile | null>(null);

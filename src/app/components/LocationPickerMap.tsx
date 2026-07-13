@@ -15,10 +15,95 @@ interface LocationPickerMapProps {
 }
 
 const mapTranslations: Record<string, any> = {
-  en: { placeholder: "Search address...", searchBtn: "Search", searching: "...", locked: "Locked", unlock: "Unlock to edit", lock: "Lock location" },
-  ru: { placeholder: "Поиск адреса...", searchBtn: "Найти", searching: "...", locked: "Заблокировано", unlock: "Разблокировать", lock: "Заблокировать" },
-  id: { placeholder: "Cari alamat...", searchBtn: "Cari", searching: "...", locked: "Terkunci", unlock: "Buka kunci", lock: "Kunci lokasi" }
-};
+  en: {
+    placeholder: "Search address...",
+    searchBtn: "Search",
+    searching: "...",
+    locked: "Locked",
+    unlock: "Unlock to edit",
+    lock: "Lock location"
+  },
+  ru: {
+    placeholder: "Поиск адреса...",
+    searchBtn: "Найти",
+    searching: "...",
+    locked: "Заблокировано",
+    unlock: "Разблокировать",
+    lock: "Заблокировать"
+  },
+  id: {
+    placeholder: "Cari alamat...",
+    searchBtn: "Cari",
+    searching: "...",
+    locked: "Terkunci",
+    unlock: "Buka kunci",
+    lock: "Kunci lokasi"
+  },
+  zh: {
+    placeholder: "搜索地址...",
+    searchBtn: "搜索",
+    searching: "...",
+    locked: "已锁定",
+    unlock: "解锁以编辑",
+    lock: "锁定位置"
+  },
+  es: {
+    placeholder: "Buscar dirección...",
+    searchBtn: "Buscar",
+    searching: "...",
+    locked: "Bloqueado",
+    unlock: "Desbloquear",
+    lock: "Bloquear ubicación"
+  },
+  de: {
+    placeholder: "Adresse suchen...",
+    searchBtn: "Suchen",
+    searching: "...",
+    locked: "Gesperrt",
+    unlock: "Entsperren",
+    lock: "Standort sperren"
+  },
+  fr: {
+    placeholder: "Rechercher une adresse...",
+    searchBtn: "Rechercher",
+    searching: "...",
+    locked: "Verrouillé",
+    unlock: "Déverrouiller",
+    lock: "Verrouiller"
+  },
+  ja: {
+    placeholder: "住所を検索...",
+    searchBtn: "検索",
+    searching: "...",
+    locked: "ロック済み",
+    unlock: "ロック解除",
+    lock: "位置をロック"
+  },
+  ar: {
+    placeholder: "البحث عن عنوان...",
+    searchBtn: "بحث",
+    searching: "...",
+    locked: "مغلق",
+    unlock: "فتح القفل للتحرير",
+    lock: "قفل الموقع"
+  },
+  pt: {
+    placeholder: "Pesquisar endereço...",
+    searchBtn: "Pesquisar",
+    searching: "...",
+    locked: "Bloqueado",
+    unlock: "Desbloquear para editar",
+    lock: "Bloquear localização"
+  },
+  hi: {
+    placeholder: "पता खोजें...",
+    searchBtn: "खोजें",
+    searching: "...",
+    locked: "लॉक",
+    unlock: "संपादित करने के लिए अनलॉक करें",
+    lock: "स्थान लॉक करें"
+  }
+};;
 
 export default function LocationPickerMap({
   initialLat,
