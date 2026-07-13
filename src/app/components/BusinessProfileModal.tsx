@@ -113,16 +113,18 @@ export default function BusinessProfileModal({
               background: "#333",
             }}
           >
-            {business.avatarUrl ? (
+            {business.avatarUrl && !business.avatarUrl.includes('dicebear.com') ? (
               <img
                 src={business.avatarUrl}
-                alt={business.fullName || "Business"}
+                alt={business.fullName || business.name || "Business"}
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
             ) : (
-              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", color: "#666" }}>
-                🏪
-              </div>
+              <img
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(business.fullName || business.name || "Business")}&backgroundColor=1a1a1a&textColor=ffffff`}
+                alt={business.fullName || business.name || "Business"}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
             )}
           </div>
           <div>

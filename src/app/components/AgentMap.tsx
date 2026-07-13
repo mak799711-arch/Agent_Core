@@ -164,11 +164,11 @@ export default function AgentMap({
       el.style.overflow = 'hidden';
       el.style.backgroundColor = '#333';
 
-      if (business.avatarUrl) {
+      if (business.avatarUrl && !business.avatarUrl.includes('dicebear.com')) {
         el.innerHTML = `<img src="${business.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;" />`;
       } else {
-        const fallbackId = business.id || business.ownerId || Math.random().toString();
-        el.innerHTML = `<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${fallbackId}" style="width: 100%; height: 100%; object-fit: cover;" />`;
+        const seed = business.fullName || business.name || 'Business';
+        el.innerHTML = `<img src="https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(seed)}&backgroundColor=1a1a1a&textColor=ffffff" style="width: 100%; height: 100%; object-fit: cover;" />`;
       }
 
       // Add click listener
