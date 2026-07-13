@@ -127,6 +127,9 @@ export default function PartnerDashboardV4() {
           return;
         }
         setUser(currentUser);
+        if (currentUser.theme) {
+          document.documentElement.setAttribute('data-theme', currentUser.theme);
+        }
 
         // V4: Get active venues/offers
         const activeOffers = await offerRepository.getOffers({
@@ -134,8 +137,9 @@ export default function PartnerDashboardV4() {
         });
         setOffers(activeOffers);
 
-        // Get all businesses for map
-        const businesses = await businessRepository.getAllBusinesses();
+        // Get all businesses for map bypassing RLS
+        const { getPublicBusinesses } = await import("@/app/actions/getPublicBusinesses");
+        const businesses = await getPublicBusinesses();
         setAllBusinesses(businesses);
 
         setLoading(false);

@@ -639,14 +639,15 @@ export default function BusinessDashboard() {
         if (!currentUser || currentUser.role !== "business") {
           await authService.signIn("business@agent.core", "password123");
           currentUser = await authService.getCurrentUser();
+          router.push("/login");
+          return;
         }
 
         if (currentUser) {
           setUser(currentUser);
-
-          const activeTheme =
-            localStorage.getItem("theme") || currentUser.theme;
-          document.documentElement.setAttribute("data-theme", activeTheme);
+          if (currentUser.theme) {
+            document.documentElement.setAttribute('data-theme', currentUser.theme);
+          }
 
           await refreshData(currentUser.id);
         }
