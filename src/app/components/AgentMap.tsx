@@ -168,7 +168,9 @@ export default function AgentMap({
         el.innerHTML = `<img src="${business.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;" />`;
       } else {
         const seed = business.fullName || business.name || 'Business';
-        el.innerHTML = `<img src="https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(seed)}&backgroundColor=1a1a1a&textColor=ffffff" style="width: 100%; height: 100%; object-fit: cover;" />`;
+        const bg = theme === 'light' ? 'f3f4f6' : '1a1a1a';
+        const txt = theme === 'light' ? '000000' : 'ffffff';
+        el.innerHTML = `<img src="https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${bg}&textColor=${txt}" style="width: 100%; height: 100%; object-fit: cover;" />`;
       }
 
       // Add click listener

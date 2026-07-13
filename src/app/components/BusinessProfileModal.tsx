@@ -10,6 +10,7 @@ interface BusinessProfileModalProps {
   onClose: () => void;
   onCopyLink?: (offerId: string) => void;
   copiedId?: string | null;
+  theme?: "light" | "dark";
 }
 
 export default function BusinessProfileModal({
@@ -18,6 +19,7 @@ export default function BusinessProfileModal({
   onClose,
   onCopyLink,
   copiedId,
+  theme = "dark",
 }: BusinessProfileModalProps) {
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
@@ -121,7 +123,7 @@ export default function BusinessProfileModal({
               />
             ) : (
               <img
-                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(business.fullName || business.name || "Business")}&backgroundColor=1a1a1a&textColor=ffffff`}
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(business.fullName || business.name || "Business")}&backgroundColor=${theme === 'light' ? 'f3f4f6' : '1a1a1a'}&textColor=${theme === 'light' ? '000000' : 'ffffff'}`}
                 alt={business.fullName || business.name || "Business"}
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
