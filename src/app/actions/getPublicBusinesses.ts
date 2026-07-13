@@ -3,12 +3,16 @@
 import { createClient } from '@supabase/supabase-js';
 import { Business } from '@/lib/interfaces/business';
 
+import { unstable_noStore as noStore } from 'next/cache';
+
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 export async function getPublicBusinesses(): Promise<Business[]> {
+  noStore(); // Prevents Next.js from caching this server action during build
+
   const { data: businesses, error } = await supabaseAdmin
     .from('businesses')
     .select('*');
