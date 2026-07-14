@@ -99,7 +99,29 @@ export class SupabaseReferralRepository implements IReferralRepository {
       .select('*');
       
     if (error) throw error;
-    return data.map(this.mapSession);
+    return data.map(this.mapSession.bind(this));
+  }
+
+  async adminGetAllSessions(): Promise<ReferralSession[]> {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    
+    if (!token) throw new Error('No valid session found');
+
+    const response = await fetch('/api/v1/admin/sessions', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to fetch sessions via admin API');
+    }
+
+    const result = await response.json();
+    return result.sessions.map(this.mapSession.bind(this));
   }
 
   async flagSession(id: string): Promise<ReferralSession> {

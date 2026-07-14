@@ -671,7 +671,7 @@ export default function AdminDashboard() {
       });
       setRequests(pendingReqs);
 
-      const allSessions = await referralRepository.getAllSessions();
+      const allSessions = await referralRepository.adminGetAllSessions();
       setSessions(allSessions);
       setAllUsersList(allUsers);
 
@@ -779,7 +779,7 @@ export default function AdminDashboard() {
         status: "banned",
         isBlocked: true,
         banReason: banReason || "Не указана",
-        banUntil: banUntil ? new Date(banUntil).toISOString() : undefined,
+        banUntil: banUntil ? new Date(banUntil).toISOString() : null,
       });
       localStorage.removeItem(`verification_requested_${id}`);
   

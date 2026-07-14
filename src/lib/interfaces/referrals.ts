@@ -22,5 +22,6 @@ export interface IReferralRepository {
   completeSession(id: string): Promise<ReferralSession>;
   expireSession(id: string): Promise<ReferralSession>;
   getAllSessions(): Promise<ReferralSession[]>;
+  adminGetAllSessions(): Promise<ReferralSession[]>;
   flagSession(id: string): Promise<ReferralSession>;
 }
