@@ -611,8 +611,12 @@ export default function AdminDashboard() {
               .reduce((sum, t) => sum + t.amount, 0);
 
           const status = u.status || "unverified";
-          const banDuration =
-            localStorage.getItem(`user_ban_dur_${u.id}`) || "";
+          let banDuration = "";
+          if (status === "banned") {
+            banDuration = u.banUntil 
+              ? new Date(u.banUntil).toLocaleDateString()
+              : t.banOptionForever;
+          }
 
           return {
             ...u,
@@ -1156,6 +1160,19 @@ export default function AdminDashboard() {
                     fontWeight: 600,
                     fontSize: "0.9rem",
                     marginTop: "10px",
+                    transition: "transform 0.1s ease, filter 0.1s ease",
+                  }}
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = "scale(0.96)";
+                    e.currentTarget.style.filter = "brightness(0.9)";
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.filter = "brightness(1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.filter = "brightness(1)";
                   }}
                 >
                   Подтвердить бан
