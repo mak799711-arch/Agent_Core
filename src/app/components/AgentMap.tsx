@@ -47,8 +47,8 @@ export default function AgentMap({
         container: mapContainer.current,
         style: styleUrl,
         center: [defaultLng, defaultLat],
-        zoom: 11,
-        minZoom: 9, // Prevent zooming out to the whole world
+        zoom: 12,
+        minZoom: 12, // Prevent zooming out to the whole world
         maxZoom: 18, // Prevent zooming in too close
         maxBounds: [
           [110.0, -12.0], // South-West bound (Longitude, Latitude)
