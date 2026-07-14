@@ -599,7 +599,6 @@ export default function BusinessProfile() {
               initialLat={lat} 
               initialLng={lng} 
               onLocationSelect={handleLocationSelect}
-              previewAvatar={avatarUrl || (user ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}` : null)}
               theme={user?.theme === "light" ? "light" : "dark"}
               lang={lang}
             />
