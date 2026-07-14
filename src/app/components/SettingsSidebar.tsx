@@ -431,6 +431,27 @@ export default function SettingsSidebar({
                 />
               </div>
 
+              {/* Wallet Link */}
+              <div
+                style={{
+                  ...rowStyle,
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "1.5rem",
+                }}
+              >
+                <button
+                  onClick={() => {
+                    onClose();
+                    router.push(user?.role === "partner" ? "/partner/wallet" : "/business/wallet");
+                  }}
+                  className="btn-primary"
+                  style={{ width: "100%", maxWidth: "200px" }}
+                >
+                  {lang === "ru" ? "Кошелек" : lang === "id" ? "Dompet" : "Wallet"}
+                </button>
+              </div>
+
               {/* Theme Toggle (Horizontal) */}
               <div
                 style={{
