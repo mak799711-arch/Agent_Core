@@ -12,7 +12,22 @@ interface AgentMapProps {
   userCurrency: string;
   onMarkerClick: (business: any, offers: Offer[]) => void;
   theme?: "light" | "dark";
+  lang?: string;
 }
+
+const mapTranslations: Record<string, string> = {
+  en: "Map is loading...",
+  ru: "Карта загружается...",
+  id: "Peta sedang memuat...",
+  zh: "地图加载中...",
+  es: "El mapa se está cargando...",
+  de: "Karte wird geladen...",
+  fr: "Chargement de la carte...",
+  ja: "マップを読み込んでいます...",
+  ar: "جاري تحميل الخريطة...",
+  pt: "O mapa está carregando...",
+  hi: "नक्शा लोड हो रहा है..."
+};
 
 export default function AgentMap({
   activeOffers,
@@ -20,6 +35,7 @@ export default function AgentMap({
   userCurrency,
   onMarkerClick,
   theme = "dark",
+  lang = "en",
 }: AgentMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<maplibregl.Map | null>(null);
@@ -33,8 +49,21 @@ export default function AgentMap({
     if (mapInstance.current) return;
     if (!mapContainer.current) return;
 
-    const defaultLat = -8.65; // Bali
-    const defaultLng = 115.2167; // Bali
+    // Get last saved location or default to [0, 0] (won't be visible due to loading screen)
+    let savedCenter: [number, number] = [0, 0];
+    let savedZoom = 12;
+    try {
+      const saved = localStorage.getItem("lastMapCenter");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.lng && parsed.lat) {
+          savedCenter = [parsed.lng, parsed.lat];
+          if (parsed.zoom) savedZoom = parsed.zoom;
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to parse lastMapCenter", e);
+    }
 
     // Changed to streets-v2 for a colorful map instead of colorless dataviz
     const styleUrl =
@@ -46,8 +75,8 @@ export default function AgentMap({
       const map = new maplibregl.Map({
         container: mapContainer.current,
         style: styleUrl,
-        center: [defaultLng, defaultLat],
-        zoom: 12,
+        center: savedCenter,
+        zoom: savedZoom,
         minZoom: 12, // Prevent zooming out to the whole world
         maxZoom: 18, // Prevent zooming in too close
         maxBounds: [
@@ -100,6 +129,17 @@ export default function AgentMap({
         }
       });
       
+      // Save location when map moves
+      map.on('moveend', () => {
+        const center = map.getCenter();
+        const zoom = map.getZoom();
+        localStorage.setItem("lastMapCenter", JSON.stringify({
+          lng: center.lng,
+          lat: center.lat,
+          zoom: zoom
+        }));
+      });
+
       mapInstance.current = map;
 
       // Fix for map resizing issues (squares not loading fully)
@@ -265,7 +305,7 @@ export default function AgentMap({
             }
           `}</style>
           <p style={{ fontWeight: 600, color: "var(--foreground)", opacity: 0.8 }}>
-            Карта загружается...
+            {mapTranslations[lang] || mapTranslations.en}
           </p>
         </div>
       )}

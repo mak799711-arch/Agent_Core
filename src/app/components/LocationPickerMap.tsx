@@ -140,9 +140,28 @@ export default function LocationPickerMap({
   useEffect(() => {
     if (mapInstance.current || !mapContainer.current) return;
 
-    // Default to Bali if no initial coords
-    const defaultLat = initialLat || -8.65;
-    const defaultLng = initialLng || 115.2167;
+    // Get last saved location or default to [0, 0] if no initial coords
+    let defaultLat = initialLat;
+    let defaultLng = initialLng;
+    let defaultZoom = initialLat ? 15 : 12;
+    
+    if (!initialLat || !initialLng) {
+      defaultLat = 0;
+      defaultLng = 0;
+      try {
+        const saved = localStorage.getItem("lastMapCenter");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.lng && parsed.lat) {
+            defaultLng = parsed.lng;
+            defaultLat = parsed.lat;
+            if (parsed.zoom) defaultZoom = parsed.zoom;
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to parse lastMapCenter", e);
+      }
+    }
 
     const styleUrl =
       theme === "dark"
@@ -153,7 +172,7 @@ export default function LocationPickerMap({
       container: mapContainer.current,
       style: styleUrl,
       center: [defaultLng, defaultLat],
-      zoom: initialLat ? 15 : 12,
+      zoom: defaultZoom,
       minZoom: 12,
       maxZoom: 18,
       attributionControl: false,
@@ -241,6 +260,17 @@ export default function LocationPickerMap({
     });
 
     mapInstance.current = map;
+
+    // Save location when map moves
+    map.on('moveend', () => {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      localStorage.setItem("lastMapCenter", JSON.stringify({
+        lng: center.lng,
+        lat: center.lat,
+        zoom: zoom
+      }));
+    });
 
     // Fix for map resizing issues (squares not loading fully)
     const resizeObserver = new ResizeObserver(() => {
