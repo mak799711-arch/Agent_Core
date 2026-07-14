@@ -696,11 +696,12 @@ export default function AdminDashboard() {
           router.push("/login");
           return;
         }
-
+        
         setUser(currentUser);
-        const activeTheme = localStorage.getItem("theme") || currentUser.theme;
-        document.documentElement.setAttribute("data-theme", activeTheme);
-
+        // Force dark theme for admin console as per user preference
+        document.documentElement.setAttribute("data-theme", "dark");
+        // We can still set activeTheme for other stuff if needed, but the DOM gets dark theme
+        
         await loadPlatformData();
         setLoading(false);
       } catch (err) {
