@@ -554,7 +554,8 @@ export default function BusinessDashboard() {
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [shortCode, setShortCode] = useState("");
-  const [history, setHistory] = useState<Transaction[]>([]);
+  const [billAmount, setBillAmount] = useState("");
+  const [isConfirming, setIsConfirming] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
@@ -606,20 +607,16 @@ export default function BusinessDashboard() {
     setLng(bus.longitude);
     setAddress(bus.address);
 
-    const bal = await walletRepository.getBalance(userId);
-    setBalance(bal);
-
     const businessOffers = await offerRepository.getOffers({
       businessId: bus.id,
     });
 
-    // Reserve Protection Layer Logic:
+    // Make all offers active since we don't have a wallet balance check anymore
     const updatedOffers = await Promise.all(
       businessOffers.map(async (offer) => {
-        const isBalanceSufficient = bal >= offer.rewardAmount;
-        if (offer.isActive !== isBalanceSufficient) {
+        if (!offer.isActive) {
           return await offerRepository.updateOffer(offer.id, {
-            isActive: isBalanceSufficient,
+            isActive: true,
           });
         }
         return offer;
@@ -627,9 +624,6 @@ export default function BusinessDashboard() {
     );
 
     setOffers(updatedOffers);
-
-    const txs = await walletRepository.getTransactions(userId);
-    setHistory(txs.slice().reverse());
   };
 
   useEffect(() => {
@@ -661,58 +655,6 @@ export default function BusinessDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleConfirmReferral = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatusMessage(null);
-    if (!user) return;
-
-    try {
-      const session = await referralRepository.getSessionByCode(shortCode);
-      if (!session) {
-        setStatusMessage({ text: t.codeError, type: "error" });
-        return;
-      }
-
-      const offer = await offerRepository.getOfferById(session.offerId);
-      if (!offer) {
-        setStatusMessage({ text: t.offerError, type: "error" });
-        return;
-      }
-
-      await referralRepository.completeSession(session.id);
-
-      // Money is already held in escrow (escrow_hold). We now pay the promoter:
-      await walletRepository.createTransaction({
-        userId: session.partnerId,
-        amount: offer.rewardAmount,
-        type: "reward",
-        sessionId: session.id,
-        status: "completed",
-      });
-
-      // Deduct reward from business reserve balance:
-      await walletRepository.createTransaction({
-        userId: session.businessId,
-        amount: offer.rewardAmount,
-        type: "fee",
-        sessionId: session.id,
-        status: "completed",
-      });
-
-      setStatusMessage({
-        text: `${t.successPrefix} ${formatCurrency(offer.rewardAmount, user.currency)} paid to promoter.`,
-        type: "success",
-      });
-      setShortCode("");
-      await refreshData(user.id);
-    } catch (err) {
-      const error = err as Error;
-      setStatusMessage({
-        text: error.message || "Error confirming referral",
-        type: "error",
-      });
-    }
-  };
 
   const handleCreateOffer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -741,10 +683,7 @@ export default function BusinessDashboard() {
       return;
     }
 
-    if (balance < computedReward) {
-      alert(t.balanceErrorCreate);
-      return;
-    }
+
 
     try {
       if (!businessId) {
@@ -777,25 +716,7 @@ export default function BusinessDashboard() {
     }
   };
 
-  const handleDepositReserve = async () => {
-    if (!user) return;
-    try {
-      await walletRepository.createTransaction({
-        userId: user.id,
-        amount: 100.0,
-        type: "deposit",
-        sessionId: null,
-        status: "completed",
-      });
-      await refreshData(user.id);
-      setStatusMessage({
-        text: `${formatCurrency(100.0, user.currency)} ${t.depositSuccess}`,
-        type: "success",
-      });
-    } catch (err) {
-      alert("Deposit failed");
-    }
-  };
+
 
   const handleLogout = async () => {
     await authService.signOut();
@@ -1229,93 +1150,7 @@ export default function BusinessDashboard() {
           </div>
         </div>
 
-        {/* Transaction History */}
-        <div className="panel" style={{ padding: "1.5rem" }}>
-          <h3
-            style={{
-              marginBottom: "1.2rem",
-              fontSize: "1.15rem",
-              fontWeight: 700,
-            }}
-          >
-            {t.recentTransactions}
-          </h3>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
-          >
-            {history.slice(0, 10).map((tx) => (
-              <div
-                key={tx.id}
-                style={{
-                  padding: "0.75rem 1rem",
-                  background: "rgba(255,255,255,0.01)",
-                  border: "1px solid var(--surface-border)",
-                  borderRadius: "10px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  fontSize: "0.85rem",
-                }}
-              >
-                <div>
-                  <div style={{ fontWeight: 600 }}>
-                    {tx.type === "deposit"
-                      ? "💳 Reserve Deposit"
-                      : tx.type === "fee"
-                        ? "💸 Commission Deducted"
-                        : tx.type === "reward"
-                          ? "🎁 Promoter Reward"
-                          : "🔄 Wallet Transaction"}
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "0.7rem",
-                      opacity: 0.4,
-                      display: "block",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {new Date(tx.createdAt).toLocaleString()}
-                  </span>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      color: tx.type === "deposit" ? "#52c41a" : "#ff4d4f",
-                    }}
-                  >
-                    {tx.type === "deposit" ? "+" : "-"}
-                    {user && formatCurrency(tx.amount, user.currency)}
-                  </span>
-                  <span
-                    style={{
-                      display: "block",
-                      fontSize: "0.65rem",
-                      opacity: 0.5,
-                      textTransform: "uppercase",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {tx.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-            {history.length === 0 && (
-              <p
-                style={{
-                  opacity: 0.4,
-                  fontSize: "0.85rem",
-                  textAlign: "center",
-                  padding: "1rem 0",
-                }}
-              >
-                {t.noTransactions || "No transactions recorded yet"}
-              </p>
-            )}
-          </div>
-        </div>
+
       </div>
 
       {/* Modal dialog for creating new offer */}

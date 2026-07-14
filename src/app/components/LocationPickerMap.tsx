@@ -204,7 +204,7 @@ export default function LocationPickerMap({
       if (previewAvatar) {
         el.innerHTML = `<img src="${previewAvatar}" style="width: 100%; height: 100%; object-fit: cover;" />`;
       } else {
-        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🏪</div>`;
+        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">📍</div>`;
       }
       
       if (onPreviewClick) {
@@ -309,7 +309,7 @@ export default function LocationPickerMap({
       if (previewAvatar) {
         el.innerHTML = `<img src="${previewAvatar}" style="width: 100%; height: 100%; object-fit: cover;" />`;
       } else {
-        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🏪</div>`;
+        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">📍</div>`;
       }
       
       if (onPreviewClick) {
@@ -361,7 +361,7 @@ export default function LocationPickerMap({
         el.style.borderRadius = "50%";
         el.style.border = "3px solid #ff5e00";
         el.style.backgroundColor = "#333";
-        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🏪</div>`;
+        el.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">📍</div>`;
         
         markerInstance.current = new maplibregl.Marker({ element: el, draggable: true })
           .setLngLat([lng, lat])
