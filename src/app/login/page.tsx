@@ -43,11 +43,14 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      const cleanEmail = email.trim();
+      const cleanPassword = password.trim();
+
       if (isSignUp) {
-        await authService.signUp(email, password, role!, fullName);
+        await authService.signUp(cleanEmail, cleanPassword, role!, fullName.trim());
         router.push(`/${role}`);
       } else {
-        await authService.signIn(email, password);
+        await authService.signIn(cleanEmail, cleanPassword);
         const user = await authService.getCurrentUser();
         if (user) {
           router.push(`/${user.role}`);
