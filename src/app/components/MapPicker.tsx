@@ -64,7 +64,7 @@ export default function MapPicker({
             ? "mapbox://styles/mapbox/dark-v11"
             : "mapbox://styles/mapbox/light-v11",
         center: [defaultLng, defaultLat], // Mapbox uses [lng, lat]
-        zoom: 12,
+        zoom: 15,
       });
 
       map.addControl(new window.mapboxgl.NavigationControl(), "top-right");

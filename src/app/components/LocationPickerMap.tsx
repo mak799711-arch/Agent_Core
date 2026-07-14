@@ -143,7 +143,7 @@ export default function LocationPickerMap({
     // Get last saved location or default to [0, 0] if no initial coords
     let defaultLat = initialLat;
     let defaultLng = initialLng;
-    let defaultZoom = initialLat ? 15 : 12;
+    let defaultZoom = 15;
     
     if (!initialLat || !initialLng) {
       defaultLat = 0;
@@ -173,7 +173,7 @@ export default function LocationPickerMap({
       style: styleUrl,
       center: [defaultLng, defaultLat],
       zoom: defaultZoom,
-      minZoom: 12,
+      minZoom: 5,
       maxZoom: 18,
       attributionControl: false,
       pitchWithRotate: false,

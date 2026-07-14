@@ -51,7 +51,7 @@ export default function AgentMap({
 
     // Get last saved location or default to [0, 0] (won't be visible due to loading screen)
     let savedCenter: [number, number] = [0, 0];
-    let savedZoom = 12;
+    let savedZoom = 15;
     try {
       const saved = localStorage.getItem("lastMapCenter");
       if (saved) {
@@ -77,7 +77,7 @@ export default function AgentMap({
         style: styleUrl,
         center: savedCenter,
         zoom: savedZoom,
-        minZoom: 12, // Prevent zooming out to the whole world
+        minZoom: 5, // Allow zooming out further
         maxZoom: 18, // Prevent zooming in too close
         maxBounds: [
           [110.0, -12.0], // South-West bound (Longitude, Latitude)
