@@ -359,6 +359,7 @@ export default function PartnerDashboardV4() {
           userCurrency={user?.currency || "IDR"}
           onMarkerClick={(business, businessOffers) => setSelectedBusiness({ business, offers: businessOffers })}
           theme={user?.theme === "light" ? "light" : "dark"}
+          lang={lang}
         />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
