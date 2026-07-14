@@ -772,26 +772,31 @@ export default function AdminDashboard() {
 
   const handleConfirmBan = async () => {
     if (!selectedBanUser) return;
-    const { id } = selectedBanUser;
-
-    await authService.adminUpdateUserProfile(id, {
-      status: "banned",
-      isBlocked: true,
-      banReason: banReason || "Не указана",
-      banUntil: banUntil ? new Date(banUntil).toISOString() : null,
-    });
-    localStorage.removeItem(`verification_requested_${id}`);
-
-    const currentUser = await authService.getCurrentUser();
-    if (currentUser && currentUser.id === id) {
-      currentUser.status = "banned";
-      currentUser.banReason = banReason || "Не указана";
-      if (banUntil) currentUser.banUntil = new Date(banUntil).toISOString();
+    try {
+      const { id } = selectedBanUser;
+  
+      await authService.adminUpdateUserProfile(id, {
+        status: "banned",
+        isBlocked: true,
+        banReason: banReason || "Не указана",
+        banUntil: banUntil ? new Date(banUntil).toISOString() : undefined,
+      });
+      localStorage.removeItem(`verification_requested_${id}`);
+  
+      const currentUser = await authService.getCurrentUser();
+      if (currentUser && currentUser.id === id) {
+        currentUser.status = "banned";
+        currentUser.banReason = banReason || "Не указана";
+        if (banUntil) currentUser.banUntil = new Date(banUntil).toISOString();
+      }
+  
+      setSelectedBanUser(null);
+      await loadPlatformData();
+      showToast(t.successUpdate);
+    } catch (err: any) {
+      console.error("Failed to ban user:", err);
+      showToast("Ошибка: " + (err.message || "Не удалось заблокировать"));
     }
-
-    setSelectedBanUser(null);
-    await loadPlatformData();
-    showToast(t.successUpdate);
   };
 
   const handleUnbanUser = async (id: string) => {
