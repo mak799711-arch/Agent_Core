@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
+import VerificationBadge from "@/app/components/VerificationBadge";
 
 const translations: Record<string, any> = {
   en: {
@@ -271,13 +272,10 @@ export default function PartnerProfile() {
                 >
                   {t.bioLabel}
                 </label>
-                {user?.isVerified && (
-                  <span
-                    title={t.verified}
-                    style={{ color: "var(--primary)", fontSize: "1rem" }}
-                  >
-                    ✓
-                  </span>
+                {user?.status === "verified" && (
+                  <div title={t.verified} style={{ display: "flex", alignItems: "center" }}>
+                    <VerificationBadge size={18} />
+                  </div>
                 )}
               </div>
               <textarea
