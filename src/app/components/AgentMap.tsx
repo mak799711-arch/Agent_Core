@@ -154,8 +154,11 @@ export default function AgentMap({
         resizeObserver.disconnect();
         map.remove();
         mapInstance.current = null;
-      }
-    };
+      };
+    } catch (err) {
+      console.error("Failed to initialize map:", err);
+      setIsLocating(false);
+    }
   }, []);
 
   // Dynamically update theme style without reloading map
