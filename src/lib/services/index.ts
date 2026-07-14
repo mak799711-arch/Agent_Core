@@ -16,10 +16,13 @@ const referralRepository = new SupabaseReferralRepository();
 const walletRepository = new SupabaseWalletRepository();
 // const walletRepository = new StripeWalletRepository();
 
+import { ticketRepository } from './supabase/SupabaseTicketRepository';
+
 export {
   authService,
   offerRepository,
   businessRepository,
   referralRepository,
-  walletRepository
+  walletRepository,
+  ticketRepository
 };

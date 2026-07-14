@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { authService } from "@/lib/services";
+import { authService, ticketRepository } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
 
 const translations = {
@@ -203,8 +203,29 @@ export default function SettingsSidebar({
     "none" | "pending" | "verified"
   >("none");
 
+  // Support Modal State
+  const [showSupport, setShowSupport] = useState(false);
+  const [supportMessage, setSupportMessage] = useState("");
+  const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
+
   const router = useRouter();
   const t = (translations as any)[lang] || translations.en;
+
+  const handleSupportSubmit = async () => {
+    if (!supportMessage.trim() || !user) return;
+    setIsSubmittingSupport(true);
+    try {
+      await ticketRepository.createTicket(user.id, supportMessage);
+      alert(lang === "ru" ? "Сообщение отправлено! Мы свяжемся с вами." : "Message sent! We will contact you soon.");
+      setShowSupport(false);
+      setSupportMessage("");
+    } catch (error) {
+      console.error(error);
+      alert(lang === "ru" ? "Ошибка при отправке." : "Failed to send message.");
+    } finally {
+      setIsSubmittingSupport(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -449,6 +470,26 @@ export default function SettingsSidebar({
                   style={{ width: "100%", maxWidth: "200px" }}
                 >
                   {lang === "ru" ? "Кошелек" : lang === "id" ? "Dompet" : "Wallet"}
+                </button>
+              </div>
+
+              {/* Support Button */}
+              <div
+                style={{
+                  ...rowStyle,
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "1.5rem",
+                  borderTop: "none",
+                  paddingTop: "0",
+                }}
+              >
+                <button
+                  onClick={() => setShowSupport(true)}
+                  className="btn-secondary"
+                  style={{ width: "100%", maxWidth: "200px" }}
+                >
+                  {lang === "ru" ? "Поддержка" : lang === "id" ? "Dukungan" : "Support"}
                 </button>
               </div>
 
@@ -777,6 +818,73 @@ export default function SettingsSidebar({
           </button>
         </div>
       </div>
+
+      {/* Support Modal */}
+      {showSupport && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(0,0,0,0.6)",
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1rem"
+          }}
+        >
+          <div className="panel" style={{ width: "100%", maxWidth: "500px", padding: "2rem", position: "relative" }}>
+            <button
+              onClick={() => setShowSupport(false)}
+              style={{
+                position: "absolute",
+                top: "1rem",
+                right: "1rem",
+                background: "none",
+                border: "none",
+                color: "var(--foreground)",
+                fontSize: "1.5rem",
+                cursor: "pointer"
+              }}
+            >
+              ×
+            </button>
+            <h3 style={{ marginTop: 0, marginBottom: "0.5rem" }}>
+              {lang === "ru" ? "Служба поддержки" : "Support"}
+            </h3>
+            <p style={{ fontSize: "0.9rem", opacity: 0.7, marginBottom: "1.5rem" }}>
+              {lang === "ru" 
+                ? "Опишите вашу проблему или задайте вопрос. Мы ответим вам в ближайшее время." 
+                : "Describe your issue or ask a question. We will get back to you shortly."}
+            </p>
+            <textarea
+              value={supportMessage}
+              onChange={(e) => setSupportMessage(e.target.value)}
+              placeholder={lang === "ru" ? "Ваше сообщение..." : "Your message..."}
+              rows={5}
+              style={{
+                width: "100%",
+                background: "var(--surface-bg)",
+                border: "1px solid var(--surface-border)",
+                color: "var(--foreground)",
+                padding: "1rem",
+                borderRadius: "12px",
+                marginBottom: "1.5rem",
+                resize: "vertical",
+                fontSize: "0.95rem"
+              }}
+            />
+            <button
+              onClick={handleSupportSubmit}
+              disabled={isSubmittingSupport || !supportMessage.trim()}
+              className="btn-primary"
+              style={{ width: "100%" }}
+            >
+              {isSubmittingSupport ? "..." : (lang === "ru" ? "Отправить" : "Send")}
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

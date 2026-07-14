@@ -25,6 +25,7 @@ const translations = {
     tabBanned: "Ban List",
     tabRequests: "Verification Requests",
     tabAudit: "Audit & Fraud",
+    tabSupport: "Support Tickets",
     status: "Status",
     role: "Role",
     agent: "Agent",
@@ -73,6 +74,7 @@ const translations = {
     tabBanned: "Бан-лист",
     tabRequests: "Запросы верификации",
     tabAudit: "Аудит и Фрод",
+    tabSupport: "Жалобы и Вопросы",
     status: "Статус",
     role: "Роль",
     agent: "Агент",
@@ -505,6 +507,7 @@ const translations = {
     tabBanned: "प्रतिबंध सूची",
     tabRequests: "सत्यापन अनुरोध",
     tabAudit: "ऑडिट और धोखाधड़ी",
+    tabSupport: "समर्थन",
     status: "स्थिति",
     role: "भूमिका",
     agent: "एजेंट",
@@ -541,7 +544,7 @@ const translations = {
     sessionCode: "सत्र कोड",
     created: "पर बनाया गया"
   }
-};;
+};
 
 interface EnrichedUser extends UserProfile {
   volume: number;
@@ -560,11 +563,12 @@ interface PendingRequest {
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<
+    "active" | "banned" | "requests" | "audit" | "support"
+  >("active");
   const [loading, setLoading] = useState(true);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<
-    "active" | "banned" | "requests" | "audit"
-  >("active");
   const [selectedBanUser, setSelectedBanUser] = useState<{
     id: string;
     name: string;
@@ -670,6 +674,15 @@ export default function AdminDashboard() {
       const allSessions = await referralRepository.getAllSessions();
       setSessions(allSessions);
       setAllUsersList(allUsers);
+
+      // Load tickets
+      try {
+        const { ticketRepository } = await import("@/lib/services");
+        const allTickets = await ticketRepository.getTickets();
+        setTickets(allTickets);
+      } catch (err) {
+        console.error("Failed to load tickets", err);
+      }
     } catch (err) {
       console.error("Error loading platform data:", err);
     }
@@ -1596,6 +1609,46 @@ export default function AdminDashboard() {
               }}
             >
               {sessions.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("support")}
+            style={{
+              background:
+                activeTab === "support"
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "transparent",
+              border: "none",
+              color:
+                activeTab === "support" ? "var(--primary)" : "var(--foreground)",
+              padding: "12px 24px",
+              borderRadius: "14px",
+              cursor: "pointer",
+              fontSize: "0.9rem",
+              fontWeight: 700,
+              transition: "all 0.25s ease",
+              opacity: activeTab === "support" ? 1 : 0.6,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              boxShadow:
+                activeTab === "support" ? "0 4px 12px rgba(0,0,0,0.1)" : "none",
+              outline: "none",
+            }}
+          >
+            {t.tabSupport || "Support Tickets"}
+            <span
+              style={{
+                fontSize: "0.75rem",
+                background: "rgba(139, 92, 246, 0.12)",
+                padding: "2px 8px",
+                borderRadius: "20px",
+                marginLeft: "4px",
+                fontWeight: 800,
+              }}
+            >
+              {tickets.filter(t => t.status === "open").length}
             </span>
           </button>
         </div>
@@ -2884,6 +2937,127 @@ export default function AdminDashboard() {
                           }}
                         >
                           {t.emptySessions}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: SUPPORT TICKETS */}
+          {activeTab === "support" && (
+            <div
+              className="glass-panel"
+              style={{
+                padding: "2rem 2.2rem",
+                border: "1px solid var(--glass-border)",
+                background: "var(--glass-bg)",
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
+              }}
+            >
+              <h3
+                style={{
+                  marginBottom: "1.8rem",
+                  fontSize: "1.25rem",
+                  fontWeight: 800,
+                  color: "var(--foreground)",
+                  letterSpacing: "-0.3px",
+                }}
+              >
+                {t.tabSupport || "Support Tickets"}
+              </h3>
+              <div className="table-wrapper">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>User ID</th>
+                      <th>Message</th>
+                      <th>Status</th>
+                      <th>Created At</th>
+                      <th style={{ textAlign: "right", paddingRight: "20px" }}>
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tickets.length > 0 ? (
+                      tickets.map((ticket) => (
+                        <tr key={ticket.id}>
+                          <td>
+                            <div style={{ fontSize: "0.85rem", opacity: 0.7, wordBreak: "break-all", maxWidth: "150px" }}>
+                              {ticket.userId}
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ maxWidth: "300px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                              {ticket.message}
+                            </div>
+                          </td>
+                          <td>
+                            <span
+                              style={{
+                                padding: "4px 8px",
+                                borderRadius: "8px",
+                                fontSize: "0.75rem",
+                                fontWeight: 700,
+                                background: ticket.status === "open" ? "rgba(250, 173, 20, 0.1)" : "rgba(16, 185, 129, 0.1)",
+                                color: ticket.status === "open" ? "var(--warning)" : "var(--success)",
+                              }}
+                            >
+                              {ticket.status.toUpperCase()}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ fontSize: "0.85rem" }}>
+                              {new Date(ticket.createdAt).toLocaleDateString()}
+                            </div>
+                            <div style={{ fontSize: "0.75rem", opacity: 0.45 }}>
+                              {new Date(ticket.createdAt).toLocaleTimeString()}
+                            </div>
+                          </td>
+                          <td style={{ textAlign: "right", paddingRight: "20px" }}>
+                            {ticket.status === "open" && (
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const { ticketRepository } = await import("@/lib/services");
+                                    await ticketRepository.updateTicketStatus(ticket.id, "closed");
+                                    await loadPlatformData();
+                                    showToast(t.successUpdate || "Action completed successfully!");
+                                  } catch (err) {
+                                    console.error(err);
+                                  }
+                                }}
+                                style={{
+                                  background: "rgba(16, 185, 129, 0.1)",
+                                  border: "1px solid rgba(16, 185, 129, 0.3)",
+                                  color: "var(--success)",
+                                  padding: "8px 14px",
+                                  borderRadius: "8px",
+                                  cursor: "pointer",
+                                  fontSize: "0.8rem",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                Mark Resolved
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          style={{
+                            padding: "3rem",
+                            textAlign: "center",
+                            opacity: 0.5,
+                          }}
+                        >
+                          No tickets found.
                         </td>
                       </tr>
                     )}
