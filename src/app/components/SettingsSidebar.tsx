@@ -452,17 +452,7 @@ export default function SettingsSidebar({
                 />
               </div>
 
-                  paddingTop: "0",
-                }}
-              >
-                <button
-                  onClick={() => setShowSupport(true)}
-                  className="btn-secondary"
-                  style={{ width: "100%", maxWidth: "200px" }}
-                >
-                  {lang === "ru" ? "Поддержка" : lang === "id" ? "Dukungan" : "Support"}
-                </button>
-              </div>
+
 
               {/* Theme Toggle (Horizontal) */}
               <div
