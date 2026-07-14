@@ -80,7 +80,12 @@ export default function AgentMap({
         setTimeout(() => setIsLocating(false), 6000);
       });
 
-      geolocate.on('geolocate', () => setIsLocating(false));
+      geolocate.on('geolocate', () => {
+        // Wait for the map to finish flying to the user's location before revealing
+        map.once('moveend', () => setIsLocating(false));
+        // Fallback just in case moveend doesn't fire
+        setTimeout(() => setIsLocating(false), 1500);
+      });
       geolocate.on('error', () => setIsLocating(false)); // fallback gracefully
       
       // Hide default MapTiler/Mapbox POIs (shops, restaurants, etc.) so only our venues stand out
@@ -260,7 +265,7 @@ export default function AgentMap({
             }
           `}</style>
           <p style={{ fontWeight: 600, color: "var(--foreground)", opacity: 0.8 }}>
-            Finding your location...
+            Карта загружается...
           </p>
         </div>
       )}
