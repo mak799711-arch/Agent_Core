@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   authService,
   walletRepository,
-  referralRepository,
 } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
 import { ReferralSession } from "@/lib/interfaces/referrals";
@@ -671,7 +670,6 @@ export default function AdminDashboard() {
       });
       setRequests(pendingReqs);
 
-      const allSessions = await referralRepository.adminGetAllSessions();
       setSessions(allSessions);
       setAllUsersList(allUsers);
 
@@ -746,7 +744,6 @@ export default function AdminDashboard() {
 
   const handleFlagSession = async (sessionId: string) => {
     try {
-      await referralRepository.flagSession(sessionId);
       await loadPlatformData();
       showToast(t.successUpdate);
     } catch (err) {
