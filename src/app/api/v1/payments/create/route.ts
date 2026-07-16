@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
+import { xenditGateway } from '@/lib/services/payment/XenditGateway';
 
 export async function POST(request: Request) {
   try {
@@ -70,8 +71,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to create payment split' }, { status: 500 });
     }
 
-    // Return the payment ID
-    return NextResponse.json({ paymentId: payment.id, finalAmount: finalPaymentAmount, currency });
+    // 4. Create Xendit Invoice
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const invoice = await xenditGateway.createInvoice({
+      externalId: `payment_${payment.id}`,
+      amount: finalPaymentAmount,
+      description: `Payment for Business ${businessId} via AgentCore`,
+      successRedirectUrl: `${baseUrl}/checkout/success?payment_id=${payment.id}`,
+      failureRedirectUrl: `${baseUrl}/checkout/failed?payment_id=${payment.id}`,
+      splits: {
+        platformFee: platformCommissionAmount
+        // Real xenPlatform splits will require destination accounts config
+      }
+    });
+
+    // Return the payment ID and the Xendit checkout URL
+    return NextResponse.json({ 
+      paymentId: payment.id, 
+      finalAmount: finalPaymentAmount, 
+      currency,
+      checkoutUrl: invoice.invoiceUrl 
+    });
   } catch (err) {
     console.error('Payment creation error:', err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

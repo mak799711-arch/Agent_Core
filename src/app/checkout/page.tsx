@@ -118,8 +118,14 @@ function CheckoutContent() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setPaymentId(data.paymentId);
-      setStatus("qr");
+      if (data.checkoutUrl) {
+        // Redirect to Xendit Hosted Checkout
+        window.location.href = data.checkoutUrl;
+      } else {
+        // Fallback for local testing if checkoutUrl is missing
+        setPaymentId(data.paymentId);
+        setStatus("qr");
+      }
     } catch (e) {
       console.error(e);
       setStatus("input");
