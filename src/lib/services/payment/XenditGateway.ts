@@ -1,13 +1,5 @@
-import { Invoice as InvoiceClient } from 'xendit-node';
-
 export class XenditGateway {
-  private invoiceClient: InvoiceClient;
-
-  constructor() {
-    // We will initialize Xendit with the API key from environment variables
-    const secretKey = process.env.XENDIT_SECRET_KEY || 'xnd_development_dummy_key';
-    this.invoiceClient = new InvoiceClient({ secretKey });
-  }
+  constructor() {}
 
   /**
    * Creates a payment invoice link in Xendit
@@ -25,24 +17,35 @@ export class XenditGateway {
     }
   }): Promise<{ invoiceUrl: string; invoiceId: string }> {
     try {
-      const data = {
-        externalId: params.externalId,
-        amount: params.amount,
-        description: params.description,
-        payerEmail: params.payerEmail,
-        successRedirectUrl: params.successRedirectUrl,
-        failureRedirectUrl: params.failureRedirectUrl,
-        currency: 'IDR'
-      };
+      const apiKey = process.env.XENDIT_SECRET_KEY || 'xnd_development_dummy_key';
+      const authString = Buffer.from(`${apiKey}:`).toString('base64');
 
-      // Create the invoice
-      const response = await this.invoiceClient.createInvoice({
-        data
+      const response = await fetch('https://api.xendit.co/v2/invoices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${authString}`
+        },
+        body: JSON.stringify({
+          external_id: params.externalId,
+          amount: params.amount,
+          description: params.description,
+          customer: params.payerEmail ? { email: params.payerEmail } : undefined,
+          currency: 'IDR',
+          success_redirect_url: params.successRedirectUrl,
+          failure_redirect_url: params.failureRedirectUrl
+        })
       });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Payment provider error');
+      }
+
       return {
-        invoiceUrl: response.invoiceUrl,
-        invoiceId: response.id
+        invoiceUrl: data.invoice_url,
+        invoiceId: data.id
       };
     } catch (error: any) {
       console.error('Xendit createInvoice error:', error);
