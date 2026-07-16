@@ -651,8 +651,7 @@ export default function BusinessDashboard() {
       return;
     }
 
-    const billLocal = parseFloat(newOfferAvgBill.replace(/,/g, ""));
-    const avgBillVal = !isNaN(billLocal) && billLocal > 0 ? convertToUSD(billLocal, user.currency || "USD") : null;
+    const avgBillVal = null;
 
 
 
@@ -672,7 +671,6 @@ export default function BusinessDashboard() {
       });
 
       setNewOfferTitle("");
-      setNewOfferAvgBill("");
       setGlobalMargin("10");
       setNewOfferConditions("");
       setNewOfferCategory("restaurant");
