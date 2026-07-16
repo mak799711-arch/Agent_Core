@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   authService,
   offerRepository,
-  referralRepository,
   walletRepository,
   businessRepository,
 } from "@/lib/services";
