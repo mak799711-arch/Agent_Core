@@ -7,18 +7,46 @@ import QRCode from "react-qr-code";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
-  const businessId = searchParams.get("b");
-  const agentId = searchParams.get("a");
+  const linkId = searchParams.get("link_id");
+  const fallbackBusinessId = searchParams.get("b");
+  const fallbackAgentId = searchParams.get("a");
+
+  const [businessId, setBusinessId] = useState<string | null>(fallbackBusinessId);
+  const [agentId, setAgentId] = useState<string | null>(fallbackAgentId);
 
   const [amount, setAmount] = useState<string>("");
   const [status, setStatus] = useState<
     "loading" | "input" | "qr" | "processing" | "success"
   >("loading");
   const [currency, setCurrency] = useState<string>("IDR");
+  const [globalMargin, setGlobalMargin] = useState<number>(10.0);
 
   useEffect(() => {
-    async function fetchCurrency() {
-      if (!businessId) {
+    async function init() {
+      let currentBusinessId = fallbackBusinessId;
+      
+      if (linkId) {
+        try {
+          const { data: link, error: linkError } = await supabase
+            .from("payment_links")
+            .select("business_id, agent_id, is_active, ttl_expires_at")
+            .eq("id", linkId)
+            .single();
+
+          if (linkError || !link || !link.is_active || new Date(link.ttl_expires_at) < new Date()) {
+            alert("Payment link is invalid or has expired.");
+            setStatus("input");
+            return;
+          }
+          currentBusinessId = link.business_id;
+          setBusinessId(link.business_id);
+          setAgentId(link.agent_id);
+        } catch (e) {
+          console.error("Error fetching link:", e);
+        }
+      }
+
+      if (!currentBusinessId) {
         setStatus("input");
         return;
       }
@@ -26,7 +54,7 @@ function CheckoutContent() {
         const { data: business } = await supabase
           .from("businesses")
           .select("owner_id")
-          .eq("id", businessId)
+          .eq("id", currentBusinessId)
           .single();
 
         if (business?.owner_id) {
@@ -40,16 +68,28 @@ function CheckoutContent() {
             setCurrency(user.currency);
           }
         }
+
+        // Fetch Global Margin from offers
+        const { data: offer } = await supabase
+          .from("offers")
+          .select("global_margin_percent")
+          .eq("business_id", currentBusinessId)
+          .eq("is_active", true)
+          .single();
+
+        if (offer?.global_margin_percent) {
+          setGlobalMargin(offer.global_margin_percent);
+        }
       } catch (e) {
-        console.error("Error fetching currency:", e);
+        console.error("Error fetching data:", e);
       }
       setStatus("input");
     }
-    fetchCurrency();
-  }, [businessId]);
+    init();
+  }, [linkId, fallbackBusinessId]);
 
-  // В V4: скидка туристу (например, 5% из Global Margin)
-  const TOURIST_DISCOUNT_PERCENT = 0.05;
+  // В V4: скидка туристу (30% от Global Margin)
+  const TOURIST_DISCOUNT_PERCENT = (globalMargin / 100) * 0.3;
 
   // Парсим сырое значение (убираем все кроме цифр)
   const rawAmount = parseFloat(amount.replace(/\D/g, "")) || 0;
@@ -71,6 +111,7 @@ function CheckoutContent() {
           currency,
           businessId,
           agentId,
+          linkId,
         }),
       });
 
@@ -179,34 +220,7 @@ function CheckoutContent() {
           </h1>
         </div>
 
-        {/* Dummy кнопка для перехода к зеленому экрану (MVP) */}
-        <button
-          onClick={async () => {
-            setStatus("processing");
-            try {
-              await fetch("/api/v1/payments/simulate-success", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentId }),
-              });
-            } catch (e) {
-              console.error(e);
-            }
-            setTimeout(() => setStatus("success"), 1500);
-          }}
-          style={{
-            background: "transparent",
-            border: "1px solid var(--surface-border)",
-            color: "var(--foreground)",
-            opacity: 0.5,
-            padding: "1rem",
-            borderRadius: "8px",
-            fontSize: "0.9rem",
-            cursor: "pointer",
-          }}
-        >
-          [DEV] Simulate Payment Success
-        </button>
+
       </div>
     );
   }
@@ -461,7 +475,7 @@ function CheckoutContent() {
                   fontWeight: 700,
                 }}
               >
-                <span>AgentCore Discount (5%):</span>
+                <span>AgentCore Discount ({(TOURIST_DISCOUNT_PERCENT * 100).toFixed(1)}%):</span>
                 <span>
                   - {formatCurrencyValue(discount)} {currency}
                 </span>

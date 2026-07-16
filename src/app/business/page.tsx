@@ -574,9 +574,7 @@ export default function BusinessDashboard() {
     | "activity"
     | "services"
   >("restaurant");
-  const [rewardType, setRewardType] = useState<"fixed" | "percentage">("fixed");
-  const [newOfferReward, setNewOfferReward] = useState("");
-  const [newOfferPercent, setNewOfferPercent] = useState("");
+  const [globalMargin, setGlobalMargin] = useState<string>("10");
   const [newOfferAvgBill, setNewOfferAvgBill] = useState("");
   const [newOfferConditions, setNewOfferConditions] = useState("");
   const [statusMessage, setStatusMessage] = useState<{
@@ -611,19 +609,7 @@ export default function BusinessDashboard() {
       businessId: bus.id,
     });
 
-    // Make all offers active since we don't have a wallet balance check anymore
-    const updatedOffers = await Promise.all(
-      businessOffers.map(async (offer) => {
-        if (!offer.isActive) {
-          return await offerRepository.updateOffer(offer.id, {
-            isActive: true,
-          });
-        }
-        return offer;
-      }),
-    );
-
-    setOffers(updatedOffers);
+    setOffers(businessOffers);
   };
 
   useEffect(() => {
@@ -660,28 +646,14 @@ export default function BusinessDashboard() {
     e.preventDefault();
     if (!user) return;
 
-    let computedReward = 0;
-    let percentVal: number | null = null;
-    let avgBillVal: number | null = null;
-
-    if (rewardType === "fixed") {
-      computedReward = convertToUSD(parseFloat(newOfferReward.replace(/,/g, "")), user.currency || "USD");
-    } else {
-      const pct = parseFloat(newOfferPercent.replace(/,/g, ""));
-      const billLocal = parseFloat(newOfferAvgBill.replace(/,/g, ""));
-      if (isNaN(pct) || pct <= 0 || isNaN(billLocal) || billLocal <= 0) {
-        alert("Invalid percentage or average bill value");
-        return;
-      }
-      computedReward = convertToUSD((billLocal * pct) / 100, user.currency || "USD");
-      percentVal = pct;
-      avgBillVal = convertToUSD(billLocal, user.currency || "USD");
-    }
-
-    if (isNaN(computedReward) || computedReward <= 0) {
-      alert("Invalid reward calculation");
+    const margin = parseFloat(globalMargin);
+    if (isNaN(margin) || margin < 1 || margin > 100) {
+      alert("Invalid Global Margin percentage (must be between 1 and 100)");
       return;
     }
+
+    const billLocal = parseFloat(newOfferAvgBill.replace(/,/g, ""));
+    const avgBillVal = !isNaN(billLocal) && billLocal > 0 ? convertToUSD(billLocal, user.currency || "USD") : null;
 
 
 
@@ -694,18 +666,15 @@ export default function BusinessDashboard() {
       await offerRepository.createOffer({
         businessId: businessId,
         title: newOfferTitle,
-        rewardAmount: computedReward,
-        rewardType,
-        rewardPercent: percentVal,
+        globalMarginPercent: margin,
         averageBill: avgBillVal,
         category: newOfferCategory,
         conditions: newOfferConditions || null,
       });
 
       setNewOfferTitle("");
-      setNewOfferReward("");
-      setNewOfferPercent("");
       setNewOfferAvgBill("");
+      setGlobalMargin("10");
       setNewOfferConditions("");
       setNewOfferCategory("restaurant");
 
@@ -1116,7 +1085,7 @@ export default function BusinessDashboard() {
                     </span>
                   )}
                 </div>
-                <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <span
                     style={{
                       display: "inline-block",
@@ -1132,6 +1101,49 @@ export default function BusinessDashboard() {
                   >
                     {offer.isActive ? t.statusActive : t.statusPaused}
                   </span>
+                  
+                  {/* Toggle Button */}
+                  <label style={{
+                    position: "relative",
+                    display: "inline-block",
+                    width: "44px",
+                    height: "24px"
+                  }}>
+                    <input 
+                      type="checkbox" 
+                      checked={offer.isActive}
+                      onChange={async () => {
+                        const newStatus = !offer.isActive;
+                        try {
+                          await offerRepository.updateOffer(offer.id, { isActive: newStatus });
+                          setOffers(offers.map(o => o.id === offer.id ? { ...o, isActive: newStatus } : o));
+                        } catch (e) {
+                          alert("Failed to update status");
+                        }
+                      }}
+                      style={{ opacity: 0, width: 0, height: 0 }}
+                    />
+                    <span style={{
+                      position: "absolute",
+                      cursor: "pointer",
+                      top: 0, left: 0, right: 0, bottom: 0,
+                      backgroundColor: offer.isActive ? "var(--primary)" : "var(--surface-border)",
+                      transition: ".4s",
+                      borderRadius: "24px"
+                    }}>
+                      <span style={{
+                        position: "absolute",
+                        content: '""',
+                        height: "18px",
+                        width: "18px",
+                        left: offer.isActive ? "22px" : "3px",
+                        bottom: "3px",
+                        backgroundColor: offer.isActive ? "#000" : "#fff",
+                        transition: ".4s",
+                        borderRadius: "50%"
+                      }}></span>
+                    </span>
+                  </label>
                 </div>
               </div>
             ))}
@@ -1301,8 +1313,7 @@ export default function BusinessDashboard() {
                   </option>
                 </select>
               </div>
-
-              {/* Reward Type Selection */}
+              {/* Global Margin Selection */}
               <div
                 style={{
                   display: "flex",
@@ -1311,56 +1322,66 @@ export default function BusinessDashboard() {
                 }}
               >
                 <label style={{ fontSize: "0.8rem", opacity: 0.8 }}>
-                  {t.rewardTypeLabel}
+                  Global Margin (%)
                 </label>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button
-                    type="button"
-                    onClick={() => setRewardType("fixed")}
-                    style={{
-                      flex: 1,
-                      padding: "8px",
-                      borderRadius: "6px",
-                      border: "2px solid",
-                      borderColor:
-                        rewardType === "fixed" ? "#FFFFFF" : "transparent",
-                      background:
-                        rewardType === "fixed"
-                          ? "rgba(255,255,255,0.1)"
-                          : "var(--input-bg)",
-                      color: "var(--foreground)",
-                      cursor: "pointer",
-                      fontSize: "0.85rem",
-                    }}
-                  >
-                    {t.fixedReward}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRewardType("percentage")}
-                    style={{
-                      flex: 1,
-                      padding: "8px",
-                      borderRadius: "6px",
-                      border: "2px solid",
-                      borderColor:
-                        rewardType === "percentage" ? "#FFFFFF" : "transparent",
-                      background:
-                        rewardType === "percentage"
-                          ? "rgba(255,255,255,0.1)"
-                          : "var(--input-bg)",
-                      color: "var(--foreground)",
-                      cursor: "pointer",
-                      fontSize: "0.85rem",
-                    }}
-                  >
-                    {t.percentageReward}
-                  </button>
-                </div>
+                <input
+                  type="number"
+                  value={globalMargin}
+                  onChange={(e) => setGlobalMargin(e.target.value)}
+                  placeholder="10"
+                  required
+                  min="1"
+                  max="100"
+                  step="0.1"
+                  style={{
+                    background: "var(--input-bg)",
+                    border: "1px solid var(--surface-border)",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    color: "var(--foreground)",
+                    outline: "none",
+                  }}
+                />
+                <p style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "2px" }}>
+                  This percentage of each transaction will be split between the tourist discount, promoter reward, and platform fee.
+                </p>
               </div>
-
-              {rewardType === "fixed" ? (
-                <div
+              
+              {/* Average Bill Input */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.4rem",
+                }}
+              >
+                <label style={{ fontSize: "0.8rem", opacity: 0.8 }}>
+                  {t.avgBillLabel?.replace("USD", user?.currency || "USD") || `Average Bill (${user?.currency || "USD"})`}
+                </label>
+                <input
+                  type="text"
+                  value={newOfferAvgBill}
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/[^\d.]/g, "");
+                    const parts = val.split(".");
+                    if (parts[0])
+                      parts[0] = Number(parts[0]).toLocaleString("en-US");
+                    setNewOfferAvgBill(parts.join("."));
+                  }}
+                  placeholder="100.00"
+                  required
+                  min="1"
+                  step="0.01"
+                  style={{
+                    background: "var(--input-bg)",
+                    border: "1px solid var(--surface-border)",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    color: "var(--foreground)",
+                    outline: "none",
+                  }}
+                />
+              </div><div
                   style={{
                     display: "flex",
                     flexDirection: "column",

@@ -2,11 +2,7 @@ export interface Offer {
   id: string;
   businessId: string;
   title: string;
-  rewardAmount: number;
-  rewardType: 'fixed' | 'percentage';
-  rewardPercent?: number | null; // % если 'percentage'
-  customerDiscountPercent?: number | null; // Скидка для туриста
-  platformFeePercent?: number | null; // Комиссия платформы
+  globalMarginPercent: number; // Единый процент (V4 Global Margin)
   averageBill?: number | null;
   category: 'restaurant' | 'nightlife' | 'real_estate' | 'beauty' | 'fitness' | 'retail' | 'activity' | 'services';
   conditions: string | null;

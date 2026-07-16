@@ -43,7 +43,7 @@ export default function AgentMap({
   const [isLocating, setIsLocating] = useState(true);
 
   // The MapTiler key provided by the user
-  const mapTilerKey = "ICwSd7c82yVo427gx1ar";
+  const mapTilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY || "ICwSd7c82yVo427gx1ar";
 
   useEffect(() => {
     if (mapInstance.current) return;

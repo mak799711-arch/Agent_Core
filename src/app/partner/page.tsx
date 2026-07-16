@@ -151,14 +151,33 @@ export default function PartnerDashboardV4() {
     loadData();
   }, [router]);
 
-  const handleCopyLink = (businessId: string) => {
+  const handleCopyLink = async (businessId: string) => {
     if (!user) return;
-    // V4: Direct Checkout Gateway Link
-    // In production, this would point to the actual domain.
-    const link = `https://agentcore.app/checkout?b=${businessId}&a=${user.id}`;
-    navigator.clipboard.writeText(link);
-    setCopiedLink(businessId);
-    setTimeout(() => setCopiedLink(null), 2000);
+    try {
+      setCopiedLink("loading-" + businessId);
+      const res = await fetch("/api/v1/links/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: user.id,
+          businessId,
+          isSingleUse: true
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate link");
+
+      const origin = window.location.origin;
+      const link = `${origin}/checkout?link_id=${data.linkId}`;
+      await navigator.clipboard.writeText(link);
+      
+      setCopiedLink(businessId);
+      setTimeout(() => setCopiedLink(null), 2000);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to generate link");
+      setCopiedLink(null);
+    }
   };
 
   const handleLogout = async () => {
@@ -386,15 +405,17 @@ export default function PartnerDashboardV4() {
               </div>
               <button
                 onClick={() => handleCopyLink(offer.businessId)}
+                disabled={copiedLink === `loading-${offer.businessId}`}
                 className="btn-primary"
                 style={{
                   background:
                     copiedLink === offer.businessId
                       ? "var(--success)"
                       : "var(--primary)",
+                  opacity: copiedLink === `loading-${offer.businessId}` ? 0.7 : 1
                 }}
               >
-                {copiedLink === offer.businessId ? "Copied!" : "Copy Link"}
+                {copiedLink === `loading-${offer.businessId}` ? "Generating..." : copiedLink === offer.businessId ? "Copied!" : "Copy Link"}
               </button>
             </div>
           ))}

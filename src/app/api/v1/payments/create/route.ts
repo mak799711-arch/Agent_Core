@@ -4,16 +4,29 @@ import { supabase } from '@/lib/supabase/client';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { amount, currency, businessId, agentId } = body;
+    const { amount, currency, businessId, agentId, linkId } = body;
 
     if (!amount || !businessId || !agentId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // 1. Calculate splits (Default 10% global margin: 5% tourist discount, 4% agent, 1% platform)
-    const TOURIST_DISCOUNT = 0.05;
-    const AGENT_COMMISSION = 0.04;
-    const PLATFORM_COMMISSION = 0.01;
+    // Fetch the active offer for this business to get the global margin
+    const { data: offer, error: offerError } = await supabase
+      .from('offers')
+      .select('global_margin_percent')
+      .eq('business_id', businessId)
+      .eq('is_active', true)
+      .single();
+
+    // Default to 10% if not found or no active offer
+    const globalMarginPercent = offer?.global_margin_percent || 10.0;
+    const globalMarginRatio = globalMarginPercent / 100.0;
+
+    // 1. Calculate splits based on Global Margin
+    // Tourist: 30% of margin, Agent: 60% of margin, Platform: 10% of margin
+    const TOURIST_DISCOUNT = globalMarginRatio * 0.3;
+    const AGENT_COMMISSION = globalMarginRatio * 0.6;
+    const PLATFORM_COMMISSION = globalMarginRatio * 0.1;
 
     const touristDiscountAmount = amount * TOURIST_DISCOUNT;
     const finalPaymentAmount = amount - touristDiscountAmount; // This is what the tourist actually pays
