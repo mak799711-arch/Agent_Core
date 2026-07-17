@@ -673,7 +673,7 @@ export default function BusinessDashboard() {
       return;
     }
 
-    const avgBillVal = averageBill ? parseFloat(averageBill) : null;
+    const avgBillVal = averageBill ? parseFloat(averageBill.replace(/\s/g, "")) : null;
 
     try {
       if (!businessId) {
@@ -1376,12 +1376,16 @@ export default function BusinessDashboard() {
                     {t.avgBillLabel ? t.avgBillLabel.replace("USD", user?.currency || "USD") : "Average Bill"}
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={averageBill}
-                    onChange={(e) => setAverageBill(e.target.value)}
-                    placeholder="50"
-                    min="0"
-                    step="0.1"
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/[^\d.]/g, "");
+                      const parts = rawValue.split(".");
+                      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                      setAverageBill(parts.join("."));
+                    }}
+                    placeholder="50 000"
                     style={{
                       background: "var(--input-bg)",
                       border: "1px solid var(--surface-border)",
