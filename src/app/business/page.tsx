@@ -1379,7 +1379,7 @@ export default function BusinessDashboard() {
                     type="number"
                     value={averageBill}
                     onChange={(e) => setAverageBill(e.target.value)}
-                    placeholder="e.g. 50"
+                    placeholder="50"
                     min="0"
                     step="0.1"
                     style={{
