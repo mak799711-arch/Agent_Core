@@ -6,6 +6,7 @@ import SettingsSidebar from "@/app/components/SettingsSidebar";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { authService, offerRepository } from "@/lib/services";
+import { supabase } from "@/lib/supabase/client";
 import { UserProfile } from "@/lib/interfaces/auth";
 import { Offer } from "@/lib/interfaces/offers";
 import { formatCurrency } from "@/lib/utils/currency";
@@ -156,9 +157,16 @@ export default function PartnerDashboardV4() {
     if (!user) return;
     try {
       setCopiedLink("loading-" + businessId);
+      
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      
       const res = await fetch("/api/v1/links/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           agentId: user.id,
           businessId,
