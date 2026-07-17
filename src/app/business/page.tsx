@@ -114,7 +114,7 @@ const translations = {
       activity: "Развлечения",
       services: "Услуги"
     },
-    globalMarginLabel: "Общая комиссия / Скидка (%)",
+    globalMarginLabel: "% за клиента",
     globalMarginDesc: "Этот процент будет разделен между скидкой туристу, вознаграждением агенту и платформой."
   },
   id: {
