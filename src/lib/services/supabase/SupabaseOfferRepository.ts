@@ -20,27 +20,26 @@ export class SupabaseOfferRepository implements IOfferRepository {
     
     // Fetch businesses for these offers since there is no FK constraint
     const businessIds = [...new Set(offersData.map((o: any) => o.business_id))];
-    const { data: usersData, error: usersError } = await supabase
-      .from('profiles')
+    const { data: bizData, error: bizError } = await supabase
+      .from('businesses')
       .select('*')
       .in('id', businessIds);
       
-    if (usersError) {
-      console.error("Error fetching businesses for offers:", usersError);
+    if (bizError) {
+      console.error("Error fetching businesses for offers:", bizError);
     }
     
-    const usersMap = new Map();
-    if (usersData) {
-      usersData.forEach((u: any) => {
-        usersMap.set(u.id, {
-          id: u.id,
-          role: u.role,
-          fullName: u.full_name,
-          avatarUrl: u.avatar_url,
-          photos: u.photos,
-          bio: u.bio,
-          latitude: u.latitude,
-          longitude: u.longitude,
+    // Optional: fetch avatarUrls from profiles if needed, but AgentMap uses theme avatar if null
+    const bizMap = new Map();
+    if (bizData) {
+      bizData.forEach((b: any) => {
+        bizMap.set(b.id, {
+          id: b.id,
+          name: b.name,
+          fullName: b.name, // for backward compatibility in some components
+          latitude: b.latitude,
+          longitude: b.longitude,
+          address: b.address,
         });
       });
     }
@@ -48,7 +47,7 @@ export class SupabaseOfferRepository implements IOfferRepository {
     return offersData.map((data: any) => {
       const offer = this.mapToOffer(data);
       // @ts-ignore - attaching business property dynamically
-      offer.business = usersMap.get(data.business_id) || null;
+      offer.business = bizMap.get(data.business_id) || null;
       return offer;
     });
   }
