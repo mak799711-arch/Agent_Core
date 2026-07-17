@@ -449,6 +449,7 @@ export default function SettingsSidebar({
                   onMouseLeave={(e) =>
                     (e.currentTarget.style.transform = "scale(1)")
                   }
+                />
               </div>
 
               {/* Theme Toggle (Horizontal) */}
