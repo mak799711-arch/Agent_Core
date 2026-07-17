@@ -595,7 +595,7 @@ export default function BusinessDashboard() {
     | "activity"
     | "services"
   >("restaurant");
-  const [globalMargin, setGlobalMargin] = useState<string>("10");
+  const [globalMargin, setGlobalMargin] = useState<string>("");
   const [averageBill, setAverageBill] = useState<string>("");
   const [newOfferConditions, setNewOfferConditions] = useState("");
   const [statusMessage, setStatusMessage] = useState<{
@@ -691,7 +691,7 @@ export default function BusinessDashboard() {
       });
 
       setNewOfferTitle("");
-      setGlobalMargin("10");
+      setGlobalMargin("");
       setAverageBill("");
       setNewOfferConditions("");
       setNewOfferCategory("restaurant");
