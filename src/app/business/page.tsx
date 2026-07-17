@@ -63,7 +63,9 @@ const translations = {
       retail: "Retail",
       activity: "Activities",
       services: "Services"
-    }
+    },
+    globalMarginLabel: "Global Margin (%)",
+    globalMarginDesc: "This percentage will be split between the tourist discount, agent reward, and platform fee."
   },
   ru: {
     venue: "Менеджер заведения",
@@ -111,7 +113,9 @@ const translations = {
       retail: "Ритейл",
       activity: "Развлечения",
       services: "Услуги"
-    }
+    },
+    globalMarginLabel: "Общая комиссия / Скидка (%)",
+    globalMarginDesc: "Этот процент будет разделен между скидкой туристу, вознаграждением агенту и платформой."
   },
   id: {
     venue: "Manajer Tempat",
@@ -159,7 +163,9 @@ const translations = {
       retail: "Eceran",
       activity: "Aktivitas",
       services: "Layanan"
-    }
+    },
+    globalMarginLabel: "Margin Global (%)",
+    globalMarginDesc: "Persentase ini akan dibagi antara diskon turis, hadiah agen, dan biaya platform."
   },
   zh: {
     venue: "商户经理",
@@ -207,7 +213,9 @@ const translations = {
       retail: "零售",
       activity: "活动",
       services: "服务"
-    }
+    },
+    globalMarginLabel: "总利润率 (%)",
+    globalMarginDesc: "该百分比将在游客折扣、代理奖励和平台费用之间分配。"
   },
   es: {
     venue: "Gerente del Lugar",
@@ -255,7 +263,9 @@ const translations = {
       retail: "Minorista",
       activity: "Actividades",
       services: "Servicios"
-    }
+    },
+    globalMarginLabel: "Margen Global (%)",
+    globalMarginDesc: "Este porcentaje se dividirá entre el descuento para turistas, la recompensa para el agente y la tarifa de la plataforma."
   },
   de: {
     venue: "Veranstaltungsort-Manager",
@@ -303,7 +313,9 @@ const translations = {
       retail: "Einzelhandel",
       activity: "Aktivitäten",
       services: "Dienstleistungen"
-    }
+    },
+    globalMarginLabel: "Globale Marge (%)",
+    globalMarginDesc: "Dieser Prozentsatz wird zwischen Touristenrabatt, Agentenbelohnung und Plattformgebühr aufgeteilt."
   },
   fr: {
     venue: "Gérant de l'Établissement",
@@ -351,7 +363,9 @@ const translations = {
       retail: "Commerce de détail",
       activity: "Activités",
       services: "Services"
-    }
+    },
+    globalMarginLabel: "Marge Globale (%)",
+    globalMarginDesc: "Ce pourcentage sera réparti entre la remise touriste, la récompense agent et les frais de plateforme."
   },
   ja: {
     venue: "会場マネージャー",
@@ -399,7 +413,9 @@ const translations = {
       retail: "小売",
       activity: "アクティビティ",
       services: "サービス"
-    }
+    },
+    globalMarginLabel: "グローバルマージン (%)",
+    globalMarginDesc: "この割合は、観光客の割引、エージェントの報酬、およびプラットフォーム手数料に分配されます。"
   },
   ar: {
     venue: "مدير المكان",
@@ -447,7 +463,9 @@ const translations = {
       retail: "تجزئة",
       activity: "أنشطة",
       services: "خدمات"
-    }
+    },
+    globalMarginLabel: "الهامش الإجمالي (%)",
+    globalMarginDesc: "سيتم تقسيم هذه النسبة بين خصم السائح ومكافأة الوكيل ورسوم المنصة."
   },
   pt: {
     venue: "Gestor de Local",
@@ -495,7 +513,9 @@ const translations = {
       retail: "Retalho",
       activity: "Atividades",
       services: "Serviços"
-    }
+    },
+    globalMarginLabel: "Margem Global (%)",
+    globalMarginDesc: "Esta percentagem será dividida entre o desconto para turistas, a recompensa do agente e a taxa da plataforma."
   },
   hi: {
     venue: "स्थान प्रबंधक",
@@ -543,7 +563,9 @@ const translations = {
       retail: "रिटेल",
       activity: "गतिविधियां",
       services: "सेवाएं"
-    }
+    },
+    globalMarginLabel: "वैश्विक मार्जिन (%)",
+    globalMarginDesc: "यह प्रतिशत पर्यटक छूट, एजेंट इनाम और प्लेटफ़ॉर्म शुल्क के बीच विभाजित किया जाएगा।"
   }
 };;
 
@@ -1318,7 +1340,7 @@ export default function BusinessDashboard() {
                 }}
               >
                 <label style={{ fontSize: "0.8rem", opacity: 0.8 }}>
-                  Global Margin (%)
+                  {t.globalMarginLabel}
                 </label>
                 <input
                   type="number"
@@ -1339,7 +1361,7 @@ export default function BusinessDashboard() {
                   }}
                 />
                 <p style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "2px" }}>
-                  This percentage of each transaction will be split between the tourist discount, promoter reward, and platform fee.
+                  {t.globalMarginDesc}
                 </p>
               </div>
               
