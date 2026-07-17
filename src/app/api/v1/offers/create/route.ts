@@ -21,12 +21,19 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     
-    if (body.business_id !== user.id) {
-       return NextResponse.json({ error: "Forbidden: You can only create offers for your own business" }, { status: 403 });
-    }
-
     // Client with service role to bypass RLS
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Check if the business belongs to the user
+    const { data: business } = await supabaseAdmin
+      .from('businesses')
+      .select('owner_id')
+      .eq('id', body.business_id)
+      .single();
+
+    if (!business || business.owner_id !== user.id) {
+       return NextResponse.json({ error: "Forbidden: You can only create offers for your own business" }, { status: 403 });
+    }
     
     const { data, error } = await supabaseAdmin
       .from("offers")
