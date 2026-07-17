@@ -142,4 +142,23 @@ export class SupabaseOfferRepository implements IOfferRepository {
       createdAt: data.created_at,
     };
   }
+
+  async deleteOffer(id: string): Promise<void> {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+
+    const response = await fetch('/api/v1/offers/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ offerId: id })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to delete offer via API');
+    }
+  }
 }

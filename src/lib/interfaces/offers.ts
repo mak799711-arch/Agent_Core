@@ -17,4 +17,5 @@ export interface IOfferRepository {
   getOfferById(id: string): Promise<Offer | null>;
   createOffer(offer: Omit<Offer, 'id' | 'isActive' | 'createdAt'>): Promise<Offer>;
   updateOffer(id: string, updates: Partial<Omit<Offer, 'id' | 'businessId' | 'createdAt'>>): Promise<Offer>;
+  deleteOffer(id: string): Promise<void>;
 }
