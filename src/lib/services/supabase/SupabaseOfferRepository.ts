@@ -84,13 +84,24 @@ export class SupabaseOfferRepository implements IOfferRepository {
       reward_type: 'percent',
     };
 
-    const { data, error } = await supabase
-      .from('offers')
-      .insert(dbData)
-      .select()
-      .single();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
 
-    if (error) throw error;
+    const response = await fetch('/api/v1/offers/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(dbData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create offer via API');
+    }
+    
+    const data = await response.json();
     return this.mapToOffer(data);
   }
 
