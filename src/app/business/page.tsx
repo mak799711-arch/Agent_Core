@@ -1331,66 +1331,70 @@ export default function BusinessDashboard() {
                   </option>
                 </select>
               </div>
-              {/* Global Margin Selection */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.4rem",
-                }}
-              >
-                <label style={{ fontSize: "0.8rem", opacity: 0.8 }}>
-                  {t.globalMarginLabel}
-                </label>
-                <input
-                  type="number"
-                  value={globalMargin}
-                  onChange={(e) => setGlobalMargin(e.target.value)}
-                  placeholder="10"
-                  required
-                  min="1"
-                  max="100"
-                  step="0.1"
+              <div style={{ display: "flex", gap: "1rem" }}>
+                {/* Global Margin Selection */}
+                <div
                   style={{
-                    background: "var(--input-bg)",
-                    border: "1px solid var(--surface-border)",
-                    borderRadius: "8px",
-                    padding: "10px 14px",
-                    color: "var(--foreground)",
-                    outline: "none",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.4rem",
+                    flex: 1,
                   }}
-                />
-                <p style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "2px" }}>
-                  {t.globalMarginDesc}
-                </p>
-              </div>
+                >
+                  <label style={{ fontSize: "0.8rem", opacity: 0.8 }}>
+                    {t.globalMarginLabel}
+                  </label>
+                  <input
+                    type="number"
+                    value={globalMargin}
+                    onChange={(e) => setGlobalMargin(e.target.value)}
+                    placeholder="10"
+                    required
+                    min="1"
+                    max="100"
+                    step="0.1"
+                    style={{
+                      background: "var(--input-bg)",
+                      border: "1px solid var(--surface-border)",
+                      borderRadius: "8px",
+                      padding: "10px 14px",
+                      color: "var(--foreground)",
+                      outline: "none",
+                    }}
+                  />
+                  <p style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "2px" }}>
+                    {t.globalMarginDesc}
+                  </p>
+                </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.5rem",
-                }}
-              >
-                <label style={{ fontSize: "0.8rem", opacity: 0.8 }}>
-                  {t.avgBillLabel || "Average Bill"}
-                </label>
-                <input
-                  type="number"
-                  value={averageBill}
-                  onChange={(e) => setAverageBill(e.target.value)}
-                  placeholder="e.g. 50"
-                  min="0"
-                  step="0.1"
+                <div
                   style={{
-                    background: "var(--input-bg)",
-                    border: "1px solid var(--surface-border)",
-                    borderRadius: "8px",
-                    padding: "10px 14px",
-                    color: "var(--foreground)",
-                    outline: "none",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.4rem",
+                    flex: 1,
                   }}
-                />
+                >
+                  <label style={{ fontSize: "0.8rem", opacity: 0.8 }}>
+                    {t.avgBillLabel ? t.avgBillLabel.replace("USD", user?.currency || "USD") : "Average Bill"}
+                  </label>
+                  <input
+                    type="number"
+                    value={averageBill}
+                    onChange={(e) => setAverageBill(e.target.value)}
+                    placeholder="e.g. 50"
+                    min="0"
+                    step="0.1"
+                    style={{
+                      background: "var(--input-bg)",
+                      border: "1px solid var(--surface-border)",
+                      borderRadius: "8px",
+                      padding: "10px 14px",
+                      color: "var(--foreground)",
+                      outline: "none",
+                    }}
+                  />
+                </div>
               </div>
               
               <div
