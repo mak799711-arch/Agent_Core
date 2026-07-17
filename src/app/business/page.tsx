@@ -596,6 +596,7 @@ export default function BusinessDashboard() {
     | "services"
   >("restaurant");
   const [globalMargin, setGlobalMargin] = useState<string>("10");
+  const [averageBill, setAverageBill] = useState<string>("");
   const [newOfferConditions, setNewOfferConditions] = useState("");
   const [statusMessage, setStatusMessage] = useState<{
     text: string;
@@ -672,9 +673,7 @@ export default function BusinessDashboard() {
       return;
     }
 
-    const avgBillVal = null;
-
-
+    const avgBillVal = averageBill ? parseFloat(averageBill) : null;
 
     try {
       if (!businessId) {
@@ -693,6 +692,7 @@ export default function BusinessDashboard() {
 
       setNewOfferTitle("");
       setGlobalMargin("10");
+      setAverageBill("");
       setNewOfferConditions("");
       setNewOfferCategory("restaurant");
 
@@ -1363,6 +1363,34 @@ export default function BusinessDashboard() {
                 <p style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "2px" }}>
                   {t.globalMarginDesc}
                 </p>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                }}
+              >
+                <label style={{ fontSize: "0.8rem", opacity: 0.8 }}>
+                  {t.avgBillLabel || "Average Bill"}
+                </label>
+                <input
+                  type="number"
+                  value={averageBill}
+                  onChange={(e) => setAverageBill(e.target.value)}
+                  placeholder="e.g. 50"
+                  min="0"
+                  step="0.1"
+                  style={{
+                    background: "var(--input-bg)",
+                    border: "1px solid var(--surface-border)",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    color: "var(--foreground)",
+                    outline: "none",
+                  }}
+                />
               </div>
               
               <div

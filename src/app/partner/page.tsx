@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { authService, offerRepository } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
 import { Offer } from "@/lib/interfaces/offers";
+import { formatCurrency } from "@/lib/utils/currency";
 import dynamic from "next/dynamic";
 import BusinessProfileModal from "@/app/components/BusinessProfileModal";
 
@@ -400,7 +401,8 @@ export default function PartnerDashboardV4() {
                   {offer.title}
                 </h4>
                 <p style={{ opacity: 0.7, fontSize: "0.9rem", margin: 0 }}>
-                  Global Margin: 20% (You get {offer.rewardAmount} IDR)
+                  Global Margin: {offer.globalMarginPercent}%
+                  {offer.averageBill ? ` (~ ${formatCurrency(offer.averageBill * (offer.globalMarginPercent / 100) * 0.6, user?.currency || "USD")} reward)` : ""}
                 </p>
               </div>
               <button
