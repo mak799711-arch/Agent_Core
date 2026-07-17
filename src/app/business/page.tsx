@@ -698,8 +698,11 @@ export default function BusinessDashboard() {
 
       setShowCreateModal(false);
       await refreshData(user.id);
-    } catch (err) {
-      alert("Failed to create offer");
+    } catch (err: any) {
+      console.error(err);
+      const errMsg = err.message || JSON.stringify(err);
+      alert("Failed to create offer: " + errMsg);
+      setStatusMessage({ text: "Failed to create offer. Please try again.", type: "error" });
     }
   };
 
