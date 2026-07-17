@@ -78,6 +78,10 @@ export class SupabaseOfferRepository implements IOfferRepository {
       conditions: offer.conditions,
       image_url: offer.imageUrl,
       image_urls: offer.imageUrls,
+      // Legacy fields to satisfy database NOT NULL constraints
+      reward_amount: 0,
+      reward_percent: 0,
+      reward_type: 'percent',
     };
 
     const { data, error } = await supabase
