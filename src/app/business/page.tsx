@@ -1362,9 +1362,6 @@ export default function BusinessDashboard() {
                       outline: "none",
                     }}
                   />
-                  <p style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "2px" }}>
-                    {t.globalMarginDesc}
-                  </p>
                 </div>
 
                 <div
