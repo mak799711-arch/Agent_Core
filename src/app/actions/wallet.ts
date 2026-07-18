@@ -11,17 +11,29 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 export async function getWalletBalance(userId: string) {
   try {
     const { data, error } = await supabaseAdmin
-      .from("wallets")
-      .select("balance, currency")
-      .eq("owner_id", userId)
-      .single();
+      .from("transactions")
+      .select("amount, type")
+      .eq("user_id", userId)
+      .eq("status", "completed");
 
     if (error) {
       console.error("Error fetching wallet balance:", error);
       return { balance: 0, currency: "USD" };
     }
 
-    return data || { balance: 0, currency: "USD" };
+    let balance = 0;
+    if (data) {
+      for (const tx of data) {
+        const amt = Number(tx.amount);
+        if (['reward', 'deposit', 'escrow_release'].includes(tx.type)) {
+          balance += amt;
+        } else if (['withdrawal', 'fee', 'escrow_hold', 'purchase'].includes(tx.type)) {
+          balance -= amt;
+        }
+      }
+    }
+
+    return { balance, currency: "USD" }; // Currency could be fetched from profile if needed
   } catch (error) {
     console.error("Failed to fetch wallet balance:", error);
     return { balance: 0, currency: "USD" };
@@ -30,19 +42,10 @@ export async function getWalletBalance(userId: string) {
 
 export async function getTransactionHistory(userId: string) {
   try {
-    // First get wallet ID
-    const { data: wallet } = await supabaseAdmin
-      .from("wallets")
-      .select("id")
-      .eq("owner_id", userId)
-      .single();
-
-    if (!wallet) return [];
-
     const { data, error } = await supabaseAdmin
       .from("transactions")
       .select("*")
-      .eq("wallet_id", wallet.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -59,32 +62,12 @@ export async function getTransactionHistory(userId: string) {
 
 export async function addFunds(userId: string, amount: number) {
   try {
-    const { data: wallet, error: walletError } = await supabaseAdmin
-      .from("wallets")
-      .select("id, balance")
-      .eq("owner_id", userId)
-      .single();
-
-    if (walletError || !wallet) {
-      throw new Error("Wallet not found");
-    }
-
-    const newBalance = Number(wallet.balance) + amount;
-
-    // 1. Update wallet balance
-    const { error: updateError } = await supabaseAdmin
-      .from("wallets")
-      .update({ balance: newBalance })
-      .eq("id", wallet.id);
-
-    if (updateError) throw updateError;
-
     // 2. Log transaction
     const { error: txError } = await supabaseAdmin.from("transactions").insert({
-      wallet_id: wallet.id,
+      user_id: userId,
       type: "deposit",
       amount: amount,
-      description: "Account funding (Mock)",
+      status: "completed",
     });
 
     if (txError) throw txError;
@@ -92,7 +75,7 @@ export async function addFunds(userId: string, amount: number) {
     revalidatePath("/wallet");
     revalidatePath("/partner");
     revalidatePath("/business");
-    return { success: true, balance: newBalance };
+    return { success: true };
   } catch (error: any) {
     console.error("Failed to add funds:", error);
     return { success: false, error: error.message };
@@ -101,34 +84,19 @@ export async function addFunds(userId: string, amount: number) {
 
 export async function processPayment(userId: string, amount: number, description: string) {
   try {
-    const { data: wallet, error: walletError } = await supabaseAdmin
-      .from("wallets")
-      .select("id, balance")
-      .eq("owner_id", userId)
-      .single();
-
-    if (walletError || !wallet) throw new Error("Wallet not found");
+    // Check balance dynamically
+    const { balance } = await getWalletBalance(userId);
     
-    if (Number(wallet.balance) < amount) {
+    if (balance < amount) {
       return { success: false, error: "Insufficient funds" };
     }
 
-    const newBalance = Number(wallet.balance) - amount;
-
-    // 1. Deduct from wallet
-    const { error: updateError } = await supabaseAdmin
-      .from("wallets")
-      .update({ balance: newBalance })
-      .eq("id", wallet.id);
-
-    if (updateError) throw updateError;
-
     // 2. Log transaction
     const { error: txError } = await supabaseAdmin.from("transactions").insert({
-      wallet_id: wallet.id,
+      user_id: userId,
       type: "purchase",
-      amount: -amount,
-      description: description,
+      amount: amount, // subtraction handled by dynamic balance
+      status: "completed",
     });
 
     if (txError) throw txError;
@@ -136,7 +104,7 @@ export async function processPayment(userId: string, amount: number, description
     revalidatePath("/wallet");
     revalidatePath("/partner");
     revalidatePath("/business");
-    return { success: true, balance: newBalance };
+    return { success: true };
   } catch (error: any) {
     console.error("Failed to process payment:", error);
     return { success: false, error: error.message };

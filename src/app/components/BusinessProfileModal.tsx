@@ -224,8 +224,13 @@ export default function BusinessProfileModal({
                 <div>
                   <h4 style={{ margin: 0, fontSize: "16px", color: "#ff5e00", fontWeight: "700" }}>{offer.title}</h4>
                   <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", marginTop: "4px" }}>
-                    Reward: <strong>{offer.rewardType === "percentage" ? `${offer.rewardPercent}%` : formatCurrency(offer.rewardAmount, business.currency || "IDR")}</strong>
+                    Global Margin: <strong>{offer.globalMarginPercent != null ? `${offer.globalMarginPercent}%` : '10%'}</strong>
                   </div>
+                  {offer.conditions && (
+                    <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", marginTop: "8px", fontStyle: "italic", whiteSpace: "pre-wrap" }}>
+                      Conditions: {offer.conditions}
+                    </div>
+                  )}
                 </div>
                 {onCopyLink && (
                   <button

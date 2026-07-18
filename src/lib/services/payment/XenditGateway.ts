@@ -9,6 +9,7 @@ export class XenditGateway {
     amount: number;
     description: string;
     payerEmail?: string;
+    currency?: string;
     successRedirectUrl: string;
     failureRedirectUrl: string;
     splits?: {
@@ -31,7 +32,7 @@ export class XenditGateway {
           amount: params.amount,
           description: params.description,
           customer: params.payerEmail ? { email: params.payerEmail } : undefined,
-          currency: 'IDR',
+          currency: params.currency || 'IDR',
           success_redirect_url: params.successRedirectUrl,
           failure_redirect_url: params.failureRedirectUrl
         })

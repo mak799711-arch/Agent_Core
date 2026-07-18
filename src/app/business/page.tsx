@@ -574,9 +574,6 @@ export default function BusinessDashboard() {
   const [balance, setBalance] = useState(0);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
-  const [shortCode, setShortCode] = useState("");
-  const [billAmount, setBillAmount] = useState("");
-  const [isConfirming, setIsConfirming] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
@@ -1071,14 +1068,10 @@ export default function BusinessDashboard() {
                       marginTop: "4px",
                     }}
                   >
-                    {t.rewardLabel}:{" "}
+                    Global Margin:{" "}
                     <strong>
-                      {user &&
-                        formatCurrency(offer.rewardAmount, user.currency)}
+                      {offer.globalMarginPercent != null ? `${offer.globalMarginPercent}%` : "10%"}
                     </strong>
-                    {offer.rewardType === "percentage" &&
-                      user &&
-                      ` (${offer.rewardPercent}% of ${formatCurrency(offer.averageBill || 0, user.currency)} check)`}
                   </span>
                   <span
                     style={{

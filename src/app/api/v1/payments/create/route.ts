@@ -71,11 +71,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to create payment split' }, { status: 500 });
     }
 
-    // 4. Create Xendit Invoice
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const invoice = await xenditGateway.createInvoice({
       externalId: `payment_${payment.id}`,
       amount: finalPaymentAmount,
+      currency: currency || 'IDR',
       description: `Payment for Business ${businessId} via AgentCore`,
       successRedirectUrl: `${baseUrl}/checkout/success?payment_id=${payment.id}`,
       failureRedirectUrl: `${baseUrl}/checkout/failed?payment_id=${payment.id}`,

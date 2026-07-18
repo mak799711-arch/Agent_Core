@@ -24,6 +24,15 @@ export async function POST(request: Request) {
 
     // 3. Process PAID status
     if (status === 'PAID' || status === 'SETTLED') {
+      // Get the payment split to know agent_id and agent_commission
+      const { data: split, error: fetchError } = await supabase
+        .from('payment_splits')
+        .select('agent_id, agent_commission')
+        .eq('payment_id', paymentId)
+        .single();
+        
+      if (fetchError) throw fetchError;
+
       // Update tourist_payments
       const { error: paymentError } = await supabase
         .from('tourist_payments')
@@ -39,6 +48,21 @@ export async function POST(request: Request) {
         .eq('payment_id', paymentId);
         
       if (splitError) throw splitError;
+
+      // CRITICAL FIX: Reward the agent by inserting a transaction into their wallet
+      if (split && split.agent_id && split.agent_commission > 0) {
+        const { error: txError } = await supabase
+          .from('transactions')
+          .insert({
+            user_id: split.agent_id,
+            amount: split.agent_commission,
+            type: 'reward',
+            status: 'completed',
+            session_id: paymentId
+          });
+          
+        if (txError) console.error('Failed to credit agent wallet:', txError);
+      }
 
       console.log(`Successfully processed payment ${paymentId}`);
       return NextResponse.json({ success: true, message: 'Payment completed' });

@@ -30,7 +30,6 @@ export default function WalletWidget({ userId }: WalletWidgetProps) {
 
   return (
     <div
-      onClick={() => router.push("/wallet")}
       style={{
         display: "flex",
         alignItems: "center",
@@ -39,7 +38,6 @@ export default function WalletWidget({ userId }: WalletWidgetProps) {
         background: "linear-gradient(135deg, rgba(255, 94, 0, 0.1), rgba(255, 94, 0, 0.05))",
         border: "1px solid rgba(255, 94, 0, 0.2)",
         borderRadius: "20px",
-        cursor: "pointer",
         transition: "all 0.2s",
       }}
       onMouseEnter={(e) => {

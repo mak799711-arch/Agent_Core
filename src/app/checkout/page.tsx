@@ -59,7 +59,7 @@ function CheckoutContent() {
 
         if (business?.owner_id) {
           const { data: user } = await supabase
-            .from("users")
+            .from("profiles")
             .select("currency")
             .eq("id", business.owner_id)
             .single();
