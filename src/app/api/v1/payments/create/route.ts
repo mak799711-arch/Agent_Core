@@ -50,12 +50,12 @@ export async function POST(request: Request) {
     const AGENT_COMMISSION = globalMarginRatio * 0.6;
     const PLATFORM_COMMISSION = globalMarginRatio * 0.1;
 
-    const touristDiscountAmount = amount * TOURIST_DISCOUNT;
-    const finalPaymentAmount = amount - touristDiscountAmount; // This is what the tourist actually pays
+    const touristDiscountAmount = Math.round(amount * TOURIST_DISCOUNT);
+    const finalPaymentAmount = Math.round(amount - touristDiscountAmount); // This is what the tourist actually pays
 
-    const agentCommissionAmount = amount * AGENT_COMMISSION;
-    const platformCommissionAmount = amount * PLATFORM_COMMISSION;
-    const businessShare = amount - touristDiscountAmount - agentCommissionAmount - platformCommissionAmount;
+    const agentCommissionAmount = Math.round(amount * AGENT_COMMISSION);
+    const platformCommissionAmount = Math.round(amount * PLATFORM_COMMISSION);
+    const businessShare = finalPaymentAmount - agentCommissionAmount - platformCommissionAmount;
 
     // 2. Insert into tourist_payments
     // We store the finalPaymentAmount as the amount paid by tourist
