@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from "@supabase/supabase-js";
 import { xenditGateway } from '@/lib/services/payment/XenditGateway';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function POST(request: Request) {
   try {
@@ -25,7 +29,7 @@ export async function POST(request: Request) {
     // 3. Process PAID status
     if (status === 'PAID' || status === 'SETTLED') {
       // Get the payment split to know agent_id and agent_commission
-      const { data: split, error: fetchError } = await supabase
+      const { data: split, error: fetchError } = await supabaseAdmin
         .from('payment_splits')
         .select('agent_id, agent_commission')
         .eq('payment_id', paymentId)
@@ -34,7 +38,7 @@ export async function POST(request: Request) {
       if (fetchError) throw fetchError;
 
       // Update tourist_payments
-      const { error: paymentError } = await supabase
+      const { error: paymentError } = await supabaseAdmin
         .from('tourist_payments')
         .update({ status: 'completed' })
         .eq('id', paymentId);
@@ -42,7 +46,7 @@ export async function POST(request: Request) {
       if (paymentError) throw paymentError;
       
       // Update payment_splits
-      const { error: splitError } = await supabase
+      const { error: splitError } = await supabaseAdmin
         .from('payment_splits')
         .update({ status: 'completed' })
         .eq('payment_id', paymentId);
@@ -51,7 +55,7 @@ export async function POST(request: Request) {
 
       // CRITICAL FIX: Reward the agent by inserting a transaction into their wallet
       if (split && split.agent_id && split.agent_commission > 0) {
-        const { error: txError } = await supabase
+        const { error: txError } = await supabaseAdmin
           .from('transactions')
           .insert({
             user_id: split.agent_id,
@@ -70,8 +74,8 @@ export async function POST(request: Request) {
 
     // 4. Handle EXPIRED or FAILED status
     if (status === 'EXPIRED') {
-      await supabase.from('tourist_payments').update({ status: 'failed' }).eq('id', paymentId);
-      await supabase.from('payment_splits').update({ status: 'failed' }).eq('payment_id', paymentId);
+      await supabaseAdmin.from('tourist_payments').update({ status: 'failed' }).eq('id', paymentId);
+      await supabaseAdmin.from('payment_splits').update({ status: 'failed' }).eq('payment_id', paymentId);
       return NextResponse.json({ success: true, message: 'Payment expired' });
     }
 

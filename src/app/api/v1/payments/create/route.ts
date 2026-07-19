@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from "@supabase/supabase-js";
 import { xenditGateway } from '@/lib/services/payment/XenditGateway';
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -11,11 +14,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    let secureBusinessId = businessId;
+    let secureAgentId = agentId;
+
+    if (linkId) {
+      const { data: link, error: linkError } = await supabaseAdmin
+        .from('payment_links')
+        .select('business_id, agent_id')
+        .eq('id', linkId)
+        .single();
+        
+      if (!linkError && link) {
+        secureBusinessId = link.business_id;
+        secureAgentId = link.agent_id;
+      } else {
+        return NextResponse.json({ error: 'Invalid link ID' }, { status: 400 });
+      }
+    }
+
     // Fetch the active offer for this business to get the global margin
-    const { data: offer, error: offerError } = await supabase
+    const { data: offer, error: offerError } = await supabaseAdmin
       .from('offers')
       .select('global_margin_percent')
-      .eq('business_id', businessId)
+      .eq('business_id', secureBusinessId)
       .eq('is_active', true)
       .single();
 
@@ -38,7 +59,7 @@ export async function POST(request: Request) {
 
     // 2. Insert into tourist_payments
     // We store the finalPaymentAmount as the amount paid by tourist
-    const { data: payment, error: paymentError } = await supabase
+    const { data: payment, error: paymentError } = await supabaseAdmin
       .from('tourist_payments')
       .insert({
         amount: finalPaymentAmount,
@@ -54,11 +75,11 @@ export async function POST(request: Request) {
     }
 
     // 3. Insert into payment_splits
-    const { error: splitError } = await supabase
+    const { error: splitError } = await supabaseAdmin
       .from('payment_splits')
       .insert({
         payment_id: payment.id,
-        agent_id: agentId,
+        agent_id: secureAgentId,
         gross_amount: finalPaymentAmount, // The total money entered into the system
         business_share: businessShare,
         agent_commission: agentCommissionAmount,
@@ -76,7 +97,7 @@ export async function POST(request: Request) {
       externalId: `payment_${payment.id}`,
       amount: finalPaymentAmount,
       currency: currency || 'IDR',
-      description: `Payment for Business ${businessId} via AgentCore`,
+      description: `Payment for Business ${secureBusinessId} via AgentCore`,
       successRedirectUrl: `${baseUrl}/checkout/success?payment_id=${payment.id}`,
       failureRedirectUrl: `${baseUrl}/checkout/failed?payment_id=${payment.id}`,
       splits: {

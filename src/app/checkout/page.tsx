@@ -91,8 +91,8 @@ function CheckoutContent() {
   // В V4: скидка туристу (30% от Global Margin)
   const TOURIST_DISCOUNT_PERCENT = (globalMargin / 100) * 0.3;
 
-  // Парсим сырое значение (убираем все кроме цифр)
-  const rawAmount = parseFloat(amount.replace(/\D/g, "")) || 0;
+  // Парсим значение, разрешая цифры, точки и запятые
+  const rawAmount = parseFloat(amount.replace(/[^\d.,]/g, "").replace(",", ".")) || 0;
   const discount = rawAmount * TOURIST_DISCOUNT_PERCENT;
   const finalAmount = rawAmount - discount;
 
