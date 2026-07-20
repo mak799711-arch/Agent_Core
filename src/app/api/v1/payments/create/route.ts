@@ -8,27 +8,38 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { amount, currency, businessId, agentId, linkId } = body;
+    const { amount, currency, linkId } = body;
 
-    if (!amount || !businessId || !agentId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    const parsedAmount = Number(amount);
+    if (!parsedAmount || isNaN(parsedAmount) || parsedAmount <= 0 || parsedAmount > 1000000000) {
+      return NextResponse.json({ error: 'Invalid amount or missing link ID' }, { status: 400 });
     }
 
-    let secureBusinessId = businessId;
-    let secureAgentId = agentId;
+    const { data: link, error: linkError } = await supabaseAdmin
+      .from('payment_links')
+      .select('business_id, agent_id, is_single_use, is_active, ttl_expires_at')
+      .eq('id', linkId)
+      .single();
+      
+    if (linkError || !link || !link.is_active || new Date(link.ttl_expires_at) < new Date()) {
+      return NextResponse.json({ error: 'Invalid, inactive, or expired link ID' }, { status: 400 });
+    }
 
-    if (linkId) {
-      const { data: link, error: linkError } = await supabaseAdmin
+    const secureBusinessId = link.business_id;
+    const secureAgentId = link.agent_id;
+
+    // Сжигаем одноразовую ссылку атомарно, чтобы предотвратить Race Condition
+    if (link.is_single_use) {
+      const { data: updatedLink, error: updateError } = await supabaseAdmin
         .from('payment_links')
-        .select('business_id, agent_id')
+        .update({ is_active: false })
         .eq('id', linkId)
+        .eq('is_active', true)
+        .select()
         .single();
         
-      if (!linkError && link) {
-        secureBusinessId = link.business_id;
-        secureAgentId = link.agent_id;
-      } else {
-        return NextResponse.json({ error: 'Invalid link ID' }, { status: 400 });
+      if (updateError || !updatedLink) {
+        return NextResponse.json({ error: 'Link already used or being processed' }, { status: 409 });
       }
     }
 
@@ -39,6 +50,20 @@ export async function POST(request: Request) {
       .eq('business_id', secureBusinessId)
       .eq('is_active', true)
       .single();
+      
+    // SECURITY FIX: Ensure the agent and business are still not banned at the moment of payment
+    const { data: agentProfile } = await supabaseAdmin.from('profiles').select('status').eq('id', secureAgentId).single();
+    if (!agentProfile || agentProfile.status === 'banned') {
+      return NextResponse.json({ error: 'Agent is banned' }, { status: 403 });
+    }
+    
+    const { data: businessOwner } = await supabaseAdmin.from('businesses').select('owner_id').eq('id', secureBusinessId).single();
+    if (businessOwner) {
+      const { data: ownerProfile } = await supabaseAdmin.from('profiles').select('status').eq('id', businessOwner.owner_id).single();
+      if (!ownerProfile || ownerProfile.status === 'banned') {
+        return NextResponse.json({ error: 'Business is banned' }, { status: 403 });
+      }
+    }
 
     // Default to 10% if not found or no active offer
     const globalMarginPercent = offer?.global_margin_percent || 10.0;
@@ -50,11 +75,11 @@ export async function POST(request: Request) {
     const AGENT_COMMISSION = globalMarginRatio * 0.6;
     const PLATFORM_COMMISSION = globalMarginRatio * 0.1;
 
-    const touristDiscountAmount = Math.round(amount * TOURIST_DISCOUNT);
-    const finalPaymentAmount = Math.round(amount - touristDiscountAmount); // This is what the tourist actually pays
+    const touristDiscountAmount = Math.round(parsedAmount * TOURIST_DISCOUNT);
+    const finalPaymentAmount = Math.round(parsedAmount - touristDiscountAmount); // This is what the tourist actually pays
 
-    const agentCommissionAmount = Math.round(amount * AGENT_COMMISSION);
-    const platformCommissionAmount = Math.round(amount * PLATFORM_COMMISSION);
+    const agentCommissionAmount = Math.round(parsedAmount * AGENT_COMMISSION);
+    const platformCommissionAmount = Math.round(parsedAmount * PLATFORM_COMMISSION);
     const businessShare = finalPaymentAmount - agentCommissionAmount - platformCommissionAmount;
 
     // 2. Insert into tourist_payments

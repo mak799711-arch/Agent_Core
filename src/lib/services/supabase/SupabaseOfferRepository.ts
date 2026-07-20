@@ -115,14 +115,24 @@ export class SupabaseOfferRepository implements IOfferRepository {
     if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
     if (updates.imageUrls !== undefined) dbUpdates.image_urls = updates.imageUrls;
 
-    const { data, error } = await supabase
-      .from('offers')
-      .update(dbUpdates)
-      .eq('id', id)
-      .select()
-      .single();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
 
-    if (error) throw error;
+    const response = await fetch('/api/v1/offers/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ offerId: id, updates: dbUpdates })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update offer via API');
+    }
+    
+    const data = await response.json();
     return this.mapToOffer(data);
   }
 

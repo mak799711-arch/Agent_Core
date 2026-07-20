@@ -189,9 +189,10 @@ export class SupabaseAuthService implements IAuthService {
     if (updates.currency !== undefined) dbUpdates.currency = updates.currency;
     if (updates.language !== undefined) dbUpdates.language = updates.language;
     if (updates.theme !== undefined) dbUpdates.theme = updates.theme;
-    if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
-    if (updates.isBlocked !== undefined) dbUpdates.is_blocked = updates.isBlocked;
+    
+    // SECURITY FIX: Users must NEVER be able to update their own status or isBlocked flags.
+    // If they could, a banned user could unban themselves or fake verification.
 
     if (updates.photos !== undefined) dbUpdates.photos = updates.photos;
 

@@ -70,8 +70,9 @@ export class SupabaseBusinessRepository implements IBusinessRepository {
     if (updates.address !== undefined) dbUpdates.address = updates.address;
     if (updates.latitude !== undefined) dbUpdates.latitude = updates.latitude;
     if (updates.longitude !== undefined) dbUpdates.longitude = updates.longitude;
-    if (updates.reserveBalance !== undefined) dbUpdates.reserve_balance = updates.reserveBalance;
-    if (updates.isVerified !== undefined) dbUpdates.is_verified = updates.isVerified;
+    
+    // SECURITY FIX: Businesses cannot self-verify or modify their reserve balance via client API
+    // Admin functions should be used for this.
 
     const { data, error } = await supabase
       .from('businesses')

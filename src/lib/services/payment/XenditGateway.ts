@@ -60,8 +60,12 @@ export class XenditGateway {
   verifyWebhook(callbackToken: string): boolean {
     const expectedToken = process.env.XENDIT_WEBHOOK_TOKEN;
     if (!expectedToken) {
-      console.warn('XENDIT_WEBHOOK_TOKEN is not set, skipping verification');
-      return true; // For local testing only
+      console.warn('XENDIT_WEBHOOK_TOKEN is not set');
+      // SECURITY FIX: Never return true in production if token is missing
+      if (process.env.NODE_ENV === 'development') {
+        return true; 
+      }
+      return false;
     }
     return callbackToken === expectedToken;
   }

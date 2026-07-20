@@ -594,24 +594,8 @@ export default function AdminDashboard() {
 
       const enrichedUsers = await Promise.all(
         allUsers.map(async (u) => {
-          const balance = await walletRepository.getBalance(u.id);
-          const txs = await walletRepository.getTransactions(u.id);
-
-          const volume = txs
-            .filter((t) => t.status === "completed")
-            .reduce((sum, t) => sum + t.amount, 0);
-
-          const escrow =
-            txs
-              .filter(
-                (t) => t.type === "escrow_hold" && t.status === "completed",
-              )
-              .reduce((sum, t) => sum + t.amount, 0) -
-            txs
-              .filter(
-                (t) => t.type === "escrow_release" && t.status === "completed",
-              )
-              .reduce((sum, t) => sum + t.amount, 0);
+          const volume = 0; // TODO: Calculate from tourist_payments
+          const escrow = 0; // TODO: Calculate from tourist_payments
 
           const status = u.status || "unverified";
           let banDuration = "";

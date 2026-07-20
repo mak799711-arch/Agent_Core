@@ -153,10 +153,10 @@ export default function PartnerDashboardV4() {
     loadData();
   }, [router]);
 
-  const handleCopyLink = async (businessId: string) => {
+  const handleCopyLink = async (businessId: string, offerId: string) => {
     if (!user) return;
     try {
-      setCopiedLink("loading-" + businessId);
+      setCopiedLink("loading-" + offerId);
       
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
@@ -180,7 +180,7 @@ export default function PartnerDashboardV4() {
       const link = `${origin}/checkout?link_id=${data.linkId}`;
       await navigator.clipboard.writeText(link);
       
-      setCopiedLink(businessId);
+      setCopiedLink(offerId);
       setTimeout(() => setCopiedLink(null), 2000);
     } catch (e) {
       console.error(e);
@@ -414,18 +414,18 @@ export default function PartnerDashboardV4() {
                 </p>
               </div>
               <button
-                onClick={() => handleCopyLink(offer.businessId)}
-                disabled={copiedLink === `loading-${offer.businessId}`}
+                onClick={() => handleCopyLink(offer.businessId, offer.id)}
+                disabled={copiedLink === `loading-${offer.id}`}
                 className="btn-primary"
                 style={{
                   background:
-                    copiedLink === offer.businessId
+                    copiedLink === offer.id
                       ? "var(--success)"
                       : "var(--primary)",
-                  opacity: copiedLink === `loading-${offer.businessId}` ? 0.7 : 1
+                  opacity: copiedLink === `loading-${offer.id}` ? 0.7 : 1
                 }}
               >
-                {copiedLink === `loading-${offer.businessId}` ? "Generating..." : copiedLink === offer.businessId ? "Copied!" : "Copy Link"}
+                {copiedLink === `loading-${offer.id}` ? "Generating..." : copiedLink === offer.id ? "Copied!" : "Copy Link"}
               </button>
             </div>
           ))}

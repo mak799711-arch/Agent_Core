@@ -37,6 +37,48 @@ export async function POST(request: Request) {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
+    // SECURITY FIX: Ensure the agent is not banned
+    const { data: agentProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('status')
+      .eq('id', agentId)
+      .single();
+      
+    if (!agentProfile || agentProfile.status === 'banned') {
+      return NextResponse.json({ error: 'Agent is banned' }, { status: 403 });
+    }
+
+    // SECURITY FIX: Ensure the business owner is not banned
+    const { data: business } = await supabaseAdmin
+      .from('businesses')
+      .select('owner_id')
+      .eq('id', businessId)
+      .single();
+      
+    if (business) {
+      const { data: ownerProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('status')
+        .eq('id', business.owner_id)
+        .single();
+        
+      if (!ownerProfile || ownerProfile.status === 'banned') {
+        return NextResponse.json({ error: 'Business is banned' }, { status: 403 });
+      }
+    }
+
+    // SECURITY FIX: Ensure the business actually has an active offer before allowing link creation
+    const { data: offer, error: offerError } = await supabaseAdmin
+      .from('offers')
+      .select('id')
+      .eq('business_id', businessId)
+      .eq('is_active', true)
+      .single();
+
+    if (offerError || !offer) {
+      return NextResponse.json({ error: 'Business has no active offers' }, { status: 400 });
+    }
+
     const { data: link, error } = await supabaseAdmin
       .from('payment_links')
       .insert({

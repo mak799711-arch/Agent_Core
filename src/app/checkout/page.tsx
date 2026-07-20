@@ -8,11 +8,8 @@ import QRCode from "react-qr-code";
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const linkId = searchParams.get("link_id");
-  const fallbackBusinessId = searchParams.get("b");
-  const fallbackAgentId = searchParams.get("a");
-
-  const [businessId, setBusinessId] = useState<string | null>(fallbackBusinessId);
-  const [agentId, setAgentId] = useState<string | null>(fallbackAgentId);
+  const [businessId, setBusinessId] = useState<string | null>(null);
+  const [agentId, setAgentId] = useState<string | null>(null);
 
   const [amount, setAmount] = useState<string>("");
   const [status, setStatus] = useState<
@@ -20,42 +17,48 @@ function CheckoutContent() {
   >("loading");
   const [currency, setCurrency] = useState<string>("IDR");
   const [globalMargin, setGlobalMargin] = useState<number>(10.0);
+  const [businessName, setBusinessName] = useState<string>("");
 
   useEffect(() => {
     async function init() {
-      let currentBusinessId = fallbackBusinessId;
-      
-      if (linkId) {
-        try {
-          const { data: link, error: linkError } = await supabase
-            .from("payment_links")
-            .select("business_id, agent_id, is_active, ttl_expires_at")
-            .eq("id", linkId)
-            .single();
-
-          if (linkError || !link || !link.is_active || new Date(link.ttl_expires_at) < new Date()) {
-            alert("Payment link is invalid or has expired.");
-            setStatus("input");
-            return;
-          }
-          currentBusinessId = link.business_id;
-          setBusinessId(link.business_id);
-          setAgentId(link.agent_id);
-        } catch (e) {
-          console.error("Error fetching link:", e);
-        }
-      }
-
-      if (!currentBusinessId) {
+      if (!linkId) {
+        alert("Payment link is missing.");
         setStatus("input");
         return;
       }
+
+      let currentBusinessId = null;
+      try {
+        const { data: link, error: linkError } = await supabase
+          .from("payment_links")
+          .select("business_id, agent_id, is_active, ttl_expires_at")
+          .eq("id", linkId)
+          .single();
+
+        if (linkError || !link || !link.is_active || new Date(link.ttl_expires_at) < new Date()) {
+          alert("Payment link is invalid or has expired.");
+          setStatus("input");
+          return;
+        }
+        currentBusinessId = link.business_id;
+        setBusinessId(link.business_id);
+        setAgentId(link.agent_id);
+      } catch (e) {
+        console.error("Error fetching link:", e);
+        setStatus("input");
+        return;
+      }
+
       try {
         const { data: business } = await supabase
           .from("businesses")
-          .select("owner_id")
+          .select("owner_id, name")
           .eq("id", currentBusinessId)
           .single();
+
+        if (business?.name) {
+          setBusinessName(business.name);
+        }
 
         if (business?.owner_id) {
           const { data: user } = await supabase
@@ -86,7 +89,7 @@ function CheckoutContent() {
       setStatus("input");
     }
     init();
-  }, [linkId, fallbackBusinessId]);
+  }, [linkId]);
 
   // В V4: скидка туристу (30% от Global Margin)
   const TOURIST_DISCOUNT_PERCENT = (globalMargin / 100) * 0.3;
@@ -109,8 +112,6 @@ function CheckoutContent() {
         body: JSON.stringify({
           amount: rawAmount,
           currency,
-          businessId,
-          agentId,
           linkId,
         }),
       });
@@ -360,7 +361,7 @@ function CheckoutContent() {
         flexDirection: "column",
       }}
     >
-      <header style={{ marginBottom: "3rem", textAlign: "center" }}>
+      <header style={{ marginBottom: "2rem", textAlign: "center" }}>
         <h1
           style={{
             fontSize: "1.5rem",
@@ -369,11 +370,25 @@ function CheckoutContent() {
             color: "var(--primary)",
           }}
         >
-          AGENT CORE
+          PAY CORE
         </h1>
         <p style={{ opacity: 0.6, fontSize: "0.9rem", marginTop: "0.5rem" }}>
           Secure Checkout
         </p>
+        {businessName && (
+          <div style={{
+            marginTop: "1.5rem",
+            padding: "0.75rem",
+            background: "var(--surface)",
+            borderRadius: "8px",
+            border: "1px solid var(--surface-border)",
+            display: "inline-block",
+            minWidth: "200px"
+          }}>
+            <p style={{ fontSize: "0.8rem", opacity: 0.7, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "1px" }}>Payment to</p>
+            <h2 style={{ fontSize: "1.3rem", fontWeight: 700, margin: 0 }}>{businessName}</h2>
+          </div>
+        )}
       </header>
 
       <div

@@ -36,8 +36,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Process the update
     const { targetUserId, updates } = await req.json();
+
+    if (targetUserId === user.id && (updates.role !== undefined || updates.status === 'banned')) {
+      return NextResponse.json({ error: 'Admins cannot ban themselves or downgrade their own role' }, { status: 400 });
+    }
 
     const { error } = await supabaseAdmin
       .from('profiles')

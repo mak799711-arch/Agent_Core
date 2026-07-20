@@ -31,11 +31,17 @@ export async function POST(request: Request) {
       // Get the payment split to know agent_id and agent_commission
       const { data: split, error: fetchError } = await supabaseAdmin
         .from('payment_splits')
-        .select('agent_id, agent_commission')
+        .select('agent_id, agent_commission, status')
         .eq('payment_id', paymentId)
         .single();
         
       if (fetchError) throw fetchError;
+      
+      // Idempotency: prevent double processing if Xendit sends webhook twice
+      if (split.status === 'completed' || split.status === 'settled') {
+        console.log(`Payment ${paymentId} already completed. Ignoring duplicate webhook.`);
+        return NextResponse.json({ success: true, message: 'Already processed' });
+      }
 
       // Update tourist_payments
       const { error: paymentError } = await supabaseAdmin
@@ -53,20 +59,8 @@ export async function POST(request: Request) {
         
       if (splitError) throw splitError;
 
-      // CRITICAL FIX: Reward the agent by inserting a transaction into their wallet
-      if (split && split.agent_id && split.agent_commission > 0) {
-        const { error: txError } = await supabaseAdmin
-          .from('transactions')
-          .insert({
-            user_id: split.agent_id,
-            amount: split.agent_commission,
-            type: 'reward',
-            status: 'completed',
-            session_id: paymentId
-          });
-          
-        if (txError) console.error('Failed to credit agent wallet:', txError);
-      }
+      // Внутренний кошелек (transactions) удален. Прямые выплаты на карты.
+      // TODO: Внедрить Xendit Platform API split rules для автоматического зачисления на привязанные карты агента и бизнеса.
 
       console.log(`Successfully processed payment ${paymentId}`);
       return NextResponse.json({ success: true, message: 'Payment completed' });

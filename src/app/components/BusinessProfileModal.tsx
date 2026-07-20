@@ -8,7 +8,7 @@ interface BusinessProfileModalProps {
   business: any;
   offers: Offer[];
   onClose: () => void;
-  onCopyLink?: (offerId: string) => void;
+  onCopyLink?: (businessId: string, offerId: string) => void;
   copiedId?: string | null;
   theme?: "light" | "dark";
 }
@@ -234,7 +234,7 @@ export default function BusinessProfileModal({
                 </div>
                 {onCopyLink && (
                   <button
-                    onClick={() => onCopyLink(offer.id)}
+                    onClick={() => onCopyLink(business.id, offer.id)}
                     style={{
                       padding: "10px",
                       background: copiedId === offer.id ? "#4caf50" : "#ff5e00",
