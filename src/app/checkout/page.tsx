@@ -78,7 +78,8 @@ function CheckoutContent() {
           .select("global_margin_percent")
           .eq("business_id", currentBusinessId)
           .eq("is_active", true)
-          .single();
+          .limit(1)
+          .maybeSingle();
 
         if (offer?.global_margin_percent) {
           setGlobalMargin(offer.global_margin_percent);

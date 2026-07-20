@@ -73,7 +73,8 @@ export async function POST(request: Request) {
       .select('id')
       .eq('business_id', businessId)
       .eq('is_active', true)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     if (offerError || !offer) {
       return NextResponse.json({ error: 'Business has no active offers' }, { status: 400 });
