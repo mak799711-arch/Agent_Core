@@ -407,10 +407,6 @@ export default function PartnerDashboardV4() {
         </button>
       </div>
 
-      <p style={{ opacity: 0.7, marginBottom: "1.5rem", fontSize: "0.9rem" }}>
-        {activeTab === "map" ? t.exploreMap : t.exploreList}
-      </p>
-
       {activeTab === "map" ? (
         <AgentMap
           activeOffers={offers}

@@ -51,7 +51,7 @@ export default function AgentMap({
 
     // Get last saved location or default to [0, 0] (won't be visible due to loading screen)
     let savedCenter: [number, number] = [0, 0];
-    let savedZoom = 15;
+    let savedZoom = 16.5;
     try {
       const saved = localStorage.getItem("lastMapCenter");
       if (saved) {
@@ -98,6 +98,9 @@ export default function AgentMap({
         trackUserLocation: true,
         showUserHeading: true,
         showAccuracyCircle: false, // We hide the blue circle to keep it clean, or we style it orange
+        fitBoundsOptions: {
+          maxZoom: 17
+        }
       });
       map.addControl(geolocate);
 
@@ -265,8 +268,7 @@ export default function AgentMap({
         ref={mapContainer}
         style={{
           width: "100%",
-          height: "100%",
-          minHeight: "500px",
+          height: "360px",
           borderRadius: "16px",
           border: "1px solid var(--surface-border)",
           backgroundColor: theme === "dark" ? "#1a1a1c" : "#f0f0f0",
