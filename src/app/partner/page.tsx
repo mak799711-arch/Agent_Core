@@ -406,10 +406,10 @@ export default function PartnerDashboardV4() {
 
       {activeTab === "map" ? (
         <AgentMap
-          activeOffers={visibleOffers}
+          activeOffers={offers}
           allBusinesses={allBusinesses}
           userCurrency={user?.currency || "IDR"}
-          onMarkerClick={(business, businessOffers) => setSelectedBusiness({ business, offers: businessOffers.filter(o => !hiddenOffers.includes(o.id)) })}
+          onMarkerClick={(business, businessOffers) => setSelectedBusiness({ business, offers: businessOffers })}
           theme={user?.theme === "light" ? "light" : "dark"}
           lang={lang}
         />
@@ -482,6 +482,27 @@ export default function PartnerDashboardV4() {
               )}
             </div>
           ))}
+          {hiddenOffers.length > 0 && (
+            <div style={{ textAlign: "center", marginTop: "1rem" }}>
+              <button
+                onClick={() => {
+                  setHiddenOffers([]);
+                  localStorage.removeItem("hiddenOffers");
+                }}
+                style={{
+                  background: "transparent",
+                  border: "1px solid var(--surface-border)",
+                  color: "var(--foreground)",
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  opacity: 0.7
+                }}
+              >
+                Restore {hiddenOffers.length} hidden offer{hiddenOffers.length > 1 ? "s" : ""}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
