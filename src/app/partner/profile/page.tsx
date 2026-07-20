@@ -253,6 +253,17 @@ export default function PartnerProfile() {
               </label>
             </div>
             <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "1rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1.5rem", fontWeight: 800 }}>
+                  {user?.fullName || "Agent"}
+                </h3>
+                {user?.status === "verified" && (
+                  <div title={t.verified} style={{ display: "flex", alignItems: "center", marginTop: "2px" }}>
+                    <VerificationBadge size={22} />
+                  </div>
+                )}
+              </div>
+
               <div
                 style={{
                   display: "flex",
@@ -272,11 +283,6 @@ export default function PartnerProfile() {
                 >
                   {t.bioLabel}
                 </label>
-                {user?.status === "verified" && (
-                  <div title={t.verified} style={{ display: "flex", alignItems: "center" }}>
-                    <VerificationBadge size={18} />
-                  </div>
-                )}
               </div>
               <textarea
                 className="input-field"

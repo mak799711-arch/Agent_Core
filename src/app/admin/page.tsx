@@ -10,6 +10,7 @@ import { UserProfile } from "@/lib/interfaces/auth";
 import { ReferralSession } from "@/lib/interfaces/referrals";
 import { formatCurrency } from "@/lib/utils/currency";
 import VerificationBadge from "@/app/components/VerificationBadge";
+import { supabase } from "@/lib/supabase/client";
 
 const translations = {
   en: {
@@ -654,7 +655,22 @@ export default function AdminDashboard() {
       });
       setRequests(pendingReqs);
 
-      setSessions(allSessions);
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        if (token) {
+          const res = await fetch('/api/v1/admin/sessions', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const result = await res.json();
+          if (result.success && result.sessions) {
+            setSessions(result.sessions);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch audit logs:", err);
+      }
+
       setAllUsersList(allUsers);
 
       // Load tickets
@@ -726,8 +742,22 @@ export default function AdminDashboard() {
     showToast(t.successUpdate);
   };
 
-  const handleFlagSession = async (sessionId: string) => {
+  const handleFlagSession = async (sessionId: string, type: 'link' | 'payment') => {
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) return;
+      
+      const res = await fetch('/api/v1/admin/audit/flag', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id: sessionId, type })
+      });
+      if (!res.ok) throw new Error("Failed to flag");
+      
       await loadPlatformData();
       showToast(t.successUpdate);
     } catch (err) {
@@ -2645,9 +2675,9 @@ export default function AdminDashboard() {
                       }}
                     >
                       <th style={{ padding: "12px 10px" }}>{t.status}</th>
-                      <th>{t.sessionCode}</th>
+                      <th>Type & Info</th>
                       <th>Promoter / Agent ID</th>
-                      <th>{t.geoLocation}</th>
+                      <th>Details</th>
                       <th>{t.created}</th>
                       <th style={{ textAlign: "right", paddingRight: "20px" }}>
                         {t.action}
@@ -2656,25 +2686,22 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody>
                     {sessions
-                      .filter((s) => {
+                      .filter((s: any) => {
+                        const searchLower = searchSessionCode.toLowerCase();
                         const matchCode =
                           !searchSessionCode ||
-                          s.shortCode
-                            .toLowerCase()
-                            .includes(searchSessionCode.toLowerCase()) ||
-                          s.id
-                            .toLowerCase()
-                            .includes(searchSessionCode.toLowerCase());
+                          s.id.toLowerCase().includes(searchLower) ||
+                          (s.businessId && s.businessId.toLowerCase().includes(searchLower));
                         const matchPromoter =
                           !searchPromoterId ||
-                          s.partnerId
+                          s.agentId
                             .toLowerCase()
                             .includes(searchPromoterId.toLowerCase());
                         return matchCode && matchPromoter;
                       })
-                      .map((session) => {
+                      .map((session: any) => {
                         const promoter = allUsersList.find(
-                          (u) => u.id === session.partnerId,
+                          (u) => u.id === session.agentId,
                         );
                         const isPromoterBlocked = promoter?.isBlocked === true;
 
@@ -2694,29 +2721,24 @@ export default function AdminDashboard() {
                                   fontSize: "0.65rem",
                                   fontWeight: 800,
                                   color:
-                                    session.status === "completed"
+                                  color:
+                                    session.status === "success" || session.status === "active"
                                       ? "var(--success)"
                                       : session.status === "flagged"
                                         ? "var(--error)"
-                                        : session.status === "expired"
-                                          ? "var(--foreground)"
-                                          : "var(--warning)",
+                                        : "var(--foreground)",
                                   background:
-                                    session.status === "completed"
+                                    session.status === "success" || session.status === "active"
                                       ? "rgba(82, 196, 26, 0.08)"
                                       : session.status === "flagged"
                                         ? "rgba(255, 77, 79, 0.08)"
-                                        : session.status === "expired"
-                                          ? "rgba(255, 255, 255, 0.05)"
-                                          : "rgba(250, 173, 20, 0.08)",
+                                        : "rgba(255, 255, 255, 0.05)",
                                   border: `1px solid ${
-                                    session.status === "completed"
+                                    session.status === "success" || session.status === "active"
                                       ? "rgba(82, 196, 26, 0.3)"
                                       : session.status === "flagged"
                                         ? "rgba(255, 77, 79, 0.3)"
-                                        : session.status === "expired"
-                                          ? "rgba(255, 255, 255, 0.15)"
-                                          : "rgba(250, 173, 20, 0.3)"
+                                        : "rgba(255, 255, 255, 0.15)"
                                   }`,
                                   padding: "4px 10px",
                                   borderRadius: "20px",
@@ -2728,19 +2750,18 @@ export default function AdminDashboard() {
                                 {session.status}
                               </span>
                             </td>
-                            <td>
                               <div
                                 style={{
                                   fontWeight: 700,
-                                  color: "var(--primary)",
+                                  color: session.type === 'link' ? "var(--primary)" : "var(--success)",
                                 }}
                               >
-                                {session.shortCode}
+                                {session.type.toUpperCase()}
                               </div>
                               <div
-                                style={{ fontSize: "0.75rem", opacity: 0.45 }}
+                                style={{ fontSize: "0.75rem", opacity: 0.45, maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis" }}
                               >
-                                ID: {session.id}
+                                {session.originalId}
                               </div>
                             </td>
                             <td>
@@ -2750,7 +2771,7 @@ export default function AdminDashboard() {
                               <div
                                 style={{ fontSize: "0.75rem", opacity: 0.45 }}
                               >
-                                ID: {session.partnerId}
+                                ID: {session.agentId}
                               </div>
                               {isPromoterBlocked && (
                                 <span
@@ -2770,10 +2791,10 @@ export default function AdminDashboard() {
                               )}
                             </td>
                             <td>
-                              {session.geoLocation ? (
+                              {session.type === 'payment' ? (
                                 <div>
-                                  <div style={{ fontWeight: 600 }}>
-                                    {session.geoLocation.city}
+                                  <div style={{ fontWeight: 600, color: "var(--foreground)" }}>
+                                    {formatCurrency(session.amount, 'IDR')}
                                   </div>
                                   <div
                                     style={{
@@ -2781,12 +2802,18 @@ export default function AdminDashboard() {
                                       opacity: 0.5,
                                     }}
                                   >
-                                    {session.geoLocation.lat.toFixed(4)},{" "}
-                                    {session.geoLocation.lng.toFixed(4)}
+                                    Agent: {formatCurrency(session.agentCommission, 'IDR')}
                                   </div>
                                 </div>
                               ) : (
-                                <span style={{ opacity: 0.4 }}>N/A</span>
+                                <div>
+                                  <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>
+                                    {session.isSingleUse ? 'Single-Use Link' : 'Reusable Link'}
+                                  </div>
+                                  <div style={{ fontSize: "0.75rem", opacity: 0.5 }}>
+                                    Bus.ID: {session.businessId.substring(0, 8)}...
+                                  </div>
+                                </div>
                               )}
                             </td>
                             <td>
@@ -2817,7 +2844,7 @@ export default function AdminDashboard() {
                                 }}
                               >
                                 <button
-                                  onClick={() => handleFlagSession(session.id)}
+                                  onClick={() => handleFlagSession(session.originalId, session.type)}
                                   disabled={session.status === "flagged"}
                                   style={{
                                     background:
@@ -2857,7 +2884,7 @@ export default function AdminDashboard() {
                                 <button
                                   onClick={() =>
                                     handleBlockPromoter(
-                                      session.partnerId,
+                                      session.agentId,
                                       !isPromoterBlocked,
                                     )
                                   }

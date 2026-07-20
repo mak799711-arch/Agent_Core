@@ -281,14 +281,11 @@ export class SupabaseAuthService implements IAuthService {
   }
 
   async blockUser(id: string, isBlocked: boolean): Promise<void> {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ is_blocked: isBlocked })
-      .eq('id', id);
-
-    if (error) {
-      throw error;
-    }
+    // Используем adminUpdateUserProfile, так как прямой update блокируется RLS
+    await this.adminUpdateUserProfile(id, { 
+      isBlocked, 
+      status: isBlocked ? 'banned' : 'unverified' 
+    });
   }
 
   async uploadAvatar(userId: string, file: File): Promise<string> {
