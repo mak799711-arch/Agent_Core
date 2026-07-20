@@ -4,7 +4,7 @@ import SettingsSidebar from "@/app/components/SettingsSidebar";
 
 // Inside the component... I need to replace from line 58. Wait, I should fetch the whole page first to do it properly. Let's do a multi-replace, but first read the top of partner/page.tsx
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { authService, offerRepository } from "@/lib/services";
 import { supabase } from "@/lib/supabase/client";
 import { UserProfile } from "@/lib/interfaces/auth";
@@ -118,6 +118,7 @@ export default function PartnerDashboardV4() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState<{ business: any; offers: Offer[] } | null>(null);
   const [allBusinesses, setAllBusinesses] = useState<any[]>([]);
+  const generatingRef = useRef<Set<string>>(new Set());
   const router = useRouter();
 
   useEffect(() => {
@@ -154,8 +155,9 @@ export default function PartnerDashboardV4() {
   }, [router]);
 
   const handleCopyLink = async (businessId: string, offerId: string) => {
-    if (!user) return;
+    if (!user || generatingRef.current.has(offerId)) return;
     try {
+      generatingRef.current.add(offerId);
       setCopiedLink("loading-" + offerId);
       
       const { data: sessionData } = await supabase.auth.getSession();
@@ -186,6 +188,8 @@ export default function PartnerDashboardV4() {
       console.error(e);
       alert("Failed to generate link");
       setCopiedLink(null);
+    } finally {
+      generatingRef.current.delete(offerId);
     }
   };
 
