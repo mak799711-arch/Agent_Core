@@ -673,11 +673,19 @@ export default function AdminDashboard() {
 
       setAllUsersList(allUsers);
 
-      // Load tickets
+      // Load tickets from admin API
       try {
-        const { ticketRepository } = await import("@/lib/services");
-        const allTickets = await ticketRepository.getTickets();
-        setTickets(allTickets);
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        if (token) {
+          const res = await fetch('/api/v1/admin/support', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const result = await res.json();
+          if (result.tickets) {
+            setTickets(result.tickets);
+          }
+        }
       } catch (err) {
         console.error("Failed to load tickets", err);
       }
@@ -3008,6 +3016,12 @@ export default function AdminDashboard() {
                           <td>
                             <div style={{ maxWidth: "300px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
                               {ticket.message}
+                              {ticket.reply && (
+                                <div style={{ marginTop: "8px", padding: "8px", background: "rgba(16, 185, 129, 0.1)", borderLeft: "2px solid var(--success)", borderRadius: "4px", fontSize: "0.85rem" }}>
+                                  <strong>Ответ:</strong><br/>
+                                  {ticket.reply}
+                                </div>
+                              )}
                             </div>
                           </td>
                           <td>
@@ -3034,30 +3048,66 @@ export default function AdminDashboard() {
                           </td>
                           <td style={{ textAlign: "right", paddingRight: "20px" }}>
                             {ticket.status === "open" && (
-                              <button
-                                onClick={async () => {
-                                  try {
-                                    const { ticketRepository } = await import("@/lib/services");
-                                    await ticketRepository.updateTicketStatus(ticket.id, "closed");
-                                    await loadPlatformData();
-                                    showToast(t.successUpdate || "Action completed successfully!");
-                                  } catch (err) {
-                                    console.error(err);
-                                  }
-                                }}
-                                style={{
-                                  background: "rgba(16, 185, 129, 0.1)",
-                                  border: "1px solid rgba(16, 185, 129, 0.3)",
-                                  color: "var(--success)",
-                                  padding: "8px 14px",
-                                  borderRadius: "8px",
-                                  cursor: "pointer",
-                                  fontSize: "0.8rem",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                Mark Resolved
-                              </button>
+                              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                                <button
+                                  onClick={async () => {
+                                    const replyText = window.prompt("Введите ответ пользователю:");
+                                    if (!replyText) return;
+                                    try {
+                                      const { data: sessionData } = await supabase.auth.getSession();
+                                      const token = sessionData.session?.access_token;
+                                      await fetch("/api/v1/admin/support", {
+                                        method: "POST",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                          "Authorization": `Bearer ${token}`
+                                        },
+                                        body: JSON.stringify({ ticketId: ticket.id, reply: replyText })
+                                      });
+                                      await loadPlatformData();
+                                      showToast(t.successUpdate || "Action completed successfully!");
+                                    } catch (err) {
+                                      console.error(err);
+                                    }
+                                  }}
+                                  style={{
+                                    background: "rgba(66, 153, 225, 0.1)",
+                                    border: "1px solid rgba(66, 153, 225, 0.3)",
+                                    color: "#4299e1",
+                                    padding: "8px 14px",
+                                    borderRadius: "8px",
+                                    cursor: "pointer",
+                                    fontSize: "0.8rem",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  Reply
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      const { ticketRepository } = await import("@/lib/services");
+                                      await ticketRepository.updateTicketStatus(ticket.id, "closed");
+                                      await loadPlatformData();
+                                      showToast(t.successUpdate || "Action completed successfully!");
+                                    } catch (err) {
+                                      console.error(err);
+                                    }
+                                  }}
+                                  style={{
+                                    background: "rgba(16, 185, 129, 0.1)",
+                                    border: "1px solid rgba(16, 185, 129, 0.3)",
+                                    color: "var(--success)",
+                                    padding: "8px 14px",
+                                    borderRadius: "8px",
+                                    cursor: "pointer",
+                                    fontSize: "0.8rem",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  Mark Resolved
+                                </button>
+                              </div>
                             )}
                           </td>
                         </tr>

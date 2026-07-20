@@ -4,7 +4,8 @@ export interface SupportTicket {
   id: string;
   userId: string;
   message: string;
-  status: 'open' | 'closed';
+  reply?: string;
+  status: 'open' | 'closed' | 'replied';
   createdAt: string;
 }
 
@@ -20,6 +21,7 @@ export class SupabaseTicketRepository implements ITicketRepository {
       id: data.id,
       userId: data.user_id,
       message: data.message,
+      reply: data.reply,
       status: data.status,
       createdAt: data.created_at
     };
