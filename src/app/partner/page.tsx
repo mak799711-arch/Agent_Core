@@ -196,9 +196,9 @@ export default function PartnerDashboardV4() {
       
       setCopiedLink(offerId);
       setTimeout(() => setCopiedLink(null), 2000);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Failed to generate link");
+      alert(e.message || "Failed to generate link");
       setCopiedLink(null);
     } finally {
       generatingRef.current.delete(offerId);

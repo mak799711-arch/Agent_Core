@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       .eq('id', agentId)
       .single();
       
-    if (!agentProfile || agentProfile.status === 'banned') {
+    if (agentProfile && agentProfile.status === 'banned') {
       return NextResponse.json({ error: 'Agent is banned' }, { status: 403 });
     }
 
@@ -55,15 +55,15 @@ export async function POST(request: Request) {
       .eq('id', businessId)
       .single();
       
-    if (business) {
+    if (business && business.owner_id) {
       const { data: ownerProfile } = await supabaseAdmin
         .from('profiles')
         .select('status')
         .eq('id', business.owner_id)
         .single();
         
-      if (!ownerProfile || ownerProfile.status === 'banned') {
-        return NextResponse.json({ error: 'Business is banned' }, { status: 403 });
+      if (ownerProfile && ownerProfile.status === 'banned') {
+        return NextResponse.json({ error: 'Business owner is banned' }, { status: 403 });
       }
     }
 
