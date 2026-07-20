@@ -118,8 +118,19 @@ export default function PartnerDashboardV4() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState<{ business: any; offers: Offer[] } | null>(null);
   const [allBusinesses, setAllBusinesses] = useState<any[]>([]);
+  const [hiddenOffers, setHiddenOffers] = useState<string[]>([]);
+  const [expandedOffer, setExpandedOffer] = useState<string | null>(null);
   const generatingRef = useRef<Set<string>>(new Set());
   const router = useRouter();
+
+  useEffect(() => {
+    const stored = localStorage.getItem("hiddenOffers");
+    if (stored) {
+      try {
+        setHiddenOffers(JSON.parse(stored));
+      } catch (e) {}
+    }
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -197,6 +208,15 @@ export default function PartnerDashboardV4() {
     await authService.signOut();
     router.push("/login");
   };
+
+  const handleHideOffer = (e: React.MouseEvent, offerId: string) => {
+    e.stopPropagation();
+    const newHidden = [...hiddenOffers, offerId];
+    setHiddenOffers(newHidden);
+    localStorage.setItem("hiddenOffers", JSON.stringify(newHidden));
+  };
+
+  const visibleOffers = offers.filter(o => !hiddenOffers.includes(o.id));
 
   const lang = user?.language || "en";
   const t = translations[lang] || translations.en;
@@ -386,51 +406,80 @@ export default function PartnerDashboardV4() {
 
       {activeTab === "map" ? (
         <AgentMap
-          activeOffers={offers}
+          activeOffers={visibleOffers}
           allBusinesses={allBusinesses}
           userCurrency={user?.currency || "IDR"}
-          onMarkerClick={(business, businessOffers) => setSelectedBusiness({ business, offers: businessOffers })}
+          onMarkerClick={(business, businessOffers) => setSelectedBusiness({ business, offers: businessOffers.filter(o => !hiddenOffers.includes(o.id)) })}
           theme={user?.theme === "light" ? "light" : "dark"}
           lang={lang}
         />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {offers.map((offer: any) => (
+          {visibleOffers.map((offer: any) => (
             <div
               key={offer.id}
               className="glass-panel"
+              onClick={() => setExpandedOffer(expandedOffer === offer.id ? null : offer.id)}
               style={{
                 padding: "1.5rem",
                 display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                flexDirection: "column",
                 borderRadius: "16px",
                 border: "1px solid var(--surface-border)",
+                cursor: "pointer",
+                transition: "all 0.2s ease"
               }}
             >
-              <div>
-                <h4 style={{ fontSize: "1.2rem", margin: "0 0 0.5rem 0" }}>
-                  {offer.title}
-                </h4>
-                <p style={{ opacity: 0.7, fontSize: "0.9rem", margin: 0 }}>
-                  Global Margin: {offer.globalMarginPercent}%
-                  {offer.averageBill ? ` (~ ${formatCurrency(offer.averageBill * (offer.globalMarginPercent / 100) * 0.6, user?.currency || "USD")} reward)` : ""}
-                </p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                <div>
+                  <h4 style={{ fontSize: "1.2rem", margin: "0 0 0.5rem 0", display: "flex", alignItems: "center", gap: "8px" }}>
+                    {offer.title}
+                    <button 
+                      onClick={(e) => handleHideOffer(e, offer.id)}
+                      style={{ 
+                        background: "none", border: "none", opacity: 0.5, cursor: "pointer",
+                        fontSize: "0.8rem", textDecoration: "underline", color: "var(--foreground)" 
+                      }}
+                    >
+                      Hide
+                    </button>
+                  </h4>
+                  <p style={{ opacity: 0.7, fontSize: "0.9rem", margin: 0 }}>
+                    Global Margin: {offer.globalMarginPercent}%
+                    {offer.averageBill ? ` (~ ${formatCurrency(offer.averageBill * (offer.globalMarginPercent / 100) * 0.6, user?.currency || "USD")} reward)` : ""}
+                  </p>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleCopyLink(offer.businessId, offer.id); }}
+                  disabled={copiedLink === `loading-${offer.id}`}
+                  className="btn-primary"
+                  style={{
+                    background:
+                      copiedLink === offer.id
+                        ? "var(--success)"
+                        : "var(--primary)",
+                    opacity: copiedLink === `loading-${offer.id}` ? 0.7 : 1
+                  }}
+                >
+                  {copiedLink === `loading-${offer.id}` ? "Generating..." : copiedLink === offer.id ? "Copied!" : "Copy Link"}
+                </button>
               </div>
-              <button
-                onClick={() => handleCopyLink(offer.businessId, offer.id)}
-                disabled={copiedLink === `loading-${offer.id}`}
-                className="btn-primary"
-                style={{
-                  background:
-                    copiedLink === offer.id
-                      ? "var(--success)"
-                      : "var(--primary)",
-                  opacity: copiedLink === `loading-${offer.id}` ? 0.7 : 1
-                }}
-              >
-                {copiedLink === `loading-${offer.id}` ? "Generating..." : copiedLink === offer.id ? "Copied!" : "Copy Link"}
-              </button>
+              
+              {/* Expandable Conditions Section */}
+              {expandedOffer === offer.id && (
+                <div style={{ 
+                  marginTop: "1.5rem", 
+                  paddingTop: "1.5rem", 
+                  borderTop: "1px solid var(--surface-border)",
+                  fontSize: "0.9rem",
+                  color: "var(--foreground)"
+                }}>
+                  <strong style={{ display: "block", marginBottom: "0.5rem", opacity: 0.8 }}>Conditions & Details:</strong>
+                  <p style={{ margin: 0, opacity: 0.9, whiteSpace: "pre-wrap" }}>
+                    {offer.conditions || "No specific conditions provided by the business."}
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>
