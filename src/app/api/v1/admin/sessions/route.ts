@@ -58,10 +58,10 @@ export async function GET(req: Request) {
       console.error('Error fetching payments:', paymentsError);
     }
 
-    const auditLogs = [];
+    const auditLogs: any[] = [];
 
     if (links) {
-      links.forEach(link => {
+      links.forEach((link: any) => {
         auditLogs.push({
           id: `link-${link.id}`,
           type: 'link',
@@ -77,7 +77,7 @@ export async function GET(req: Request) {
     }
 
     if (payments) {
-      payments.forEach(payment => {
+      payments.forEach((payment: any) => {
         auditLogs.push({
           id: `payment-${payment.id}`,
           type: 'payment',

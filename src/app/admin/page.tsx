@@ -742,7 +742,7 @@ export default function AdminDashboard() {
     showToast(t.successUpdate);
   };
 
-  const handleFlagSession = async (sessionId: string, type: 'link' | 'payment') => {
+  const handleFlagSession = async (sessionId: string, type: string) => {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
@@ -2750,6 +2750,7 @@ export default function AdminDashboard() {
                                 {session.status}
                               </span>
                             </td>
+                            <td>
                               <div
                                 style={{
                                   fontWeight: 700,
