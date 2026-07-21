@@ -116,7 +116,7 @@ export default function AgentMap({
           maxZoom: 17
         }
       });
-      map.addControl(geolocate);
+      map.addControl(geolocate, 'bottom-right');
 
       // Trigger geolocation once the map loads
       map.on('load', () => {
@@ -343,7 +343,7 @@ export default function AgentMap({
         position: "absolute",
         top: "16px",
         left: "16px",
-        right: "64px", // Leave room for MapTiler controls
+        right: "16px", // Full width, Geolocate moved to bottom
         zIndex: 1,
       }}>
         <div style={{
@@ -368,6 +368,7 @@ export default function AgentMap({
             onFocus={() => setShowDropdown(true)}
             style={{
               flex: 1,
+              minWidth: 0, // Fix flexbox overflow bug on mobile
               background: "transparent",
               border: "none",
               color: "var(--foreground)",
