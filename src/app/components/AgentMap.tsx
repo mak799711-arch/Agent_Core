@@ -353,9 +353,9 @@ export default function AgentMap({
         ref={mapContainer}
         style={{
           width: "100%",
-          height: "calc(100vh - 250px)",
-          maxHeight: "55vh",
-          minHeight: "350px",
+          height: "calc(100vh - 320px)", // reduced from 250px
+          maxHeight: "40vh",             // reduced from 55vh
+          minHeight: "240px",            // reduced from 350px
           borderRadius: "16px",
           border: "1px solid var(--surface-border)",
           backgroundColor: theme === "dark" ? "#1a1a1c" : "#f0f0f0",
