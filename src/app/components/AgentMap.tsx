@@ -264,6 +264,16 @@ export default function AgentMap({
 
       markers.current.push(marker);
     });
+
+    // If search yields exactly one result, fly to it
+    if (searchQuery && filteredMap.size === 1) {
+      const singleResult = Array.from(filteredMap.values())[0].business;
+      map.flyTo({
+        center: [singleResult.longitude, singleResult.latitude],
+        zoom: 15,
+        essential: true,
+      });
+    }
   }, [activeOffers, allBusinesses, onMarkerClick, searchQuery, theme]);
 
   return (
@@ -299,7 +309,7 @@ export default function AgentMap({
         position: "absolute",
         top: "16px",
         left: "16px",
-        right: "16px",
+        right: "64px", // Leave room for MapTiler controls
         zIndex: 1,
       }}>
         <div style={{
@@ -328,6 +338,23 @@ export default function AgentMap({
               fontWeight: 500
             }}
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--foreground)",
+                opacity: 0.5,
+                cursor: "pointer",
+                padding: "0 4px",
+                fontSize: "18px",
+                lineHeight: 1
+              }}
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
 
