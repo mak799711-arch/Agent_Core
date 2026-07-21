@@ -10,6 +10,7 @@ import { UserProfile } from "@/lib/interfaces/auth";
 import { ReferralSession } from "@/lib/interfaces/referrals";
 import { formatCurrency } from "@/lib/utils/currency";
 import VerificationBadge from "@/app/components/VerificationBadge";
+import QRScanner from "@/app/components/QRScanner";
 import { supabase } from "@/lib/supabase/client";
 
 const translations = {
@@ -585,6 +586,7 @@ export default function AdminDashboard() {
   const [allUsersList, setAllUsersList] = useState<UserProfile[]>([]);
   const [searchSessionCode, setSearchSessionCode] = useState("");
   const [searchPromoterId, setSearchPromoterId] = useState("");
+  const [isScanning, setIsScanning] = useState(false);
 
   const lang = user?.language || "en";
   const t = (translations as any)[lang] || translations.en;
@@ -2615,6 +2617,44 @@ export default function AdminDashboard() {
               >
                 {t.tabAudit}
               </h3>
+
+              {isScanning ? (
+                <div style={{ marginBottom: "2rem", textAlign: "center" }}>
+                  <div style={{ marginBottom: "1rem" }}>
+                    <button 
+                      className="btn-primary" 
+                      onClick={() => setIsScanning(false)}
+                      style={{ background: "var(--surface-border)", color: "var(--foreground)" }}
+                    >
+                      Отменить сканирование
+                    </button>
+                  </div>
+                  <QRScanner 
+                    onScanSuccess={(decodedText) => {
+                      let id = decodedText;
+                      if (decodedText.includes('/p/')) {
+                        id = decodedText.split('/p/')[1]?.split('?')[0] || decodedText;
+                      } else if (decodedText.includes('/pay/')) {
+                        id = decodedText.split('/pay/')[1]?.split('?')[0] || decodedText;
+                      }
+                      setSearchSessionCode(id);
+                      setIsScanning(false);
+                      showToast("QR код распознан!");
+                    }} 
+                  />
+                </div>
+              ) : (
+                <div style={{ marginBottom: "2rem" }}>
+                   <button 
+                    className="btn-primary" 
+                    onClick={() => setIsScanning(true)}
+                    style={{ width: "100%", padding: "16px", fontSize: "1.1rem" }}
+                  >
+                    📸 Сканировать QR-код Сделки
+                  </button>
+                </div>
+              )}
+
 
               {/* Filters Row */}
               <div
