@@ -12,6 +12,7 @@ interface BusinessProfileModalProps {
   onShowQR?: (businessId: string, offerId: string) => void;
   copiedId?: string | null;
   theme?: "light" | "dark";
+  language?: string;
 }
 
 export default function BusinessProfileModal({
@@ -22,8 +23,23 @@ export default function BusinessProfileModal({
   onShowQR,
   copiedId,
   theme = "dark",
+  language = "en",
 }: BusinessProfileModalProps) {
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+
+  const tAccept = {
+    ru: "Принять предложение",
+    en: "Accept Offer",
+    id: "Terima Penawaran",
+    es: "Aceptar Oferta",
+    fr: "Accepter l'Offre",
+    de: "Angebot annehmen",
+    zh: "接受优惠",
+    pt: "Aceitar Oferta",
+    hi: "प्रस्ताव स्वीकार करें",
+    ja: "オファーを受け入れる",
+    ar: "قبول العرض",
+  }[language] || "Accept Offer";
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat("en-US", {
@@ -255,7 +271,7 @@ export default function BusinessProfileModal({
                           transition: "all 0.2s",
                         }}
                       >
-                        Show QR
+                        {tAccept}
                       </button>
                     )}
                   </div>

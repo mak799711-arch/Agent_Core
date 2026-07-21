@@ -408,6 +408,7 @@ export default function PartnerDashboardV4() {
           onCopyLink={handleCopyLink}
           onShowQR={handleShowQR}
           copiedId={copiedLink}
+          language={lang}
         />
       )}
 
