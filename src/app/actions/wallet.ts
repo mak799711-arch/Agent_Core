@@ -61,52 +61,13 @@ export async function getTransactionHistory(userId: string) {
 }
 
 export async function addFunds(userId: string, amount: number) {
-  try {
-    // 2. Log transaction
-    const { error: txError } = await supabaseAdmin.from("transactions").insert({
-      user_id: userId,
-      type: "deposit",
-      amount: amount,
-      status: "completed",
-    });
-
-    if (txError) throw txError;
-
-    revalidatePath("/wallet");
-    revalidatePath("/partner");
-    revalidatePath("/business");
-    return { success: true };
-  } catch (error: any) {
-    console.error("Failed to add funds:", error);
-    return { success: false, error: error.message };
-  }
+  // SECURITY FIX: addFunds is disabled in production to prevent infinite money exploits
+  console.warn(`Unauthorized attempt to add funds for user ${userId}`);
+  return { success: false, error: "Operation disabled in production" };
 }
 
 export async function processPayment(userId: string, amount: number, description: string) {
-  try {
-    // Check balance dynamically
-    const { balance } = await getWalletBalance(userId);
-    
-    if (balance < amount) {
-      return { success: false, error: "Insufficient funds" };
-    }
-
-    // 2. Log transaction
-    const { error: txError } = await supabaseAdmin.from("transactions").insert({
-      user_id: userId,
-      type: "purchase",
-      amount: amount, // subtraction handled by dynamic balance
-      status: "completed",
-    });
-
-    if (txError) throw txError;
-
-    revalidatePath("/wallet");
-    revalidatePath("/partner");
-    revalidatePath("/business");
-    return { success: true };
-  } catch (error: any) {
-    console.error("Failed to process payment:", error);
-    return { success: false, error: error.message };
-  }
+  // SECURITY FIX: processPayment is disabled in production to prevent exploits
+  console.warn(`Unauthorized attempt to process payment for user ${userId}`);
+  return { success: false, error: "Operation disabled in production" };
 }
