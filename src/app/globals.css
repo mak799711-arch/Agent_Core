@@ -362,4 +362,12 @@ input[type="number"] {
     padding: 24px 16px !important;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.2) !important;
   }
+  
+  /* Map Height Override */
+  .mobile-map-container {
+    height: 35vh !important;
+    min-height: 220px !important;
+    max-height: 300px !important;
+  }
 }
+

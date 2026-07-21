@@ -351,6 +351,7 @@ export default function AgentMap({
       `}</style>
       <div
         ref={mapContainer}
+        className="mobile-map-container"
         style={{
           width: "100%",
           height: "calc(100vh - 320px)", // reduced from 250px
