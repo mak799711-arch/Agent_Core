@@ -2651,7 +2651,7 @@ export default function AdminDashboard() {
                     onClick={() => setIsScanning(true)}
                     style={{ width: "100%", padding: "16px", fontSize: "1.1rem" }}
                   >
-                    📸 Сканировать QR-код Сделки
+                    Сканировать QR-код Сделки
                   </button>
                 </div>
               )}
