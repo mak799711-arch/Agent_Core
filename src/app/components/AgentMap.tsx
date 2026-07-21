@@ -56,6 +56,8 @@ export default function AgentMap({
   const markers = useRef<maplibregl.Marker[]>([]);
   const [isLocating, setIsLocating] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   // The MapTiler key provided by the user
   const mapTilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY || "ICwSd7c82yVo427gx1ar";
@@ -246,6 +248,24 @@ export default function AgentMap({
       }
     });
 
+    const center = map.getCenter();
+    const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    };
+
+    const resultsArray = Array.from(filteredMap.values()).map(item => ({
+      ...item,
+      distance: getDistance(center.lat, center.lng, item.business.latitude, item.business.longitude)
+    }));
+    resultsArray.sort((a, b) => a.distance - b.distance);
+    setSearchResults(resultsArray);
+
     filteredMap.forEach(({ business, offers }) => {
       // Create custom DOM element for the marker to look like an avatar
       const el = document.createElement('div');
@@ -341,7 +361,11 @@ export default function AgentMap({
             type="text"
             placeholder="Search venues or offers..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowDropdown(true);
+            }}
+            onFocus={() => setShowDropdown(true)}
             style={{
               flex: 1,
               background: "transparent",
@@ -391,6 +415,60 @@ export default function AgentMap({
             {searchBtnTranslations[lang] || searchBtnTranslations.en}
           </button>
         </div>
+
+        {/* Dropdown Results */}
+        {showDropdown && searchQuery && searchResults.length > 0 && (
+          <div style={{
+            marginTop: "8px",
+            background: theme === "dark" ? "rgba(28, 28, 30, 0.95)" : "rgba(255, 255, 255, 0.95)",
+            backdropFilter: "blur(12px)",
+            borderRadius: "12px",
+            border: "1px solid var(--surface-border)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+            maxHeight: "300px",
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column"
+          }}>
+            {searchResults.map((item) => (
+              <div
+                key={item.business.id || item.business.name}
+                onClick={() => {
+                  setSearchQuery(item.business.name || item.business.fullName);
+                  setShowDropdown(false);
+                  if (mapInstance.current) {
+                    mapInstance.current.flyTo({
+                      center: [item.business.longitude, item.business.latitude],
+                      zoom: 16,
+                      essential: true
+                    });
+                  }
+                  onMarkerClick(item.business, item.offers);
+                }}
+                style={{
+                  padding: "12px 16px",
+                  borderBottom: "1px solid var(--surface-border)",
+                  cursor: "pointer",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--foreground)" }}>
+                    {item.business.name || item.business.fullName}
+                  </div>
+                  <div style={{ fontSize: "12px", opacity: 0.6, marginTop: "2px" }}>
+                    {item.offers.length} {item.offers.length === 1 ? 'offer' : 'offers'}
+                  </div>
+                </div>
+                <div style={{ fontSize: "12px", opacity: 0.8, color: "var(--primary)", whiteSpace: "nowrap", marginLeft: "12px" }}>
+                  {item.distance < 1 ? `${Math.round(item.distance * 1000)}m` : `${item.distance.toFixed(1)}km`}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {isLocating && (
