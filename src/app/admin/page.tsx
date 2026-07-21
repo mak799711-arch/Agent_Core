@@ -2767,7 +2767,16 @@ export default function AdminDashboard() {
                                 {session.type.toUpperCase()}
                               </div>
                               <div
-                                style={{ fontSize: "0.75rem", opacity: 0.45, maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis" }}
+                                style={{ 
+                                  fontSize: "0.75rem", 
+                                  opacity: 0.45, 
+                                  maxWidth: "140px", 
+                                  overflow: "hidden", 
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  fontFamily: "monospace"
+                                }}
+                                title={session.originalId}
                               >
                                 {session.originalId}
                               </div>
@@ -2777,7 +2786,16 @@ export default function AdminDashboard() {
                                 {promoter?.fullName || "Unknown Promoter"}
                               </div>
                               <div
-                                style={{ fontSize: "0.75rem", opacity: 0.45 }}
+                                style={{ 
+                                  fontSize: "0.75rem", 
+                                  opacity: 0.45,
+                                  maxWidth: "140px",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  fontFamily: "monospace"
+                                }}
+                                title={session.agentId}
                               >
                                 ID: {session.agentId}
                               </div>
@@ -2818,7 +2836,11 @@ export default function AdminDashboard() {
                                   <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>
                                     {session.isSingleUse ? 'Single-Use Link' : 'Reusable Link'}
                                   </div>
-                                  <div style={{ fontSize: "0.75rem", opacity: 0.5 }}>
+                                  <div style={{ 
+                                    fontSize: "0.75rem", 
+                                    opacity: 0.5,
+                                    fontFamily: "monospace" 
+                                  }}>
                                     Bus.ID: {session.businessId.substring(0, 8)}...
                                   </div>
                                 </div>
