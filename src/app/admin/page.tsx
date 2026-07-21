@@ -2657,50 +2657,6 @@ export default function AdminDashboard() {
               )}
 
 
-              {/* Filters Row */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "16px",
-                  marginBottom: "2rem",
-                  flexWrap: "wrap",
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder={t.searchCode}
-                  value={searchSessionCode}
-                  onChange={(e) => setSearchSessionCode(e.target.value)}
-                  style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid var(--surface-border)",
-                    color: "var(--foreground)",
-                    padding: "12px 20px",
-                    borderRadius: "12px",
-                    outline: "none",
-                    fontSize: "0.9rem",
-                    minWidth: "200px",
-                    flex: 1,
-                  }}
-                />
-                <input
-                  type="text"
-                  placeholder={t.searchPromoter}
-                  value={searchPromoterId}
-                  onChange={(e) => setSearchPromoterId(e.target.value)}
-                  style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid var(--surface-border)",
-                    color: "var(--foreground)",
-                    padding: "12px 20px",
-                    borderRadius: "12px",
-                    outline: "none",
-                    fontSize: "0.9rem",
-                    minWidth: "200px",
-                    flex: 1,
-                  }}
-                />
-              </div>
 
               {/* Sessions Table */}
               <div style={{ overflowX: "auto" }}>
