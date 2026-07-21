@@ -1653,7 +1653,7 @@ export default function AdminDashboard() {
                 fontWeight: 800,
               }}
             >
-              {sessions.length}
+              {sessions.filter(s => !hiddenAuditSessions.includes(s.id)).length}
             </span>
           </button>
 
@@ -2931,18 +2931,16 @@ export default function AdminDashboard() {
                           </tr>
                         );
                       })}
-                    {sessions.filter((s) => {
+                    {sessions.filter((s: any) => {
+                      if (hiddenAuditSessions.includes(s.id)) return false;
+                      const searchLower = searchSessionCode.toLowerCase();
                       const matchCode =
                         !searchSessionCode ||
-                        s.shortCode
-                          .toLowerCase()
-                          .includes(searchSessionCode.toLowerCase()) ||
-                        s.id
-                          .toLowerCase()
-                          .includes(searchSessionCode.toLowerCase());
+                        s.id.toLowerCase().includes(searchLower) ||
+                        (s.businessId && s.businessId.toLowerCase().includes(searchLower));
                       const matchPromoter =
                         !searchPromoterId ||
-                        s.partnerId
+                        s.agentId
                           .toLowerCase()
                           .includes(searchPromoterId.toLowerCase());
                       return matchCode && matchPromoter;
