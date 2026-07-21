@@ -671,6 +671,7 @@ export default function BusinessDashboard() {
     }
 
     const avgBillVal = averageBill ? parseFloat(averageBill.replace(/\s/g, "")) : null;
+    const avgBillInUSD = avgBillVal ? convertToUSD(avgBillVal, user?.currency || "USD") : null;
 
     try {
       if (!businessId) {
@@ -682,7 +683,7 @@ export default function BusinessDashboard() {
         businessId: businessId,
         title: newOfferTitle,
         globalMarginPercent: margin,
-        averageBill: avgBillVal,
+        averageBill: avgBillInUSD,
         category: newOfferCategory,
         conditions: newOfferConditions || null,
       });
