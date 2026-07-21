@@ -29,6 +29,20 @@ const mapTranslations: Record<string, string> = {
   hi: "नक्शा लोड हो रहा है..."
 };
 
+const searchBtnTranslations: Record<string, string> = {
+  en: "Search",
+  ru: "Найти",
+  id: "Cari",
+  zh: "搜索",
+  es: "Buscar",
+  de: "Suchen",
+  fr: "Chercher",
+  ja: "検索",
+  ar: "بحث",
+  pt: "Buscar",
+  hi: "खोजें"
+};
+
 export default function AgentMap({
   activeOffers,
   allBusinesses = [],
@@ -355,6 +369,27 @@ export default function AgentMap({
               ×
             </button>
           )}
+          <button
+            onClick={() => {
+              if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+              }
+            }}
+            style={{
+              background: "var(--primary)",
+              color: "#000",
+              border: "none",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              marginLeft: "8px",
+              fontWeight: 600,
+              fontSize: "13px",
+              cursor: "pointer",
+              transition: "opacity 0.2s"
+            }}
+          >
+            {searchBtnTranslations[lang] || searchBtnTranslations.en}
+          </button>
         </div>
       </div>
 
