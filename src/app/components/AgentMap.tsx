@@ -116,7 +116,7 @@ export default function AgentMap({
           maxZoom: 17
         }
       });
-      map.addControl(geolocate, 'bottom-right');
+      map.addControl(geolocate);
 
       // Trigger geolocation once the map loads
       map.on('load', () => {
@@ -343,7 +343,7 @@ export default function AgentMap({
         position: "absolute",
         top: "16px",
         left: "16px",
-        right: "16px", // Full width, Geolocate moved to bottom
+        right: "64px", // Leave room for MapTiler controls
         zIndex: 1,
       }}>
         <div style={{
@@ -388,7 +388,8 @@ export default function AgentMap({
                 cursor: "pointer",
                 padding: "0 4px",
                 fontSize: "18px",
-                lineHeight: 1
+                lineHeight: 1,
+                flexShrink: 0
               }}
             >
               ×
@@ -410,7 +411,9 @@ export default function AgentMap({
               fontWeight: 600,
               fontSize: "13px",
               cursor: "pointer",
-              transition: "opacity 0.2s"
+              transition: "opacity 0.2s",
+              flexShrink: 0,
+              whiteSpace: "nowrap"
             }}
           >
             {searchBtnTranslations[lang] || searchBtnTranslations.en}
