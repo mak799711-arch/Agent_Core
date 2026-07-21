@@ -312,6 +312,7 @@ export default function PartnerDashboardV4() {
 
   return (
     <div
+      className="mobile-padding"
       style={{
         minHeight: "100vh",
         background: "var(--bg-gradient)",
@@ -321,6 +322,7 @@ export default function PartnerDashboardV4() {
     >
       {/* Header */}
       <header
+        className="mobile-header-margin"
         style={{
           display: "flex",
           justifyContent: "space-between",

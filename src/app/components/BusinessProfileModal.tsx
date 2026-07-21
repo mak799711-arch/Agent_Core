@@ -63,6 +63,7 @@ export default function BusinessProfileModal({
 
   return (
     <div
+      className="mobile-modal-overlay"
       style={{
         position: "fixed",
         top: 0,
@@ -80,7 +81,7 @@ export default function BusinessProfileModal({
       onClick={onClose}
     >
       <div
-        className="glass-panel"
+        className="glass-panel mobile-modal-content"
         style={{
           width: "100%",
           maxWidth: "500px",
