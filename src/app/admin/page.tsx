@@ -2680,8 +2680,8 @@ export default function AdminDashboard() {
                       }}
                     >
                       <th style={{ padding: "12px 10px" }}>{t.status}</th>
-                      <th>Type & Info</th>
-                      <th>Promoter / Agent ID</th>
+                      <th>Type</th>
+                      <th>Agent</th>
                       <th>Details</th>
                       <th>{t.created}</th>
                       <th style={{ textAlign: "right", paddingRight: "20px" }}>
@@ -2707,6 +2707,9 @@ export default function AdminDashboard() {
                       .map((session: any) => {
                         const promoter = allUsersList.find(
                           (u) => u.id === session.agentId,
+                        );
+                        const business = allUsersList.find(
+                          (u) => u.id === session.businessId,
                         );
                         const isPromoterBlocked = promoter?.isBlocked === true;
 
@@ -2763,38 +2766,10 @@ export default function AdminDashboard() {
                               >
                                 {session.type.toUpperCase()}
                               </div>
-                              <div
-                                style={{ 
-                                  fontSize: "0.75rem", 
-                                  opacity: 0.45, 
-                                  maxWidth: "140px", 
-                                  overflow: "hidden", 
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                  fontFamily: "monospace"
-                                }}
-                                title={session.originalId}
-                              >
-                                {session.originalId}
-                              </div>
                             </td>
                             <td>
                               <div style={{ fontWeight: 600 }}>
-                                {promoter?.fullName || "Unknown Promoter"}
-                              </div>
-                              <div
-                                style={{ 
-                                  fontSize: "0.75rem", 
-                                  opacity: 0.45,
-                                  maxWidth: "140px",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                  fontFamily: "monospace"
-                                }}
-                                title={session.agentId}
-                              >
-                                ID: {session.agentId}
+                                {promoter?.fullName || promoter?.name || "Unknown Promoter"}
                               </div>
                               {isPromoterBlocked && (
                                 <span
@@ -2827,6 +2802,9 @@ export default function AdminDashboard() {
                                   >
                                     Agent: {formatCurrency(session.agentCommission, 'IDR')}
                                   </div>
+                                  <div style={{ fontSize: "0.75rem", opacity: 0.7, marginTop: "4px" }}>
+                                    Bus: {business?.fullName || business?.name || "Unknown Business"}
+                                  </div>
                                 </div>
                               ) : (
                                 <div>
@@ -2835,10 +2813,10 @@ export default function AdminDashboard() {
                                   </div>
                                   <div style={{ 
                                     fontSize: "0.75rem", 
-                                    opacity: 0.5,
-                                    fontFamily: "monospace" 
+                                    opacity: 0.7,
+                                    marginTop: "2px"
                                   }}>
-                                    Bus.ID: {session.businessId.substring(0, 8)}...
+                                    Bus: {business?.fullName || business?.name || "Unknown Business"}
                                   </div>
                                 </div>
                               )}
@@ -2849,9 +2827,7 @@ export default function AdminDashboard() {
                                   session.createdAt,
                                 ).toLocaleDateString()}
                               </div>
-                              <div
-                                style={{ fontSize: "0.75rem", opacity: 0.45 }}
-                              >
+                              <div style={{ fontSize: "0.75rem", opacity: 0.45 }}>
                                 {new Date(
                                   session.createdAt,
                                 ).toLocaleTimeString()}
