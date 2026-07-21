@@ -41,6 +41,7 @@ export default function AgentMap({
   const mapInstance = useRef<maplibregl.Map | null>(null);
   const markers = useRef<maplibregl.Marker[]>([]);
   const [isLocating, setIsLocating] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // The MapTiler key provided by the user
   const mapTilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY || "ICwSd7c82yVo427gx1ar";
@@ -77,12 +78,9 @@ export default function AgentMap({
         style: styleUrl,
         center: savedCenter,
         zoom: savedZoom,
-        minZoom: 5, // Allow zooming out further
+        minZoom: 3, // Allow zooming out further
         maxZoom: 18, // Prevent zooming in too close
-        maxBounds: [
-          [110.0, -12.0], // South-West bound (Longitude, Latitude)
-          [120.0, -5.0],  // North-East bound (Longitude, Latitude)
-        ],
+        // maxBounds removed so the user can see everything smoothly
         attributionControl: false,
         pitchWithRotate: false,
         dragRotate: false,
@@ -216,7 +214,25 @@ export default function AgentMap({
       }
     });
 
-    businessMap.forEach(({ business, offers }) => {
+    const filteredMap = new Map<string, { business: any; offers: Offer[] }>();
+    businessMap.forEach(({ business, offers }, key) => {
+      if (!searchQuery) {
+        filteredMap.set(key, { business, offers });
+        return;
+      }
+      
+      const q = searchQuery.toLowerCase();
+      const n1 = (business.name || "").toLowerCase();
+      const n2 = (business.fullName || "").toLowerCase();
+      const matchName = n1.includes(q) || n2.includes(q);
+      const matchOffer = offers.some((o: any) => o.title.toLowerCase().includes(q));
+      
+      if (matchName || matchOffer) {
+        filteredMap.set(key, { business, offers });
+      }
+    });
+
+    filteredMap.forEach(({ business, offers }) => {
       // Create custom DOM element for the marker to look like an avatar
       const el = document.createElement('div');
       el.style.width = '40px';
@@ -248,7 +264,7 @@ export default function AgentMap({
 
       markers.current.push(marker);
     });
-  }, [activeOffers, allBusinesses, onMarkerClick]);
+  }, [activeOffers, allBusinesses, onMarkerClick, searchQuery, theme]);
 
   return (
     <div style={{ position: "relative", height: "100%" }}>
@@ -268,13 +284,52 @@ export default function AgentMap({
         ref={mapContainer}
         style={{
           width: "100%",
-          height: "360px",
+          height: "calc(100vh - 250px)",
+          maxHeight: "55vh",
+          minHeight: "350px",
           borderRadius: "16px",
           border: "1px solid var(--surface-border)",
           backgroundColor: theme === "dark" ? "#1a1a1c" : "#f0f0f0",
           zIndex: 0,
         }}
       ></div>
+
+      {/* Search Overlay */}
+      <div style={{
+        position: "absolute",
+        top: "16px",
+        left: "16px",
+        right: "16px",
+        zIndex: 1,
+      }}>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          background: theme === "dark" ? "rgba(28, 28, 30, 0.8)" : "rgba(255, 255, 255, 0.8)",
+          backdropFilter: "blur(12px)",
+          borderRadius: "12px",
+          padding: "8px 16px",
+          border: "1px solid var(--surface-border)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15)"
+        }}>
+          <span style={{ marginRight: "10px", opacity: 0.5 }}>🔍</span>
+          <input
+            type="text"
+            placeholder="Search venues or offers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              flex: 1,
+              background: "transparent",
+              border: "none",
+              color: "var(--foreground)",
+              outline: "none",
+              fontSize: "15px",
+              fontWeight: 500
+            }}
+          />
+        </div>
+      </div>
 
       {isLocating && (
         <div
