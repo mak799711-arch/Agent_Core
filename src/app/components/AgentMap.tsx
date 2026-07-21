@@ -43,6 +43,20 @@ const searchBtnTranslations: Record<string, string> = {
   hi: "खोजें"
 };
 
+const searchPlaceholderTranslations: Record<string, string> = {
+  en: "Search venues or offers...",
+  ru: "Поиск заведений или акций...",
+  id: "Cari tempat atau promo...",
+  zh: "搜索场所或优惠...",
+  es: "Buscar lugares u ofertas...",
+  de: "Suchen Sie nach Orten oder Angeboten...",
+  fr: "Rechercher des lieux ou des offres...",
+  ja: "施設やオファーを検索...",
+  ar: "ابحث عن الأماكن أو العروض...",
+  pt: "Buscar locais ou ofertas...",
+  hi: "स्थान या ऑफ़र खोजें..."
+};
+
 export default function AgentMap({
   activeOffers,
   allBusinesses = [],
@@ -359,7 +373,7 @@ export default function AgentMap({
           <span style={{ marginRight: "10px", opacity: 0.5 }}>🔍</span>
           <input
             type="text"
-            placeholder="Search venues or offers..."
+            placeholder={searchPlaceholderTranslations[lang] || searchPlaceholderTranslations.en}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
