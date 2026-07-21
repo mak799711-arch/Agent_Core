@@ -54,7 +54,7 @@ const translations = {
     emptyBanned: "All users are in good standing. Ban list is empty.",
     emptyRequests: "Verification queue is empty.",
     emptySessions: "No sessions match your search criteria.",
-    searchCode: "Search by Code",
+    searchCode: "Enter Deal ID manually",
     searchPromoter: "Search by Promoter ID",
     btnFlag: "Flag Fraud",
     btnBlock: "Block Promoter",
@@ -103,7 +103,7 @@ const translations = {
     emptyBanned: "Бан-лист пуст.",
     emptyRequests: "Очередь верификации пуста.",
     emptySessions: "Нет сессий.",
-    searchCode: "Поиск по коду",
+    searchCode: "Ввести ID сделки вручную",
     searchPromoter: "Поиск по ID промоутера",
     btnFlag: "Отметить фрод",
     btnBlock: "Заблокировать",
@@ -2913,44 +2913,6 @@ export default function AdminDashboard() {
                                   alignItems: "center",
                                 }}
                               >
-                                <button
-                                  onClick={() => handleFlagSession(session.originalId, session.type)}
-                                  disabled={session.status === "flagged"}
-                                  style={{
-                                    background:
-                                      session.status === "flagged"
-                                        ? "rgba(255, 77, 79, 0.05)"
-                                        : "rgba(255, 77, 79, 0.1)",
-                                    border: "1px solid rgba(255, 77, 79, 0.3)",
-                                    color: "var(--error)",
-                                    padding: "8px 14px",
-                                    borderRadius: "8px",
-                                    cursor:
-                                      session.status === "flagged"
-                                        ? "default"
-                                        : "pointer",
-                                    fontSize: "0.8rem",
-                                    fontWeight: 700,
-                                    transition: "all 0.2s",
-                                    opacity:
-                                      session.status === "flagged" ? 0.5 : 1,
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    if (session.status !== "flagged") {
-                                      e.currentTarget.style.background =
-                                        "rgba(255, 77, 79, 0.2)";
-                                    }
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    if (session.status !== "flagged") {
-                                      e.currentTarget.style.background =
-                                        "rgba(255, 77, 79, 0.1)";
-                                    }
-                                  }}
-                                >
-                                  {t.btnFlag}
-                                </button>
-
                                 <button
                                   onClick={() =>
                                     handleBlockPromoter(
