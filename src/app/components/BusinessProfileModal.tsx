@@ -236,37 +236,15 @@ export default function BusinessProfileModal({
                 </div>
                 {(onCopyLink || onShowQR) && (
                   <div style={{ display: "flex", gap: "8px" }}>
-                    {onCopyLink && (
-                      <button
-                        onClick={() => onCopyLink(business.id, offer.id)}
-                        style={{
-                          flex: 1,
-                          padding: "10px",
-                          background: copiedId === offer.id ? "#4caf50" : "#ff5e00",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "8px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "8px",
-                          transition: "all 0.2s",
-                        }}
-                      >
-                        {copiedId === offer.id ? "Copied!" : "Copy Link"}
-                      </button>
-                    )}
                     {onShowQR && (
                       <button
                         onClick={() => onShowQR(business.id, offer.id)}
                         style={{
                           flex: 1,
                           padding: "10px",
-                          background: "var(--surface)",
-                          color: "var(--foreground)",
-                          border: "1px solid var(--surface-border)",
+                          background: "#ff5e00",
+                          color: "#fff",
+                          border: "none",
                           borderRadius: "8px",
                           fontWeight: "600",
                           cursor: "pointer",

@@ -2986,11 +2986,16 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody>
                     {tickets.length > 0 ? (
-                      tickets.map((ticket) => (
+                      tickets.map((ticket) => {
+                        const ticketUser = allUsersList.find((u) => u.id === ticket.userId);
+                        return (
                         <tr key={ticket.id}>
                           <td>
-                            <div style={{ fontSize: "0.85rem", opacity: 0.7, wordBreak: "break-all", maxWidth: "150px" }}>
-                              {ticket.userId}
+                            <div style={{ fontSize: "0.9rem", fontWeight: 600, opacity: 0.9 }}>
+                              {ticketUser?.fullName || ticketUser?.name || "Unknown User"}
+                            </div>
+                            <div style={{ fontSize: "0.8rem", opacity: 0.7, wordBreak: "break-all", maxWidth: "200px", marginTop: "4px" }}>
+                              {ticketUser?.email || ticket.userId}
                             </div>
                           </td>
                           <td>
@@ -3061,15 +3066,16 @@ export default function AdminDashboard() {
                                     fontWeight: 700,
                                   }}
                                 >
-                                  Reply
+                                  Ответить
                                 </button>
                                 <button
                                   onClick={async () => {
                                     try {
+                                      await handleBlockPromoter(ticket.userId, false);
                                       const { ticketRepository } = await import("@/lib/services");
                                       await ticketRepository.updateTicketStatus(ticket.id, "closed");
                                       await loadPlatformData();
-                                      showToast(t.successUpdate || "Action completed successfully!");
+                                      showToast("Пользователь разбанен и тикет закрыт!");
                                     } catch (err) {
                                       console.error(err);
                                     }
@@ -3085,13 +3091,13 @@ export default function AdminDashboard() {
                                     fontWeight: 700,
                                   }}
                                 >
-                                  Mark Resolved
+                                  Разбанить
                                 </button>
                               </div>
                             )}
                           </td>
                         </tr>
-                      ))
+                      )})
                     ) : (
                       <tr>
                         <td

@@ -484,32 +484,16 @@ export default function PartnerDashboardV4() {
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleCopyLink(offer.businessId, offer.id); }}
-                    disabled={copiedLink === `loading-${offer.id}`}
+                    onClick={(e) => { e.stopPropagation(); handleShowQR(offer.businessId, offer.id); }}
                     className="btn-primary"
                     style={{
-                      background:
-                        copiedLink === offer.id
-                          ? "var(--success)"
-                          : "var(--primary)",
-                      opacity: copiedLink === `loading-${offer.id}` ? 0.7 : 1,
-                      padding: "8px 12px",
-                      fontSize: "0.9rem"
-                    }}
-                  >
-                    {copiedLink === `loading-${offer.id}` ? "Generating..." : copiedLink === offer.id ? "Copied!" : "Copy Link"}
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleShowQR(offer.businessId, offer.id); }}
-                    className="btn-secondary"
-                    style={{
-                      background: "var(--surface)",
-                      color: "var(--foreground)",
-                      border: "1px solid var(--surface-border)",
-                      padding: "8px 12px",
+                      background: "var(--primary)",
+                      color: "#000",
+                      border: "none",
+                      padding: "10px 20px",
                       borderRadius: "8px",
                       fontWeight: "bold",
-                      fontSize: "0.9rem"
+                      fontSize: "1rem"
                     }}
                   >
                     Show QR
