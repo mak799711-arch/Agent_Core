@@ -588,6 +588,23 @@ export default function AdminDashboard() {
   const [searchSessionCode, setSearchSessionCode] = useState("");
   const [searchPromoterId, setSearchPromoterId] = useState("");
   const [isScanning, setIsScanning] = useState(false);
+  const [hiddenAuditSessions, setHiddenAuditSessions] = useState<string[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("hiddenAuditSessions");
+    if (stored) {
+      try {
+        setHiddenAuditSessions(JSON.parse(stored));
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleHideSession = (e: React.MouseEvent, sessionId: string) => {
+    e.stopPropagation();
+    const newHidden = [...hiddenAuditSessions, sessionId];
+    setHiddenAuditSessions(newHidden);
+    localStorage.setItem("hiddenAuditSessions", JSON.stringify(newHidden));
+  };
 
   const lang = user?.language || "en";
   const t = (translations as any)[lang] || translations.en;
@@ -2692,6 +2709,7 @@ export default function AdminDashboard() {
                   <tbody>
                     {sessions
                       .filter((s: any) => {
+                        if (hiddenAuditSessions.includes(s.id)) return false;
                         const searchLower = searchSessionCode.toLowerCase();
                         const matchCode =
                           !searchSessionCode ||
@@ -2885,6 +2903,29 @@ export default function AdminDashboard() {
                                     ? t.btnUnblock
                                     : t.btnBlock}
                                 </button>
+                                <button
+                                  onClick={(e) => handleHideSession(e, session.id)}
+                                  style={{
+                                    background: "rgba(100, 100, 100, 0.1)",
+                                    border: "1px solid rgba(100, 100, 100, 0.3)",
+                                    color: "var(--foreground)",
+                                    padding: "8px 14px",
+                                    borderRadius: "8px",
+                                    cursor: "pointer",
+                                    fontSize: "0.8rem",
+                                    fontWeight: 700,
+                                    transition: "all 0.2s",
+                                    opacity: 0.7,
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.opacity = "1";
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.opacity = "0.7";
+                                  }}
+                                >
+                                  Скрыть
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -2971,7 +3012,7 @@ export default function AdminDashboard() {
                               {ticketUser?.fullName || ticketUser?.name || "Unknown User"}
                             </div>
                             <div style={{ fontSize: "0.8rem", opacity: 0.7, wordBreak: "break-all", maxWidth: "200px", marginTop: "4px" }}>
-                              {ticketUser?.email || ticket.userId}
+                              {ticketUser?.email || "Нет почты"}
                             </div>
                           </td>
                           <td>
