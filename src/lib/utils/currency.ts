@@ -37,6 +37,17 @@ export function formatCurrency(amountInUSD: number, currency: string): string {
   return `${symbol}${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+export function formatLocalCurrency(amountInLocal: number, currency: string): string {
+  const currencyUpper = (currency || 'USD').toUpperCase();
+  const symbol = SYMBOLS[currencyUpper] || `${currencyUpper} `;
+  
+  if (currencyUpper === 'IDR' || currencyUpper === 'JPY') {
+    return `${symbol}${Math.round(amountInLocal).toLocaleString()}`;
+  }
+  
+  return `${symbol}${amountInLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export function convertToUSD(amountInLocal: number, currency: string): number {
   const currencyUpper = (currency || 'USD').toUpperCase();
   const rate = RATES[currencyUpper] || 1.0;

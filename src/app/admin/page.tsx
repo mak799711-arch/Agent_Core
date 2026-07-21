@@ -8,7 +8,7 @@ import {
 } from "@/lib/services";
 import { UserProfile } from "@/lib/interfaces/auth";
 import { ReferralSession } from "@/lib/interfaces/referrals";
-import { formatCurrency } from "@/lib/utils/currency";
+import { formatCurrency, formatLocalCurrency } from "@/lib/utils/currency";
 import VerificationBadge from "@/app/components/VerificationBadge";
 import dynamic from "next/dynamic";
 const QRScanner = dynamic(() => import("@/app/components/QRScanner"), { ssr: false });
@@ -2810,7 +2810,7 @@ export default function AdminDashboard() {
                               {session.type === 'payment' ? (
                                 <div>
                                   <div style={{ fontWeight: 600, color: "var(--foreground)" }}>
-                                    {formatCurrency(session.amount, 'IDR')}
+                                    {formatLocalCurrency(session.amount, 'IDR')}
                                   </div>
                                   <div
                                     style={{
@@ -2818,7 +2818,7 @@ export default function AdminDashboard() {
                                       opacity: 0.5,
                                     }}
                                   >
-                                    Agent: {formatCurrency(session.agentCommission, 'IDR')}
+                                    Agent: {formatLocalCurrency(session.agentCommission, 'IDR')}
                                   </div>
                                   <div style={{ fontSize: "0.75rem", opacity: 0.7, marginTop: "4px" }}>
                                     Bus: {business?.fullName || business?.name || "Unknown Business"}
