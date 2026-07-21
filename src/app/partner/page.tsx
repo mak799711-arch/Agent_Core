@@ -322,7 +322,7 @@ export default function PartnerDashboardV4() {
     >
       {/* Header */}
       <header
-        className="mobile-header-margin"
+        className="mobile-header"
         style={{
           display: "flex",
           justifyContent: "space-between",

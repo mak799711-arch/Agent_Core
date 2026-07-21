@@ -337,6 +337,17 @@ export default function AgentMap({
         .maplibregl-user-location-accuracy-circle {
           background-color: rgba(255, 94, 0, 0.15) !important;
         }
+        /* Theme adaptation for MapLibre controls (Geolocate button) */
+        .maplibregl-ctrl-group {
+          background-color: ${theme === 'dark' ? '#1c1c1e' : '#ffffff'} !important;
+          border: 1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} !important;
+        }
+        .maplibregl-ctrl-group button+button {
+          border-top: 1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} !important;
+        }
+        .maplibregl-ctrl-icon {
+          filter: ${theme === 'dark' ? 'invert(1) opacity(0.8)' : 'none'} !important;
+        }
       `}</style>
       <div
         ref={mapContainer}
