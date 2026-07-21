@@ -2990,11 +2990,11 @@ export default function AdminDashboard() {
                 <table className="admin-table">
                   <thead>
                     <tr>
-                      <th>User ID</th>
+                      <th>User</th>
                       <th>Message</th>
                       <th>Status</th>
-                      <th>Created At</th>
-                      <th style={{ textAlign: "right", paddingRight: "20px" }}>
+                      <th style={{ paddingRight: "20px" }}>Date</th>
+                      <th style={{ textAlign: "right", paddingRight: "20px", paddingLeft: "20px", minWidth: "100px" }}>
                         Actions
                       </th>
                     </tr>
