@@ -2729,7 +2729,6 @@ export default function AdminDashboard() {
                                   fontSize: "0.65rem",
                                   fontWeight: 800,
                                   color:
-                                  color:
                                     session.status === "success" || session.status === "active"
                                       ? "var(--success)"
                                       : session.status === "flagged"
