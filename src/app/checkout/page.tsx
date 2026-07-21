@@ -29,17 +29,16 @@ function CheckoutContent() {
 
       let currentBusinessId = null;
       try {
-        const { data: link, error: linkError } = await supabase
-          .from("payment_links")
-          .select("business_id, agent_id, is_active, ttl_expires_at")
-          .eq("id", linkId)
-          .single();
+        const response = await fetch(`/api/v1/links/verify?id=${linkId}`);
+        const data = await response.json();
 
-        if (linkError || !link || !link.is_active || new Date(link.ttl_expires_at) < new Date()) {
+        if (!response.ok || !data.link || !data.link.is_active || new Date(data.link.ttl_expires_at) < new Date()) {
           alert("Payment link is invalid or has expired.");
           setStatus("input");
           return;
         }
+        
+        const link = data.link;
         currentBusinessId = link.business_id;
         setBusinessId(link.business_id);
         setAgentId(link.agent_id);
