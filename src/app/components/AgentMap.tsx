@@ -357,20 +357,18 @@ export default function AgentMap({
         position: "absolute",
         top: "16px",
         left: "16px",
-        right: "64px", // Leave room for MapTiler controls
+        right: "16px", // Full width like Gojek
         zIndex: 1,
       }}>
         <div style={{
           display: "flex",
           alignItems: "center",
-          background: theme === "dark" ? "rgba(28, 28, 30, 0.8)" : "rgba(255, 255, 255, 0.8)",
-          backdropFilter: "blur(12px)",
-          borderRadius: "12px",
-          padding: "8px 16px",
+          background: theme === "dark" ? "#1c1c1e" : "#ffffff", // Solid background
+          borderRadius: "100px", // Pill shape
+          padding: "8px 12px 8px 24px",
           border: "1px solid var(--surface-border)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)"
+          boxShadow: "0 8px 32px rgba(0,0,0,0.12)" // Soft elegant shadow
         }}>
-          <span style={{ marginRight: "10px", opacity: 0.5 }}>🔍</span>
           <input
             type="text"
             placeholder={searchPlaceholderTranslations[lang] || searchPlaceholderTranslations.en}
@@ -382,13 +380,13 @@ export default function AgentMap({
             onFocus={() => setShowDropdown(true)}
             style={{
               flex: 1,
-              minWidth: 0, // Fix flexbox overflow bug on mobile
+              minWidth: 0, // Fix flexbox overflow bug
               background: "transparent",
               border: "none",
               color: "var(--foreground)",
               outline: "none",
-              fontSize: "15px",
-              fontWeight: 500
+              fontSize: "16px",
+              fontWeight: 600
             }}
           />
           {searchQuery && (
@@ -400,8 +398,8 @@ export default function AgentMap({
                 color: "var(--foreground)",
                 opacity: 0.5,
                 cursor: "pointer",
-                padding: "0 4px",
-                fontSize: "18px",
+                padding: "0 8px",
+                fontSize: "22px",
                 lineHeight: 1,
                 flexShrink: 0
               }}
@@ -416,21 +414,22 @@ export default function AgentMap({
               }
             }}
             style={{
-              background: "var(--primary)",
-              color: "#000",
+              background: "var(--success, #10B981)", // Gojek green color style, or brand primary
+              color: "#fff",
               border: "none",
-              borderRadius: "8px",
-              padding: "6px 12px",
+              borderRadius: "50%", // Circular button
+              width: "40px",
+              height: "40px",
               marginLeft: "8px",
-              fontWeight: 600,
-              fontSize: "13px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               cursor: "pointer",
-              transition: "opacity 0.2s",
+              transition: "transform 0.15s ease",
               flexShrink: 0,
-              whiteSpace: "nowrap"
             }}
           >
-            {searchBtnTranslations[lang] || searchBtnTranslations.en}
+            <span style={{ fontSize: "18px" }}>🔍</span>
           </button>
         </div>
 
