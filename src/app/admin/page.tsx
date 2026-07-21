@@ -10,7 +10,8 @@ import { UserProfile } from "@/lib/interfaces/auth";
 import { ReferralSession } from "@/lib/interfaces/referrals";
 import { formatCurrency } from "@/lib/utils/currency";
 import VerificationBadge from "@/app/components/VerificationBadge";
-import QRScanner from "@/app/components/QRScanner";
+import dynamic from "next/dynamic";
+const QRScanner = dynamic(() => import("@/app/components/QRScanner"), { ssr: false });
 import { supabase } from "@/lib/supabase/client";
 
 const translations = {
