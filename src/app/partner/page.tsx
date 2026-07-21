@@ -14,6 +14,7 @@ import dynamic from "next/dynamic";
 import BusinessProfileModal from "@/app/components/BusinessProfileModal";
 import VerificationBadge from "@/app/components/VerificationBadge";
 import FatalBanScreen from "@/app/components/FatalBanScreen";
+import QRCode from "react-qr-code";
 
 const AgentMap = dynamic(() => import("@/app/components/AgentMap"), {
   ssr: false,
@@ -119,6 +120,7 @@ export default function PartnerDashboardV4() {
   const [activeTab, setActiveTab] = useState<"list" | "map">("map");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState<{ business: any; offers: Offer[] } | null>(null);
+  const [qrModalLink, setQrModalLink] = useState<string | null>(null);
   const [allBusinesses, setAllBusinesses] = useState<any[]>([]);
   const [hiddenOffers, setHiddenOffers] = useState<string[]>([]);
   const [expandedOffer, setExpandedOffer] = useState<string | null>(null);
@@ -205,6 +207,42 @@ export default function PartnerDashboardV4() {
       generatingRef.current.delete(offerId);
     }
   };
+
+  const handleShowQR = async (businessId: string, offerId: string) => {
+    if (!user || generatingRef.current.has(offerId)) return;
+    try {
+      generatingRef.current.add(offerId);
+      
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      
+      const res = await fetch("/api/v1/links/create", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          agentId: user.id,
+          businessId,
+          isSingleUse: true
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate link");
+
+      const origin = window.location.origin;
+      const link = `${origin}/checkout?link_id=${data.linkId}`;
+      
+      setQrModalLink(link);
+    } catch (e: any) {
+      console.error(e);
+      alert(e.message || "Failed to generate link");
+    } finally {
+      generatingRef.current.delete(offerId);
+    }
+  };
+
 
   const handleLogout = async () => {
     await authService.signOut();
@@ -368,6 +406,7 @@ export default function PartnerDashboardV4() {
           offers={selectedBusiness.offers}
           onClose={() => setSelectedBusiness(null)}
           onCopyLink={handleCopyLink}
+          onShowQR={handleShowQR}
           copiedId={copiedLink}
         />
       )}
@@ -443,20 +482,39 @@ export default function PartnerDashboardV4() {
                     {offer.averageBill ? ` (~ ${formatCurrency(offer.averageBill * (offer.globalMarginPercent / 100) * 0.6, user?.currency || "USD")} reward)` : ""}
                   </p>
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleCopyLink(offer.businessId, offer.id); }}
-                  disabled={copiedLink === `loading-${offer.id}`}
-                  className="btn-primary"
-                  style={{
-                    background:
-                      copiedLink === offer.id
-                        ? "var(--success)"
-                        : "var(--primary)",
-                    opacity: copiedLink === `loading-${offer.id}` ? 0.7 : 1
-                  }}
-                >
-                  {copiedLink === `loading-${offer.id}` ? "Generating..." : copiedLink === offer.id ? "Copied!" : "Copy Link"}
-                </button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleCopyLink(offer.businessId, offer.id); }}
+                    disabled={copiedLink === `loading-${offer.id}`}
+                    className="btn-primary"
+                    style={{
+                      background:
+                        copiedLink === offer.id
+                          ? "var(--success)"
+                          : "var(--primary)",
+                      opacity: copiedLink === `loading-${offer.id}` ? 0.7 : 1,
+                      padding: "8px 12px",
+                      fontSize: "0.9rem"
+                    }}
+                  >
+                    {copiedLink === `loading-${offer.id}` ? "Generating..." : copiedLink === offer.id ? "Copied!" : "Copy Link"}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleShowQR(offer.businessId, offer.id); }}
+                    className="btn-secondary"
+                    style={{
+                      background: "var(--surface)",
+                      color: "var(--foreground)",
+                      border: "1px solid var(--surface-border)",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      fontWeight: "bold",
+                      fontSize: "0.9rem"
+                    }}
+                  >
+                    Show QR
+                  </button>
+                </div>
               </div>
               
               {/* Expandable Conditions Section */}
@@ -517,6 +575,20 @@ export default function PartnerDashboardV4() {
               </button>
             </div>
           )}
+        </div>
+      )}
+      
+      {qrModalLink && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000, padding: "20px"
+        }} onClick={() => setQrModalLink(null)}>
+          <div className="glass-panel" style={{ padding: "30px", borderRadius: "16px", background: "#fff", textAlign: "center", maxWidth: "400px", width: "100%" }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ color: "#000", marginTop: 0, marginBottom: "20px" }}>Scan to Pay</h3>
+            <QRCode value={qrModalLink} size={256} style={{ maxWidth: "100%", height: "auto" }} />
+            <p style={{ color: "#666", fontSize: "0.9rem", marginTop: "16px" }}>Show this QR code to the customer. Once they scan and pay, you will automatically receive your commission.</p>
+            <button className="btn-primary" onClick={() => setQrModalLink(null)} style={{ marginTop: "20px", width: "100%", background: "var(--primary)", color: "#000", padding: "12px", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>Close</button>
+          </div>
         </div>
       )}
     </div>
